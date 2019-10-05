@@ -154,33 +154,7 @@ VALUES (1,1,'bonus',40,'N');
 --  combo_product end
 
 
---  Table: order_combo_detail
-CREATE TABLE order_combo_detail(
-  combo_detail_id NUMBER(3) NOT NULL,
-  food NUMBER(3) NOT NULL,
-  combo_dish_state VARCHAR(10) NOT NULL,
-  remark VARCHAR(20) NOT NULL
-);
 
-ALTER TABLE order_combo_detail
-ADD PRIMARY KEY (combo_detail_id);
-
-ALTER TABLE order_combo_detail
-ADD FOREIGN KEY (food)
-REFERENCES combo_food(food);
-
-CREATE SEQUENCE combo_detail_pk;
-
-CREATE TRIGGER combo_detail_bi
-BEFORE INSERT ON order_combo_detail
-FOR EACH ROW
-BEGIN
-  SELECT combo_detail_pk.NEXTVAL
-  INTO   :new.combo_detail_id
-  FROM   dual;
-END;
-/
--- order_combo_detail end
 
 --Table:coupon
 
@@ -212,16 +186,20 @@ ADD PRIMARY KEY (member_id);
 
 --Table:member_coupon
 CREATE TABLE member_coupon
-(coupon_id CHAR(16) NOT NULL,
+(coupon CHAR(16) NOT NULL,
  member_id CHAR(8) NOT NULL,
  coupon_state VARCHAR2(10) NOT NULL);
 
 ALTER TABLE member_coupon
-ADD PRIMARY KEY (coupon_id);
+ADD PRIMARY KEY (coupon);
 
 ALTER TABLE member_coupon
-ADD FORIGEN KEY (member_id)
+ADD FOREIGN KEY (member_id)
 REFERENCES members(member_id);
+
+ALTER TABLE member_coupon
+ADD FOREIGN KEY (coupon)
+REFERENCE coupon(coupon_id);
 
 -- member_coupon end
 
@@ -237,7 +215,7 @@ ALTER TABLE membership
 ADD PRIMARY KEY (card_id);
 
 ALTER TABLE membership
-ADD　FORIGEN KEY (member_id)
+ADD　FOREIGN KEY (member_id)
 REFERENCES members(member_id);
 
 -- membership end
@@ -261,64 +239,6 @@ REFERENCES members(member_id);
 
 --member_address end
 
---  Table: table_list
-CREATE TABLE table_list (
-  table_id CHAR(2) NOT NULL,
-  table_password CHAR(30) NOT NULL,
-  table_available CHAR(1) NOT NULL,
-  table_sit NUMBER(2) NOT NULL,
-  orders CHAR(5),
-  table_start DATE
-);
-
-ALTER TABLE table_list
-ADD PRIMARY KEY (table_id);
-
-CREATE SEQUENCE table_list_pk;
-
-CREATE TRIGGER table_list_bi
-BEFORE INSERT ON table_list
-FOR EACH ROW
-BEGIN
-  SELECT table_list_pk.NEXTVAL
-  INTO   :new.table_id
-  FROM   dual;
-END;
-/
-
-INSERT INTO table_list
-  (table_password,table_available, table_sit)
-VALUES
-  ('table1pw','Y', 4);
-
-INSERT INTO table_list
-  (table_password,table_available, table_sit)
-VALUES
-  ('table2pw','Y', 8);
-
-INSERT INTO table_list
-  (table_password,table_available, table_sit)
-VALUES
-  ('table3pw','Y', 12);
---  table_list end
-
---  Table: table_order
-CREATE TABLE order_table(
-  order_id CHAR(5) NOT NULL,
-  table_id CHAR(2) NOT NULL
-);
-
-ALTER TABLE order_table
-ADD PRIMARY KEY (order_id, table_id);
-
-ALTER TABLE order_table
-ADD FOREIGN KEY (table_id) 
-REFERENCES table_list(table_id);
-
-ALTER TABLE order_table
-ADD FOREIGN KEY (order_id) 
-REFERENCES orders(order_id);
--- table_order end
 
 -- Table: payment_method
 CREATE TABLE payment_method(
@@ -419,3 +339,158 @@ ALTER TABLE staff_salary
 ADD FOREIGN KEY (staff)
 REFERENCES staff(staff_id);
 --  staff_salary end
+
+-- Table: orders
+
+CREATE TABLE orders(
+ order_id CHAR(8) NOT NULL,
+ member_id CHAR(8) NOT NULL,
+ total_price NUMBER(7,1) NOT NULL,
+ order_state VARCHAR(20) NOT NULL,
+ dates DATE NOT NULL,
+ staff_id CHAR(4) NOT NULL
+);
+
+ALTER TABLE orders
+ADD PRIMARY KEY (order_id);
+
+ALTER TABLE orders
+ADD FOREIGN KEY (member_id)
+REFERENCES members(member_id);
+
+ALTER TABLE orders
+ADD FOREIGN KEY (staff_id)
+REFERENCES staff(staff_id);
+
+-- orders end
+
+--  Table: table_list
+CREATE TABLE table_list (
+  table_id CHAR(2) NOT NULL,
+  table_password CHAR(30) NOT NULL,
+  table_available CHAR(1) NOT NULL,
+  table_sit NUMBER(2) NOT NULL,
+  orders CHAR(8),
+  table_start DATE
+);
+
+ALTER TABLE table_list
+ADD PRIMARY KEY (table_id);
+
+CREATE SEQUENCE table_list_pk;
+
+CREATE TRIGGER table_list_bi
+BEFORE INSERT ON table_list
+FOR EACH ROW
+BEGIN
+  SELECT table_list_pk.NEXTVAL
+  INTO   :new.table_id
+  FROM   dual;
+END;
+/
+
+INSERT INTO table_list
+  (table_password,table_available, table_sit)
+VALUES
+  ('table1pw','Y', 4);
+
+INSERT INTO table_list
+  (table_password,table_available, table_sit)
+VALUES
+  ('table2pw','Y', 8);
+
+INSERT INTO table_list
+  (table_password,table_available, table_sit)
+VALUES
+  ('table3pw','Y', 12);
+--  table_list end
+
+--  Table: table_order
+CREATE TABLE order_table(
+  order_id CHAR(8) NOT NULL,
+  table_id CHAR(2) NOT NULL
+);
+
+ALTER TABLE order_table
+ADD PRIMARY KEY (order_id, table_id);
+
+ALTER TABLE order_table
+ADD FOREIGN KEY (table_id) 
+REFERENCES table_list(table_id);
+
+ALTER TABLE order_table
+ADD FOREIGN KEY (order_id) 
+REFERENCES orders(order_id);
+
+-- table_order end
+
+-- Table: order_food
+
+CREATE TABLE order_food(
+ order_food_id CHAR(8) NOT NULL,
+ food CHAR(8) NOT NULL,
+ dish_state VARCHAR(20) NOT NULL,
+ orders CHAR(8) NOT NULL
+);
+
+ALTER TABLE order_food
+ADD PRIMARY KEY (order_food_id);
+
+ALTER TABLE order_food
+ADD FOREIGN KEY (food)
+REFERENCES food(food_id);
+
+ALTER TABLE order_food
+ADD FOREIGN KEY (orders)
+REFERENCES orders(order_id);
+
+-- order_food end
+
+-- Table: order_combo
+
+CREATE TABLE order_combo(
+ order_combo_id CHAR(8) NOT NULL,
+ combo NUMBER(3) NOT NULL,
+ orders CHAR(8) NOT NULL);
+
+ALTER TABLE order_combo
+ADD PRIMARY KEY (order_combo_id);
+
+ALTER TABLE order_combo
+ADD FOREIGN KEY (orders)
+REFERENCES orders(order_id);
+
+-- order_combo end
+
+--  Table: order_combo_detail
+
+CREATE TABLE order_combo_detail(
+  combo_detail_id NUMBER(8) NOT NULL,
+  food NUMBER(3) NOT NULL,
+  combo_dish_state VARCHAR(10) NOT NULL,
+  remark VARCHAR(20) NOT NULL,
+  order_combo CHAR(8) NOT NULL);
+
+ALTER TABLE order_combo_detail
+ADD PRIMARY KEY (combo_detail_id);
+
+ALTER TABLE order_combo_detail
+ADD FOREIGN KEY (food)
+REFERENCES combo_food(food);
+
+ALTER TABLE order_combo_detail
+ADD FOREIGN KEY (order_combo)
+REFERENCES oreder_combo(order_combo_id);
+
+CREATE SEQUENCE combo_detail_pk;
+
+CREATE TRIGGER combo_detail_bi
+BEFORE INSERT ON order_combo_detail
+FOR EACH ROW
+BEGIN
+  SELECT combo_detail_pk.NEXTVAL
+  INTO   :new.combo_detail_id
+  FROM   dual;
+END;
+/
+-- order_combo_detail end
