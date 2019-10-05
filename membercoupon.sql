@@ -1,4 +1,0 @@
-create table member_coupon
-(COUPON_ID CHAR(16) primary key NOT NULL,
-MEMBER_ID CHAR(8) NOT NULL,
-COUPON_STATE VARCHAR2(10) NOT NULL);

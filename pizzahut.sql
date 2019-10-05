@@ -1,4 +1,13 @@
 ﻿--  Droping
+DROP TABLE staff_salary;
+DROP TABLE staff_address;
+DROP TABLE staff;
+DROP SEQUENCE staff_pk;
+DROP TABLE payment_method;
+DROP SEQUENCE payment_method_pk;
+DROP TABLE order_table;
+DROP TABLE table_list;
+DROP SEQUENCE table_list_pk;
 DROP TABLE combo_food;
 DROP SEQUENCE combo_pk;
 DROP TABLE combo;
@@ -232,6 +241,7 @@ ADD　FORIGEN KEY (member_id)
 REFERENCES members(member_id);
 
 -- membership end
+
 --Table member_address
 
 CREATE TABLE member_address(
@@ -250,3 +260,162 @@ ADD FOREIGN KEY (members)
 REFERENCES members(member_id);
 
 --member_address end
+
+--  Table: table_list
+CREATE TABLE table_list (
+  table_id CHAR(2) NOT NULL,
+  table_password CHAR(30) NOT NULL,
+  table_available CHAR(1) NOT NULL,
+  table_sit NUMBER(2) NOT NULL,
+  orders CHAR(5),
+  table_start DATE
+);
+
+ALTER TABLE table_list
+ADD PRIMARY KEY (table_id);
+
+CREATE SEQUENCE table_list_pk;
+
+CREATE TRIGGER table_list_bi
+BEFORE INSERT ON table_list
+FOR EACH ROW
+BEGIN
+  SELECT table_list_pk.NEXTVAL
+  INTO   :new.table_id
+  FROM   dual;
+END;
+/
+
+INSERT INTO table_list
+  (table_password,table_available, table_sit)
+VALUES
+  ('table1pw','Y', 4);
+
+INSERT INTO table_list
+  (table_password,table_available, table_sit)
+VALUES
+  ('table2pw','Y', 8);
+
+INSERT INTO table_list
+  (table_password,table_available, table_sit)
+VALUES
+  ('table3pw','Y', 12);
+--  table_list end
+
+--  Table: table_order
+CREATE TABLE order_table(
+  order_id CHAR(5) NOT NULL,
+  table_id CHAR(2) NOT NULL
+);
+
+ALTER TABLE order_table
+ADD PRIMARY KEY (order_id, table_id);
+
+ALTER TABLE order_table
+ADD FOREIGN KEY (table_id) 
+REFERENCES table_list(table_id);
+
+ALTER TABLE order_table
+ADD FOREIGN KEY (order_id) 
+REFERENCES orders(order_id);
+-- table_order end
+
+-- Table: payment_method
+CREATE TABLE payment_method(
+  payment_method_id CHAR(2) NOT NULL,
+  payment_method_name VARCHAR2(30) NOT NULL,
+  price_rate NUMBER(3) NOT NULL
+);
+
+ALTER TABLE payment_method
+ADD PRIMARY KEY (payment_method_id);
+
+CREATE SEQUENCE payment_method_pk;
+
+CREATE TRIGGER payment_method_bi
+BEFORE INSERT ON payment_method
+FOR EACH ROW
+BEGIN
+  SELECT payment_method_pk.NEXTVAL
+  INTO   :new.payment_method_id
+  FROM   dual;
+END;
+/
+
+INSERT INTO payment_method
+  (payment_method_name,price_rate)
+VALUES  
+  ('Cash', 100);
+
+INSERT INTO payment_method
+  (payment_method_name,price_rate)
+VALUES  
+  ('Credit Card A', 95);
+
+INSERT INTO payment_method
+  (payment_method_name,price_rate)
+VALUES  
+  ('Credit Card B', 90);
+--  payment_method end
+
+--  Table: staff
+CREATE TABLE staff(
+  staff_id CHAR(4) NOT NULL,
+  staff_password VARCHAR2(30) NOT NULL,
+  staff_surname CHAR(20) NOT NULL,
+  staff_lastname CHAR(30) NOT NULL,
+  sex CHAR(1) NOT NULL,
+  birthday DATE NOT NULL,
+  position VARCHAR2(20) NOT NULL,
+  staff_tel CHAR(8) NOT NULL
+);
+
+ALTER TABLE staff
+ADD PRIMARY KEY (staff_id);
+
+CREATE SEQUENCE staff_pk;
+
+CREATE TRIGGER staff_pk
+BEFORE INSERT ON staff
+FOR EACH ROW
+BEGIN
+  SELECT staff_pk.NEXTVAL
+  INTO   :new.staff_id
+  FROM   dual;
+END;
+/
+--  staff end
+
+--  Table: staff_address
+CREATE TABLE staff_address(
+  staff CHAR(4) NOT NULL,
+  flat VARCHAR2(20) NOT NULL,
+  building VARCHAR2(30) NOT NULL,
+  street VARCHAR2(30) NOT NULL,
+  distrit VARCHAR2(20) NOT NULL
+);
+
+ALTER TABLE staff_address
+ADD PRIMARY KEY (staff);
+
+ALTER TABLE staff_address 
+ADD FOREIGN KEY (staff)
+REFERENCES staff(staff_id);
+--  staff_address end
+
+--  Table: staff_salary
+CREATE TABLE staff_salary(
+  staff CHAR(4) NOT NULL,
+  salary_type CHAR(5) NOT NULL,
+  salary NUMBER(6,1) NOT NULL,
+  work_hour NUMBER(4,1) NOT NULL,
+  dates date NOT NULL
+);
+
+ALTER TABLE staff_salary
+ADD PRIMARY KEY (staff);
+
+ALTER TABLE staff_salary
+ADD FOREIGN KEY (staff)
+REFERENCES staff(staff_id);
+--  staff_salary end
