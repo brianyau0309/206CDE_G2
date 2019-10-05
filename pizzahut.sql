@@ -233,7 +233,7 @@ CREATE TABLE member_address(
   flat VARCHAR2(20) NOT NULL,
   building VARCHAR2(30) NOT NULL,
   street VARCHAR2(30) NOT NULL,
-  distrit VARCHAR2(20) NOT NULL
+  district VARCHAR2(20) NOT NULL
 );
 
 ALTER TABLE member_address
@@ -318,7 +318,7 @@ CREATE TABLE staff_address(
   flat VARCHAR2(20) NOT NULL,
   building VARCHAR2(30) NOT NULL,
   street VARCHAR2(30) NOT NULL,
-  distrit VARCHAR2(20) NOT NULL
+  district VARCHAR2(20) NOT NULL
 );
 
 ALTER TABLE staff_address
