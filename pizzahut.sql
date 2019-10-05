@@ -1,11 +1,18 @@
---  Droping
-DROP TABLE combo_product;
+﻿--  Droping
+DROP TABLE combo_food;
 DROP SEQUENCE combo_pk;
 DROP TABLE combo;
 DROP SEQUENCE food_pk;
 DROP TABLE food;
 DROP SEQUENCE category_pk;
 DROP TABLE category;
+DROP SEQUENCE combo_detail_pk;
+DROP TABLE order_combo_detail;
+DROP TABLE coupon;
+DROP TABLE members;
+DROP TABLE member_coupon;
+DROP TABLE membership;
+DROP TABLE member_address;
 --  Droping end
 
 --  Table: category
@@ -107,8 +114,8 @@ VALUES
   ('Combo A','套餐甲','description_eng for Combo A','套餐甲 套餐甲 套餐甲',399.9,'Y');
 --  combo end
 
---  Table: combo_product
-CREATE TABLE combo_product(
+--  Table: combo_food
+CREATE TABLE combo_food(
   combo NUMBER(3) NOT NULL,
   food NUMBER(3) NOT NULL,
   product_type CHAR(7) NOT NULL,
@@ -116,23 +123,130 @@ CREATE TABLE combo_product(
   provide CHAR(1) NOT NULL
 );
 
-ALTER TABLE combo_product
+ALTER TABLE combo_food
 ADD PRIMARY KEY (combo,food,product_type);
 
-ALTER TABLE combo_product
+ALTER TABLE combo_food
 ADD FOREIGN KEY (combo) 
 REFERENCES combo(combo_id);
 
-ALTER TABLE combo_product
+ALTER TABLE combo_food
 ADD FOREIGN KEY (food) 
 REFERENCES food(food_id);
 
-INSERT INTO combo_product 
+INSERT INTO combo_food
 VALUES (1,1,'default',0,'Y');
 
-INSERT INTO combo_product 
+INSERT INTO combo_food
 VALUES (1,1,'upgrade',15,'Y');
 
-INSERT INTO combo_product 
+INSERT INTO combo_food
 VALUES (1,1,'bonus',40,'N');
 --  combo_product end
+
+
+--  Table: order_combo_detail
+CREATE TABLE order_combo_detail(
+  combo_detail_id NUMBER(3) NOT NULL,
+  food NUMBER(3) NOT NULL,
+  combo_dish_state VARCHAR(10) NOT NULL,
+  remark VARCHAR(20) NOT NULL
+);
+
+ALTER TABLE order_combo_detail
+ADD PRIMARY KEY (combo_detail_id);
+
+ALTER TABLE order_combo_detail
+ADD FOREIGN KEY (food)
+REFERENCES combo_food(food);
+
+CREATE SEQUENCE combo_detail_pk;
+
+CREATE TRIGGER combo_detail_bi
+BEFORE INSERT ON order_combo_detail
+FOR EACH ROW
+BEGIN
+  SELECT combo_detail_pk.NEXTVAL
+  INTO   :new.combo_detail_id
+  FROM   dual;
+END;
+/
+-- order_combo_detail end
+
+--Table:coupon
+
+CREATE TABLE coupon
+(coupon_id CHAR(16) NOT NULL,
+ coupon_type VARCHAR(20) NOT NULL,
+ discount NUMBER(2,2) NOT NULL);
+
+ALTER TABLE coupon
+ADD PRIMARY KEY (coupon_id);
+
+-- coupon end
+
+--Table:members
+
+CREATE TABLE members
+(member_id CHAR(8) NOT NULL,
+ member_password VARCHAR2 (30) NOT NULL,
+ birthday DATE NOT NULL,
+ member_surname VARCHAR2(30) NOT NULL,
+ member_lastname VARCHAR2(30) NOT NULL,
+ sex CHAR(1) NOT NULL,
+ member_tel CHAR(8) NOT NULL);
+ 
+ALTER TABLE members
+ADD PRIMARY KEY (member_id);
+
+-- members end
+
+--Table:member_coupon
+CREATE TABLE member_coupon
+(coupon_id CHAR(16) NOT NULL,
+ member_id CHAR(8) NOT NULL,
+ coupon_state VARCHAR2(10) NOT NULL);
+
+ALTER TABLE member_coupon
+ADD PRIMARY KEY (coupon_id);
+
+ALTER TABLE member_coupon
+ADD FORIGEN KEY (member_id)
+REFERENCES members(member_id);
+
+-- member_coupon end
+
+--Table: membership
+CREATE TABLE membership
+(card_id NUMBER(8) NOT NULL,
+ member_id CHAR(8) NOT NULL,
+ member_point NUMBER(8) NOT NULL,
+ card_type VARCHAR(20) NOT NULL, 
+ discount NUMBER(3,2) NOT NULL);
+
+ALTER TABLE membership
+ADD PRIMARY KEY (card_id);
+
+ALTER TABLE membership
+ADD　FORIGEN KEY (member_id)
+REFERENCES members(member_id);
+
+-- membership end
+--Table member_address
+
+CREATE TABLE member_address(
+  members CHAR(8) NOT NULL,
+  flat VARCHAR2(20) NOT NULL,
+  building VARCHAR2(30) NOT NULL,
+  street VARCHAR2(30) NOT NULL,
+  distrit VARCHAR2(20) NOT NULL
+);
+
+ALTER TABLE member_address
+ADD PRIMARY KEY (members);
+
+ALTER TABLE member_address
+ADD FOREIGN KEY (members)
+REFERENCES members(member_id);
+
+--member_address end
