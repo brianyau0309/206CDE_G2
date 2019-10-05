@@ -22,6 +22,12 @@ DROP TABLE members;
 DROP TABLE member_coupon;
 DROP TABLE membership;
 DROP TABLE member_address;
+DROP TABLE orders;
+DROP SEQUENCE orders_pk;
+DROP SEQUENCE order_combo_pk;
+DROP SEQUENCE order_food_pk;
+DROP TABLE order_combo;
+DROP TABLE order_food;
 --  Droping end
 
 --  Table: category
@@ -362,6 +368,17 @@ ALTER TABLE orders
 ADD FOREIGN KEY (staff_id)
 REFERENCES staff(staff_id);
 
+CREATE SEQUENCE orders_pk;
+
+CREATE TRIGGER orders_pk
+BEFORE INSERT ON orders
+FOR EACH ROW
+BEGIN
+  SELECT orders_pk.NEXTVAL
+  INTO   :new.order_id
+  FROM   dual;
+END;
+/
 -- orders end
 
 --  Table: table_list
@@ -444,6 +461,18 @@ ALTER TABLE order_food
 ADD FOREIGN KEY (orders)
 REFERENCES orders(order_id);
 
+CREATE SEQUENCE order_food_pk;
+
+CREATE TRIGGER order_food_pk
+BEFORE INSERT ON staff
+FOR EACH ROW
+BEGIN
+  SELECT order_food_pk.NEXTVAL
+  INTO   :new.order_food_id
+  FROM   dual;
+END;
+/
+
 -- order_food end
 
 -- Table: order_combo
@@ -460,6 +489,17 @@ ALTER TABLE order_combo
 ADD FOREIGN KEY (orders)
 REFERENCES orders(order_id);
 
+CREATE SEQUENCE order_combo_pk;
+
+CREATE TRIGGER order_combo_pk
+BEFORE INSERT ON order_combo
+FOR EACH ROW
+BEGIN
+  SELECT order_combo_pk.NEXTVAL
+  INTO   :new.order_combo_id
+  FROM   dual;
+END;
+/
 -- order_combo end
 
 --  Table: order_combo_detail
