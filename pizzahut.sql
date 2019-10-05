@@ -1,33 +1,33 @@
-Ôªø--  Droping
-DROP TABLE staff_salary;
-DROP TABLE staff_address;
-DROP TABLE staff;
-DROP SEQUENCE staff_pk;
-DROP TABLE payment_method;
-DROP SEQUENCE payment_method_pk;
-DROP TABLE order_table;
-DROP TABLE table_list;
-DROP SEQUENCE table_list_pk;
-DROP TABLE combo_food;
-DROP SEQUENCE combo_pk;
-DROP TABLE combo;
-DROP SEQUENCE food_pk;
-DROP TABLE food;
-DROP SEQUENCE category_pk;
-DROP TABLE category;
-DROP SEQUENCE combo_detail_pk;
-DROP TABLE order_combo_detail;
-DROP TABLE coupon;
-DROP TABLE members;
-DROP TABLE member_coupon;
-DROP TABLE membership;
-DROP TABLE member_address;
-DROP TABLE orders;
+--  Droping
 DROP SEQUENCE orders_pk;
 DROP SEQUENCE order_combo_pk;
 DROP SEQUENCE order_food_pk;
+DROP SEQUENCE staff_pk;
+DROP SEQUENCE payment_method_pk;
+DROP SEQUENCE table_list_pk;
+DROP SEQUENCE combo_pk;
+DROP SEQUENCE food_pk;
+DROP SEQUENCE category_pk;
+DROP SEQUENCE combo_detail_pk;
+DROP TABLE order_combo_detail;
 DROP TABLE order_combo;
 DROP TABLE order_food;
+DROP TABLE order_table;
+DROP TABLE table_list;
+DROP TABLE orders;
+DROP TABLE staff_salary;
+DROP TABLE staff_address;
+DROP TABLE staff;
+DROP TABLE payment_method;
+DROP TABLE member_address;
+DROP TABLE membership;
+DROP TABLE member_coupon;
+DROP TABLE members;
+DROP TABLE coupon;
+DROP TABLE combo_food;
+DROP TABLE combo;
+DROP TABLE food;
+DROP TABLE category;
 --  Droping end
 
 --  Table: category
@@ -94,7 +94,7 @@ END;
 INSERT INTO food 
   (category,food_eng_name,food_chi_name,description_eng,description_chi,food_price,vegetarian,provide)
 VALUES
-  (1,'Pizza A','ËñÑÈ§ÖÁî≤','description_eng for pizza A','ËñÑÈ§ÖÁî≤ËñÑÈ§ÖÁî≤ËñÑÈ§ÖÁî≤',150.5,'N','Y');
+  (1,'Pizza A','??ÑÈ?ÖÁî≤','description_eng for pizza A','??ÑÈ?ÖÁî≤??ÑÈ?ÖÁî≤??ÑÈ?ÖÁî≤',150.5,'N','Y');
 --  food end
 
 --  Table: combo
@@ -126,7 +126,7 @@ END;
 INSERT INTO combo 
   (combo_name_eng,combo_name_chi,description_eng,description_chi,combo_price,provide)
 VALUES
-  ('Combo A','Â•óÈ§êÁî≤','description_eng for Combo A','Â•óÈ§êÁî≤ Â•óÈ§êÁî≤ Â•óÈ§êÁî≤',399.9,'Y');
+  ('Combo A','Â•óÈ?êÁî≤','description_eng for Combo A','Â•óÈ?êÁî≤ Â•óÈ?êÁî≤ Â•óÈ?êÁî≤',399.9,'Y');
 --  combo end
 
 --  Table: combo_food
@@ -205,7 +205,7 @@ REFERENCES members(member_id);
 
 ALTER TABLE member_coupon
 ADD FOREIGN KEY (coupon)
-REFERENCE coupon(coupon_id);
+REFERENCES coupon(coupon_id);
 
 -- member_coupon end
 
@@ -221,7 +221,7 @@ ALTER TABLE membership
 ADD PRIMARY KEY (card_id);
 
 ALTER TABLE membership
-ADD„ÄÄFOREIGN KEY (member_id)
+ADD FOREIGN KEY (member_id)
 REFERENCES members(member_id);
 
 -- membership end
@@ -445,7 +445,7 @@ REFERENCES orders(order_id);
 
 CREATE TABLE order_food(
  order_food_id CHAR(8) NOT NULL,
- food CHAR(8) NOT NULL,
+ food NUMBER(3) NOT NULL,
  dish_state VARCHAR(20) NOT NULL,
  orders CHAR(8) NOT NULL
 );
@@ -464,7 +464,7 @@ REFERENCES orders(order_id);
 CREATE SEQUENCE order_food_pk;
 
 CREATE TRIGGER order_food_pk
-BEFORE INSERT ON staff
+BEFORE INSERT ON order_food
 FOR EACH ROW
 BEGIN
   SELECT order_food_pk.NEXTVAL
@@ -516,11 +516,11 @@ ADD PRIMARY KEY (combo_detail_id);
 
 ALTER TABLE order_combo_detail
 ADD FOREIGN KEY (food)
-REFERENCES combo_food(food);
+REFERENCES food(food_id);
 
 ALTER TABLE order_combo_detail
 ADD FOREIGN KEY (order_combo)
-REFERENCES oreder_combo(order_combo_id);
+REFERENCES order_combo(order_combo_id);
 
 CREATE SEQUENCE combo_detail_pk;
 
