@@ -5,9 +5,8 @@ Topic: PRJ_03 Pizza Hut - Menu Order System
 Group: 2  
 Team: 1  
 
-| Tools         | Description |
-|---------------|-------------|
-| Oracle        | Database    |
-| Python(Flask) | Server      |
-| Jinja2        | UI          |
-| Javascript    | UI          |
+| Tools  | Version | Description      |
+|--------|---------|------------------|
+| Oracle | 11g     | Database         |
+| Python | 3.6.2   | Server           |
+| Flask  | 1.1.1   | Server Framework |
