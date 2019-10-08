@@ -6,8 +6,6 @@ DROP SEQUENCE staff_pk;
 DROP SEQUENCE payment_method_pk;
 DROP SEQUENCE members_pk;
 DROP SEQUENCE membership_pk;
-DROP SEQUENCE member_coupon_pk;
-DROP SEQUENCE coupon_pk;
 DROP SEQUENCE table_list_pk;
 DROP SEQUENCE food_pk;
 DROP SEQUENCE category_pk;
@@ -16,13 +14,10 @@ DROP TABLE order_remark;
 DROP TABLE order_table;
 DROP TABLE table_list;
 DROP TABLE orders;
-DROP TABLE staff_salary;
 DROP TABLE staff;
 DROP TABLE payment_method;
 DROP TABLE membership;
-DROP TABLE member_coupon;
 DROP TABLE members;
-DROP TABLE coupon;
 DROP TABLE combo_price;
 DROP TABLE food;
 DROP TABLE category;
@@ -75,32 +70,15 @@ CREATE TABLE members(
   member_lastname VARCHAR2(30) NOT NULL,
   sex CHAR(1) NOT NULL,
   birthday DATE NOT NULL,
-  address_flat VARCHAR2(20) NOT NULL,
-  address_building VARCHAR2(30) NOT NULL,
-  address_street VARCHAR2(30) NOT NULL,
-  address_district VARCHAR2(20) NOT NULL,
   member_tel CHAR(8) NOT NULL,
   membership CHAR(1) NOT NULL,
   member_point NUMBER(8) NOT NULL
 );
 --  members end  --
 
---  coupon  --
-CREATE TABLE coupon(
-  coupon_id CHAR(16) NOT NULL,
-  coupon_name VARCHAR(20) NOT NULL,
-  discount NUMBER(3) NOT NULL
-);
---  coupon end  --
 
---  member_coupon  --
-CREATE TABLE member_coupon(
-  member_coupon_id CHAR(8) NOT NULL,
-  member_id CHAR(8) NOT NULL,
-  coupon CHAR(16) NOT NULL,
-  coupon_state VARCHAR2(10) NOT NULL
-);
---  member_coupon end  --
+
+
 
 --  staff  --
 CREATE TABLE staff(
@@ -109,25 +87,10 @@ CREATE TABLE staff(
   staff_surname CHAR(20) NOT NULL,
   staff_lastname CHAR(30) NOT NULL,
   sex CHAR(1) NOT NULL,
-  birthday DATE NOT NULL,
-  address_flat VARCHAR2(20) NOT NULL,
-  address_building VARCHAR2(30) NOT NULL,
-  address_street VARCHAR2(30) NOT NULL,
-  address_district VARCHAR2(20) NOT NULL,
-  position VARCHAR2(20) NOT NULL,
-  staff_tel CHAR(8) NOT NULL
+  position VARCHAR2(20) NOT NULL
 );
 --  staff end  --
 
---  staff_salary  --
-CREATE TABLE staff_salary(
-  staff CHAR(4) NOT NULL,
-  salary_date date NOT NULL,
-  salary_type CHAR(5) NOT NULL,
-  salary NUMBER(6,1) NOT NULL,
-  work_hour NUMBER(4,1) NOT NULL
-);
---  staff_salary end  --
 
 --  payment_method  --
 CREATE TABLE payment_method(
@@ -141,7 +104,6 @@ CREATE TABLE payment_method(
 CREATE TABLE orders(
   order_id CHAR(8) NOT NULL,
   member CHAR(8),
-  coupon CHAR(8),
   staff CHAR(4) NOT NULL,
   payment_method CHAR(2) NOT NULL,
   order_state CHAR(6) NOT NULL,
@@ -175,9 +137,9 @@ CREATE TABLE order_remark(
 -- order_remark end --
 --  order_food  --
 CREATE TABLE order_food(
- order_food_id CHAR(8) NOT NULL,
  orders CHAR(8) NOT NULL,
  food CHAR(3) NOT NULL,
+ order_sequence NUMBER(3) NOT NULL,
  remark CHAR(3) NOT NULL,
  dish_state VARCHAR(20) NOT NULL
 );
@@ -227,24 +189,6 @@ ALTER TABLE members
 ADD PRIMARY KEY (member_id);
 --  members end  --
 
---  coupon  --
-ALTER TABLE coupon
-ADD PRIMARY KEY (coupon_id);
---  coupon end  --
-
---  member_coupon  --
-ALTER TABLE member_coupon
-ADD PRIMARY KEY (member_coupon_id);
-
-ALTER TABLE member_coupon
-ADD FOREIGN KEY (member_id)
-REFERENCES members(member_id);
-
-ALTER TABLE member_coupon
-ADD FOREIGN KEY (coupon)
-REFERENCES coupon(coupon_id);
---  member_coupon end  --
-
 --  payment_method  --
 ALTER TABLE payment_method
 ADD PRIMARY KEY (payment_method_id);
@@ -255,14 +199,6 @@ ALTER TABLE staff
 ADD PRIMARY KEY (staff_id);
 --  staff end  --
 
---  staff_salary  --
-ALTER TABLE staff_salary
-ADD PRIMARY KEY (staff, salary_date);
-
-ALTER TABLE staff_salary
-ADD FOREIGN KEY (staff)
-REFERENCES staff(staff_id);
---  staff_salary end  --
 
 --  orders  --
 ALTER TABLE orders
@@ -272,9 +208,6 @@ ALTER TABLE orders
 ADD FOREIGN KEY (member)
 REFERENCES members(member_id);
 
-ALTER TABLE orders
-ADD FOREIGN KEY (coupon)
-REFERENCES member_coupon(member_coupon_id);
 
 ALTER TABLE orders
 ADD FOREIGN KEY (staff)
@@ -314,12 +247,11 @@ ADD PRIMARY KEY (remark_id);
 ALTER TABLE order_remark
 ADD FOREIGN KEY (food)
 REFERENCES food(food_id);
-
 --  order_remark end  --
 
 --  order_food  --
 ALTER TABLE order_food
-ADD PRIMARY KEY (order_food_id);
+ADD PRIMARY KEY (orders, food, order_sequence);
 
 ALTER TABLE order_food
 ADD FOREIGN KEY (orders)
@@ -333,7 +265,6 @@ ALTER TABLE order_food
 ADD FOREIGN KEY (remark)
 REFERENCES order_remark(remark_id);
 --  order_food end --
-
 
 --  Primary Key & Foreign key end  --
 
@@ -367,10 +298,6 @@ END;
 /
 --  food end  --
 
-
-
-
-
 --  membership  --
 CREATE SEQUENCE membership_pk;
 
@@ -398,34 +325,6 @@ BEGIN
 END;
 /
 --  members end  --
-
---  coupon  --
-CREATE SEQUENCE coupon_pk;
-
-CREATE TRIGGER coupon_bi
-BEFORE INSERT ON coupon
-FOR EACH ROW
-BEGIN
-  SELECT coupon_pk.NEXTVAL
-  INTO   :new.coupon_id
-  FROM   dual;
-END;
-/
---  coupon end  --
-
---  member_coupon  --
-CREATE SEQUENCE member_coupon_pk;
-
-CREATE TRIGGER member_coupon_bi
-BEFORE INSERT ON member_coupon
-FOR EACH ROW
-BEGIN
-  SELECT member_coupon_pk.NEXTVAL
-  INTO   :new.member_coupon_id
-  FROM   dual;
-END;
-/
---  member_coupon end  --
 
 --  staff  --
 CREATE SEQUENCE staff_pk;
@@ -504,14 +403,11 @@ CREATE TRIGGER order_food_pk
 BEFORE INSERT ON order_food
 FOR EACH ROW
 BEGIN
-  SELECT order_food_pk.NEXTVAL
-  INTO   :new.order_food_id
-  FROM   dual;
+  SELECT  COUNT(:old.orders)+1
+  INTO   :new.order_sequence
+  FROM   order_food;
 END;
 /
 --  order_food end  --
-
-
-
 
 --  Sequences & Trigger end  --
