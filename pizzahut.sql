@@ -113,11 +113,9 @@ CREATE TABLE orders(
 
 --  table_list  --
 CREATE TABLE table_list (
-  table_order CHAR(8),
   table_id CHAR(2) NOT NULL,
   table_available CHAR(1) NOT NULL,
-  table_sit NUMBER(2) NOT NULL,
-  table_start DATE
+  table_sit NUMBER(2) NOT NULL
 );
 --  table_list end  --
 
@@ -139,7 +137,8 @@ CREATE TABLE order_food(
  orders CHAR(8) NOT NULL,
  food CHAR(3) NOT NULL,
  order_sequence NUMBER(3) NOT NULL,
- remark CHAR(3) NOT NULL,
+ remark CHAR(3),
+ remark2 CHAR(3),
  dish_state VARCHAR(20) NOT NULL
 );
 --  order_food end  --
@@ -221,9 +220,6 @@ REFERENCES payment_method(payment_method_id);
 ALTER TABLE table_list
 ADD PRIMARY KEY (table_id);
 
-ALTER TABLE table_list
-ADD FOREIGN KEY (table_order)
-REFERENCES orders(order_id);
 --  table_list end  --
 
 --  order_table  --
@@ -262,6 +258,10 @@ REFERENCES food(food_id);
 
 ALTER TABLE order_food
 ADD FOREIGN KEY (remark)
+REFERENCES order_remark(remark_id);
+
+ALTER TABLE order_food
+ADD FOREIGN KEY (remark2)
 REFERENCES order_remark(remark_id);
 --  order_food end --
 
