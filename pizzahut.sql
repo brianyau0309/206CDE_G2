@@ -1,7 +1,7 @@
 --  Droping  --
 DROP SEQUENCE orders_pk;
-DROP SEQUENCE order_combo_pk;
 DROP SEQUENCE order_food_pk;
+DROP SEQUENCE order_remark_pk;
 DROP SEQUENCE staff_pk;
 DROP SEQUENCE payment_method_pk;
 DROP SEQUENCE members_pk;
@@ -9,14 +9,10 @@ DROP SEQUENCE membership_pk;
 DROP SEQUENCE member_coupon_pk;
 DROP SEQUENCE coupon_pk;
 DROP SEQUENCE table_list_pk;
-DROP SEQUENCE combo_pk;
 DROP SEQUENCE food_pk;
 DROP SEQUENCE category_pk;
-DROP SEQUENCE combo_detail_pk;
-DROP SEQUENCE combo_food_pk;
-DROP TABLE order_combo_detail;
-DROP TABLE order_combo;
 DROP TABLE order_food;
+DROP TABLE order_remark;
 DROP TABLE order_table;
 DROP TABLE table_list;
 DROP TABLE orders;
@@ -27,8 +23,7 @@ DROP TABLE membership;
 DROP TABLE member_coupon;
 DROP TABLE members;
 DROP TABLE coupon;
-DROP TABLE combo_food;
-DROP TABLE combo;
+DROP TABLE combo_price;
 DROP TABLE food;
 DROP TABLE category;
 --  Droping end  --
@@ -44,7 +39,7 @@ CREATE TABLE category (
 
 --  food  --
 CREATE TABLE food(
-  food_id NUMBER(3) NOT NULL,
+  food_id CHAR(3) NOT NULL,
   category NUMBER(2) NOT NULL,
   food_eng_name VARCHAR2(50) NOT NULL,
   food_chi_name NVARCHAR2(20) NOT NULL,
@@ -56,28 +51,13 @@ CREATE TABLE food(
 );
 --  food end  --
 
---  combo  --
-CREATE TABLE combo(
-  combo_id NUMBER(3) NOT NULL,
-  combo_name_eng VARCHAR2(50) NOT NULL,
-  combo_name_chi NVARCHAR2(20) NOT NULL,
-  description_eng VARCHAR2(100) NOT NULL,
-  description_chi NVARCHAR2(50) NOT NULL,
-  combo_price NUMBER(5,1) NOT NULL,
-  provide CHAR(1) NOT NULL
+-- combo price --
+CREATE TABLE combo_price(
+  combo_id CHAR(3) NOT NULL,
+  food_id CHAR(3) NOT NULL,
+  price NUMBER(4,1) NOT NULL
 );
---  combo end  --
-
---  combo_food  --
-CREATE TABLE combo_food(
-  combo_food_id CHAR(3) NOT NULL,
-  combo NUMBER(3) NOT NULL,
-  food NUMBER(3) NOT NULL,
-  product_type CHAR(7) NOT NULL,
-  combo_product_price NUMBER(3,1) NOT NULL,
-  provide CHAR(1) NOT NULL
-);
---  combo_food end  --
+-- combo price --
 
 --  membership  --
 CREATE TABLE membership(
@@ -165,7 +145,8 @@ CREATE TABLE orders(
   staff CHAR(4) NOT NULL,
   payment_method CHAR(2) NOT NULL,
   order_state CHAR(6) NOT NULL,
-  order_date DATE NOT NULL
+  order_date DATE NOT NULL,
+  total_price NUMBER(6,1) NOT NULL
 );
 --  orders  --
 
@@ -173,7 +154,6 @@ CREATE TABLE orders(
 CREATE TABLE table_list (
   table_order CHAR(8),
   table_id CHAR(2) NOT NULL,
-  table_password CHAR(30) NOT NULL,
   table_available CHAR(1) NOT NULL,
   table_sit NUMBER(2) NOT NULL,
   table_start DATE
@@ -186,34 +166,25 @@ CREATE TABLE order_table(
   table_id CHAR(2) NOT NULL
 );
 --  order_table end  --
-
+-- order_remark --
+CREATE TABLE order_remark(
+  remark_id CHAR(3) NOT NULL,
+  food CHAR(3) NOT NULL,
+  remark VARCHAR(20) NOT NULL
+);
+-- order_remark end --
 --  order_food  --
 CREATE TABLE order_food(
  order_food_id CHAR(8) NOT NULL,
  orders CHAR(8) NOT NULL,
- food NUMBER(3) NOT NULL,
- remark VARCHAR2(20),
+ food CHAR(3) NOT NULL,
+ remark CHAR(3) NOT NULL,
  dish_state VARCHAR(20) NOT NULL
 );
 --  order_food end  --
 
---  order_combo  --
-CREATE TABLE order_combo(
- order_combo_id CHAR(8) NOT NULL,
- combo NUMBER(3) NOT NULL,
- orders CHAR(8) NOT NULL
-);
---  order_combo end  --
 
---  order_combo_detail  --
-CREATE TABLE order_combo_detail(
-  combo_detail_id NUMBER(8) NOT NULL,
-  order_combo CHAR(8) NOT NULL,
-  combo_food CHAR(3) NOT NULL,
-  remark VARCHAR2(20),
-  combo_dish_state VARCHAR2(10) NOT NULL
-);
---  order_combo_detail end  --
+
 
 --  Table end  --
 
@@ -233,23 +204,18 @@ ADD FOREIGN KEY (category)
 REFERENCES category(category_id);
 --  food end  --
 
---  combo  -- 
-ALTER TABLE combo
-ADD PRIMARY KEY (combo_id);
---  combo end  --
+-- combo price --
+ALTER TABLE combo_price
+ADD PRIMARY KEY (combo_id, food_id);
 
---  combo_food  --
-ALTER TABLE combo_food
-ADD PRIMARY KEY (combo_food_id);
-
-ALTER TABLE combo_food
-ADD FOREIGN KEY (combo) 
-REFERENCES combo(combo_id);
-
-ALTER TABLE combo_food
-ADD FOREIGN KEY (food) 
+ALTER TABLE combo_price
+ADD FOREIGN KEY (combo_id) 
 REFERENCES food(food_id);
---  combo_food end  --
+
+ALTER TABLE combo_price
+ADD FOREIGN KEY (food_id)
+REFERENCES food(food_id); 
+-- combo price end --
 
 --  membership  --
 ALTER TABLE membership
@@ -341,6 +307,16 @@ ADD FOREIGN KEY (order_id)
 REFERENCES orders(order_id);
 --  order_table end  --
 
+-- order remark --
+ALTER TABLE order_remark
+ADD PRIMARY KEY (remark_id);
+
+ALTER TABLE order_remark
+ADD FOREIGN KEY (food)
+REFERENCES food(food_id);
+
+--  order_remark end  --
+
 --  order_food  --
 ALTER TABLE order_food
 ADD PRIMARY KEY (order_food_id);
@@ -352,33 +328,12 @@ REFERENCES orders(order_id);
 ALTER TABLE order_food
 ADD FOREIGN KEY (food)
 REFERENCES food(food_id);
+
+ALTER TABLE order_food
+ADD FOREIGN KEY (remark)
+REFERENCES order_remark(remark_id);
 --  order_food end --
 
---  order_combo  --
-ALTER TABLE order_combo
-ADD PRIMARY KEY (order_combo_id);
-
-ALTER TABLE order_combo
-ADD FOREIGN KEY (orders)
-REFERENCES orders(order_id);
-
-ALTER TABLE order_combo
-ADD FOREIGN KEY (combo)
-REFERENCES combo(combo_id);
---  order_combo end  --
-
---  order_combo_detail  --
-ALTER TABLE order_combo_detail
-ADD PRIMARY KEY (combo_detail_id);
-
-ALTER TABLE order_combo_detail
-ADD FOREIGN KEY (order_combo)
-REFERENCES order_combo(order_combo_id);
-
-ALTER TABLE order_combo_detail
-ADD FOREIGN KEY (combo_food)
-REFERENCES combo_food(combo_food_id);
---  order_combo_detail end  --
 
 --  Primary Key & Foreign key end  --
 
@@ -412,33 +367,9 @@ END;
 /
 --  food end  --
 
---  combo  --
-CREATE SEQUENCE combo_pk;
 
-CREATE TRIGGER combo_bi
-BEFORE INSERT ON combo
-FOR EACH ROW
-BEGIN
-  SELECT combo_pk.NEXTVAL
-  INTO   :new.combo_id
-  FROM   dual;
-END;
-/
---  combo end  --
 
---  combo_food  --
-CREATE SEQUENCE combo_food_pk;
 
-CREATE TRIGGER combo_food_bi
-BEFORE INSERT ON combo_food
-FOR EACH ROW
-BEGIN
-  SELECT combo_food_pk.NEXTVAL
-  INTO   :new.combo_food_id
-  FROM   dual;
-END;
-/
---  combo_food end  --
 
 --  membership  --
 CREATE SEQUENCE membership_pk;
@@ -552,6 +483,20 @@ END;
 /
 --  table_list end  --
 
+--  order_remark  --
+CREATE SEQUENCE order_remark_pk;
+
+CREATE TRIGGER order_remark_pk
+BEFORE INSERT ON order_remark
+FOR EACH ROW
+BEGIN
+  SELECT order_remark_pk.NEXTVAL
+  INTO   :new.remark_id
+  FROM   dual;
+END;
+/
+--  order_remark end  --
+
 --  order_food  --
 CREATE SEQUENCE order_food_pk;
 
@@ -566,32 +511,7 @@ END;
 /
 --  order_food end  --
 
---  order_combo  --
-CREATE SEQUENCE order_combo_pk;
 
-CREATE TRIGGER order_combo_pk
-BEFORE INSERT ON order_combo
-FOR EACH ROW
-BEGIN
-  SELECT order_combo_pk.NEXTVAL
-  INTO   :new.order_combo_id
-  FROM   dual;
-END;
-/
---  order_combo end  --
 
---  order_combo_detail  --
-CREATE SEQUENCE combo_detail_pk;
-
-CREATE TRIGGER combo_detail_bi
-BEFORE INSERT ON order_combo_detail
-FOR EACH ROW
-BEGIN
-  SELECT combo_detail_pk.NEXTVAL
-  INTO   :new.combo_detail_id
-  FROM   dual;
-END;
-/
---  order_combo_detail end  --
 
 --  Sequences & Trigger end  --
