@@ -1,0 +1,109 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+.Client {
+  display: grid;
+  width: 100%;
+  height: 100vh;
+  grid-template-rows: 5% 10% 1fr;
+  grid-template-areas:
+    'top'
+    'menu'
+    'main';
+  overflow: hidden;
+}
+.ClientTop {
+  grid-area: top;
+  text-align: center;
+}
+.ClientTop img {
+  height: 90%;
+  margin-top: 5px;
+}
+#logo {
+  transform: translateX(-12%);
+  width: 35vw;
+}
+#side_btn {
+  float: left;
+  width: 8vw;
+  margin-left: 3px;
+  cursor: pointer;
+}
+#side_toggle {
+  position: absolute;
+  z-index: -1;
+  opacity: 0;
+}
+#side_toggle:checked ~ .ClientTop,
+#side_toggle:checked ~ .ClientMain,
+#side_toggle:checked ~ .ClientMenu {
+  transform: translateX(70%);  
+}
+.translateX-3 {
+  transition: transform .3s;
+}
+.ClientMenu {
+  grid-area: menu;
+  display: flex;
+  flex-flow: row nowrap;
+  list-style: none;
+  text-align: center;
+  overflow-y: hidden;
+  overflow-x: scroll;
+  border-bottom: 1px solid #CCC;
+}
+.ClientMenu > li {
+  margin: 1vw;
+  padding: 1vw;
+}
+.ClientMenu > li > img {
+  width: 8vw;
+  height: 8vw;
+}
+.ClientMenu > li > div {
+  font-size: 2vh;
+}
+.ClientMain {
+  grid-area: main;
+  background: whitesmoke;
+  overflow-y: scroll;
+  padding: 1vh;
+}
+.product_container {
+  outline: 1px solid lightgray;
+  width: 95%;
+  height: 40vh;
+  margin: 1vh auto;
+}
+.product_container:active {
+  opacity: .3;
+}
+.product_image {
+  width: 100%;
+  height: 60%;
+  border-bottom: 1px solid lightgray;
+}
+.product_title {
+  width: 100%;
+  height: 10%;
+  font-size: 3vh;
+  padding-left: 10px;
+}
+.product_detail {
+  width: 96%;
+  height: 23%;
+  margin: auto;
+  font-size: 1.5vh;
+  overflow-y: scroll;
+}
+.product_price {
+  width: 100%;
+  height: 5%;
+  font-size: 2vh;
+}
+.product_price span {
+  padding-right: 5px;
+  float: right;
+}
