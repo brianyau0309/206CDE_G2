@@ -24,7 +24,6 @@ DROP TABLE category;
 --  Droping end  --
 
 --  Table  --
-
 --  category  --
 CREATE TABLE category (
   category_id NUMBER(2) NOT NULL,
