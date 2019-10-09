@@ -1,7 +1,7 @@
 --  Droping  --
 DROP SEQUENCE orders_pk;
 DROP SEQUENCE order_food_pk;
-DROP SEQUENCE order_remark_pk;
+DROP SEQUENCE food_remark_pk;
 DROP SEQUENCE staff_pk;
 DROP SEQUENCE payment_method_pk;
 DROP SEQUENCE members_pk;
@@ -9,8 +9,9 @@ DROP SEQUENCE membership_pk;
 DROP SEQUENCE table_list_pk;
 DROP SEQUENCE food_pk;
 DROP SEQUENCE category_pk;
-DROP TABLE order_food;
 DROP TABLE order_remark;
+DROP TABLE order_food;
+DROP TABLE food_remark;
 DROP TABLE order_table;
 DROP TABLE table_list;
 DROP TABLE orders;
@@ -41,7 +42,7 @@ CREATE TABLE food(
   description_chi NVARCHAR2(50) NOT NULL,
   food_price NUMBER(4,1) NOT NULL,
   vegetarian CHAR(1) NOT NULL,
-  provide CHAR(1) NOT NULL
+  available CHAR(1) NOT NULL
 );
 --  food end  --
 
@@ -49,6 +50,7 @@ CREATE TABLE food(
 CREATE TABLE combo_price(
   combo_id CHAR(3) NOT NULL,
   food_id CHAR(3) NOT NULL,
+  types CHAR(10) NOT NULL,
   price NUMBER(4,1) NOT NULL
 );
 -- combo price --
@@ -125,25 +127,31 @@ CREATE TABLE order_table(
   table_id CHAR(2) NOT NULL
 );
 --  order_table end  --
--- order_remark --
-CREATE TABLE order_remark(
+-- food_remark --
+CREATE TABLE food_remark(
   remark_id CHAR(3) NOT NULL,
   food CHAR(3) NOT NULL,
   remark VARCHAR(20) NOT NULL
 );
--- order_remark end --
+-- food_remark end --
+
 --  order_food  --
 CREATE TABLE order_food(
  orders CHAR(8) NOT NULL,
  food CHAR(3) NOT NULL,
  order_sequence NUMBER(3) NOT NULL,
- remark CHAR(3),
- remark2 CHAR(3),
  dish_state VARCHAR(20) NOT NULL
 );
 --  order_food end  --
 
-
+-- order_remark --
+CREATE TABLE order_remark(
+ orders CHAR(8) NOT NULL,
+ food CHAR(3) NOT NULL,
+ order_sequence NUMBER(3) NOT NULL,
+ remark CHAR(3)
+);
+-- order_remark end --
 
 
 --  Table end  --
@@ -235,14 +243,14 @@ ADD FOREIGN KEY (order_id)
 REFERENCES orders(order_id);
 --  order_table end  --
 
--- order remark --
-ALTER TABLE order_remark
+-- food remark --
+ALTER TABLE food_remark
 ADD PRIMARY KEY (remark_id);
 
-ALTER TABLE order_remark
+ALTER TABLE food_remark
 ADD FOREIGN KEY (food)
 REFERENCES food(food_id);
---  order_remark end  --
+--  food_remark end  --
 
 --  order_food  --
 ALTER TABLE order_food
@@ -256,14 +264,20 @@ ALTER TABLE order_food
 ADD FOREIGN KEY (food)
 REFERENCES food(food_id);
 
-ALTER TABLE order_food
-ADD FOREIGN KEY (remark)
-REFERENCES order_remark(remark_id);
-
-ALTER TABLE order_food
-ADD FOREIGN KEY (remark2)
-REFERENCES order_remark(remark_id);
 --  order_food end --
+
+--  order remark --
+ALTER TABLE order_remark
+ADD PRIMARY KEY (orders, food, order_sequence, remark);
+
+ALTER TABLE order_remark
+ADD FOREIGN KEY (orders, food, order_sequence)
+REFERENCES order_food(orders, food, order_sequence);
+
+ALTER TABLE order_remark
+ADD FOREIGN KEY (remark)
+REFERENCES food_remark(remark_id);
+-- order remark end --
 
 --  Primary Key & Foreign key end  --
 
@@ -381,19 +395,19 @@ END;
 /
 --  table_list end  --
 
---  order_remark  --
-CREATE SEQUENCE order_remark_pk;
+--  food_remark  --
+CREATE SEQUENCE food_remark_pk;
 
-CREATE TRIGGER order_remark_pk
-BEFORE INSERT ON order_remark
+CREATE TRIGGER food_remark_pk
+BEFORE INSERT ON food_remark
 FOR EACH ROW
 BEGIN
-  SELECT order_remark_pk.NEXTVAL
+  SELECT food_remark_pk.NEXTVAL
   INTO   :new.remark_id
   FROM   dual;
 END;
 /
---  order_remark end  --
+--  food_remark end  --
 
 --  order_food  --
 CREATE SEQUENCE order_food_pk;
