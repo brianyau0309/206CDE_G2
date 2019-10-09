@@ -424,3 +424,20 @@ END;
 --  order_food end  --
 
 --  Sequences & Trigger end  --
+-- Insert --
+-- category --
+INSERT INTO category(category_name)
+VALUES('combo');
+INSERT INTO category(category_name)
+VALUES('pizza');
+INSERT INTO category(category_name)
+VALUES('pasta');
+INSERT INTO category(category_name)
+VALUES('rice');
+INSERT INTO category(category_name)
+VALUES('starter');
+INSERT INTO category(category_name)
+VALUES('drink');
+INSERT INTO category(category_name)
+VALUES('dessert');
+-- category end --
