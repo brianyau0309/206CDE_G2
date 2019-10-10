@@ -3,6 +3,7 @@
   padding: 0;
 }
 .Client {
+  font-family: 'Georgia';
   display: grid;
   width: 100%;
   height: 100vh;
@@ -22,28 +23,65 @@
   margin-top: 5px;
 }
 #logo {
-  transform: translateX(-12%);
   width: 35vw;
+  transform: translateX(-8%)
 }
 #side_btn {
   float: left;
   width: 8vw;
   margin-left: 3px;
+  margin-top: 1px;
   cursor: pointer;
 }
-#side_toggle {
+.cover {
+  z-index: -1;
+  width: 100vw;
+  height: 100vh;
+  opacity: 0;
+  position: fixed;
+  background: black;
+  top: 0;
+  left: 0;
+  transition-property: opacity, transform;
+  transition-duration: .3s;
+}
+#bill_btn {
+  background: rgba(255,0,0,.5);
+  position: fixed;
+  top: 90%;
+  left: 85%;
+  width: 13vw;
+  height: 13vw;
+  cursor: pointer;
+  border-radius: 50%;
+}
+#side_toggle ,
+#bill_toggle {
   position: absolute;
   z-index: -1;
   opacity: 0;
 }
+#side_toggle:checked ~ .cover {
+  z-index: 100;
+  opacity: .5;
+}
 #side_toggle:checked ~ .ClientTop,
 #side_toggle:checked ~ .ClientMain,
-#side_toggle:checked ~ .ClientMenu {
+#side_toggle:checked ~ .ClientMenu,
+#side_toggle:checked ~ .cover {
   transform: translateX(70%);  
+}
+#side_toggle:checked ~ .ClientSide {
+  width: 70vw;
+}
+#bill_toggle:checked ~ .ClientBill {
+  transform: translateX(-100%);
 }
 .translateX-3 {
   transition: transform .3s;
 }
+
+
 .ClientMenu {
   grid-area: menu;
   display: flex;
@@ -54,31 +92,64 @@
   overflow-x: scroll;
   border-bottom: 1px solid #CCC;
 }
-.ClientMenu > li {
-  margin: 1vw;
-  padding: 1vw;
+.ClientMenu > a {
+  cursor: default;
+  text-decoration: none;
+  color: inherit;
 }
-.ClientMenu > li > img {
+.ClientMenu > a.active {
+  pointer-events: none;
+}
+.ClientMenu > a > li {
+  margin: .5vw;
+  padding: 0 1vw;
+  z-index: 2;
+  border-radius: 5px;
+}
+.ClientMenu > a > li:active {
+  opacity: .5;
+  background: rgba(0,0,0,0.2);
+}
+.ClientMenu > a > li > img {
   width: 8vw;
   height: 8vw;
 }
-.ClientMenu > li > div {
+.ClientMenu > a > li > div {
   font-size: 2vh;
 }
+
+
 .ClientMain {
   grid-area: main;
   background: whitesmoke;
-  overflow-y: scroll;
   padding: 1vh;
+  overflow-y: scroll;
 }
-.product_container {
+.ClientCombo,
+.ClientFood {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+.combo_container {
   outline: 1px solid lightgray;
   width: 95%;
   height: 40vh;
   margin: 1vh auto;
 }
-.product_container:active {
-  opacity: .3;
+.combo_container:active {
+  opacity: .5;
+}
+.food_container {
+  outline: 1px solid lightgray;
+  width: 32%;
+  height: 27vh;
+  margin: 1vh 0;
+}
+.food_container:active {
+  opacity: .5;
 }
 .product_image {
   width: 100%;
@@ -101,9 +172,79 @@
 .product_price {
   width: 100%;
   height: 5%;
-  font-size: 2vh;
 }
 .product_price span {
   padding-right: 5px;
   float: right;
+  font-size: 1.5vh;
+}
+.food_container .product_title {
+  font-size: 1.5vh;
+}
+.food_container .product_detail {
+  height: 20%;
+  font-size: 1.3vh;
+}
+.food_container .product_price span{
+  font-size: 1.2vh;
+}
+.placeholder {
+  visibility: hidden;
+  height: 0;
+  padding: 0;
+  margin: 0;
+  border-top-width: 0;
+  border-bottom-width: 0;
+}
+
+
+.ClientSide {
+  width: 0;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: rgba(0,0,0,.8);
+  transition: width .3s;
+  overflow: hidden;
+}
+.ClientSide > * {
+  display: inline-block;
+  width: 100%;
+  font-size: 4vh;
+  white-space: nowrap;
+  color: #FFF;
+}
+.ClientSide > h1 {
+  text-align: center;
+  margin-top: 2vh;
+  font-size: 6vh;
+  font-style: italic;
+}
+.ClientSide > h3 {
+  font-size: 4vh;
+}
+.ClientSide > ul {
+  font-size: 3vh;
+  margin-top: 2vh;
+}
+.ClientSide > ul > li {
+  text-align: center;
+  padding-top: 1vh;
+  border-top: 2px solid lightgray;
+}
+
+
+.ClientBill {
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 100vw;
+  background: white;
+}
+.ClientBill label > img {
+  margin-top: 1vw;
+  width: 7vw;
+  height: 7vw;
 }
