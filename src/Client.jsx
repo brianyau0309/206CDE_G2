@@ -10,6 +10,17 @@ import ClientBill from './ClientBill.jsx'
 import ClientSide from './ClientSide.jsx'
 
 export default class Client extends React.Component {
+  componentDidMount() {
+      var socket = io.connect('http://localhost:5000')
+      
+      socket.on('connect', function() {
+          socket.send('User has connected!');
+      });
+      
+      socket.on('message', function(msg) {
+          console.log(msg);
+      });
+  }
   render() {
     return(
       <div className="Client">
