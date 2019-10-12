@@ -27,15 +27,15 @@ DROP TABLE category;
 --  Table  --
 --  category  --
 CREATE TABLE category (
-  category_id NUMBER(2) NOT NULL,
+  category_id CHAR(2) NOT NULL,
   category_name VARCHAR2(20) NOT NULL
 );
 --  category end  --
 
 --  food  --
 CREATE TABLE food(
-  food_id CHAR(3) NOT NULL,
-  category NUMBER(2) NOT NULL,
+  food_id CHAR(4) NOT NULL,
+  category CHAR(2) NOT NULL,
   food_eng_name VARCHAR2(50) NOT NULL,
   food_chi_name NVARCHAR2(20) NOT NULL,
   description_eng VARCHAR2(100) NOT NULL,
@@ -48,8 +48,8 @@ CREATE TABLE food(
 
 -- combo price --
 CREATE TABLE combo_price(
-  combo_id CHAR(3) NOT NULL,
-  food_id CHAR(3) NOT NULL,
+  combo_id CHAR(4) NOT NULL,
+  food_id CHAR(4) NOT NULL,
   types CHAR(10) NOT NULL,
   price NUMBER(4,1) NOT NULL
 );
@@ -115,7 +115,7 @@ CREATE TABLE orders(
 
 --  table_list  --
 CREATE TABLE table_list (
-  table_id CHAR(2) NOT NULL,
+  table_id CHAR(3) NOT NULL,
   table_available CHAR(1) NOT NULL,
   table_sit NUMBER(2) NOT NULL
 );
@@ -124,13 +124,13 @@ CREATE TABLE table_list (
 --  order_table  --
 CREATE TABLE order_table(
   order_id CHAR(8) NOT NULL,
-  table_id CHAR(2) NOT NULL
+  table_id CHAR(3) NOT NULL
 );
 --  order_table end  --
 -- food_remark --
 CREATE TABLE food_remark(
-  remark_id CHAR(3) NOT NULL,
-  food CHAR(3) NOT NULL,
+  remark_id CHAR(4) NOT NULL,
+  food CHAR(4) NOT NULL,
   remark VARCHAR(20) NOT NULL
 );
 -- food_remark end --
@@ -138,7 +138,7 @@ CREATE TABLE food_remark(
 --  order_food  --
 CREATE TABLE order_food(
  orders CHAR(8) NOT NULL,
- food CHAR(3) NOT NULL,
+ food CHAR(4) NOT NULL,
  order_sequence NUMBER(3) NOT NULL,
  dish_state VARCHAR(20) NOT NULL
 );
@@ -147,9 +147,9 @@ CREATE TABLE order_food(
 -- order_remark --
 CREATE TABLE order_remark(
  orders CHAR(8) NOT NULL,
- food CHAR(3) NOT NULL,
+ food CHAR(4) NOT NULL,
  order_sequence NUMBER(3) NOT NULL,
- remark CHAR(3)
+ remark CHAR(4)
 );
 -- order_remark end --
 
@@ -290,7 +290,7 @@ CREATE TRIGGER category_bi
 BEFORE INSERT ON category
 FOR EACH ROW
 BEGIN
-  SELECT category_pk.NEXTVAL
+  SELECT 'C' || LPAD(category_pk.NEXTVAL,1)
   INTO   :new.category_id
   FROM   dual;
 END;
@@ -304,7 +304,7 @@ CREATE TRIGGER food_id_bi
 BEFORE INSERT ON food
 FOR EACH ROW
 BEGIN
-  SELECT food_pk.NEXTVAL
+  SELECT 'F' || LPAD(food_pk.NEXTVAL,3,'0')
   INTO   :new.food_id
   FROM   dual;
 END;
@@ -332,7 +332,7 @@ CREATE TRIGGER members_bi
 BEFORE INSERT ON members
 FOR EACH ROW
 BEGIN
-  SELECT members_pk.NEXTVAL
+  SELECT 'M' || LPAD(members_pk.NEXTVAL,7,'0')
   INTO   :new.member_id
   FROM   dual;
 END;
@@ -346,7 +346,7 @@ CREATE TRIGGER staff_pk
 BEFORE INSERT ON staff
 FOR EACH ROW
 BEGIN
-  SELECT staff_pk.NEXTVAL
+  SELECT 'S' || LPAD(staff_pk.NEXTVAL,3,'0')
   INTO   :new.staff_id
   FROM   dual;
 END;
@@ -388,7 +388,7 @@ CREATE TRIGGER table_list_bi
 BEFORE INSERT ON table_list
 FOR EACH ROW
 BEGIN
-  SELECT table_list_pk.NEXTVAL
+  SELECT 'T' || LPAD(table_list_pk.NEXTVAL,2,'0')
   INTO   :new.table_id
   FROM   dual;
 END;
@@ -402,7 +402,7 @@ CREATE TRIGGER food_remark_pk
 BEFORE INSERT ON food_remark
 FOR EACH ROW
 BEGIN
-  SELECT food_remark_pk.NEXTVAL
+  SELECT 'R' || LPAD(food_remark_pk.NEXTVAL,3,'0')
   INTO   :new.remark_id
   FROM   dual;
 END;
