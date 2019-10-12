@@ -1,4 +1,5 @@
 # 206CDE Group 2 Team 1
+
 206CDE Real Life Project  
 
 Topic: PRJ_03 Pizza Hut - Menu Order System  
@@ -14,6 +15,8 @@ Team: 1
 | Jinja2                | 2.10.3  | Python Templating Language |
 | Flask-SocketIO        | 4.2.1   | Socket Framework           |
 | eventlet              | 0.25.1  | Networking Library         |
+| Node.js               | 12.10.0 | JS Environment             |
+| npm                   | 6.10.3  | Node Package Manager       |
 | React                 | 16.10.1 | JS Framework               |
 | React-Router          | 5.1.1   | Routing Tool for React     |
 | webpack               | 4.41.0  | Module Bundler             |
