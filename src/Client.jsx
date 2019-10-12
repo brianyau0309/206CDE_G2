@@ -12,13 +12,14 @@ import ClientSide from './ClientSide.jsx'
 export default class Client extends React.Component {
   constructor() {
     super()
-    this.state = { 'member': 'Guest' }
+    this.state = { 'member': 'Guest', 'lang': 'eng' }
     this.login = this.login.bind(this)
     this.getMemberInfo = this.getMemberInfo.bind(this)
+    this.changeLang = this.changeLang.bind(this)
   }
 
   componentDidMount() {
-    var socket = io.connect('http://localhost:5000')
+    var socket = io.connect(window.location.origin)
       
     socket.on('connect', function() {
       socket.send('User has connected!');
@@ -43,6 +44,14 @@ export default class Client extends React.Component {
     })
   }
 
+  changeLang() {
+    if (this.state.lang === 'eng') {
+      this.setState({ 'lang': 'chi' })
+    } else {
+      this.setState({ 'lang': 'eng' })
+    }
+  }
+
   getMemberInfo() {
     fetch(`/myinfo`, {
       method: 'POST'
@@ -59,14 +68,14 @@ export default class Client extends React.Component {
     return(
       <div className="Client">
         <input id="side_toggle" type="checkbox" />
-        <label for="side_toggle" class="cover"></label>
+        <label for="side_toggle" className="cover"></label>
         <input id="bill_toggle" type="checkbox" />
         <label for="bill_toggle">
           <img id="bill_btn" src="https://img.icons8.com/carbon-copy/100/000000/bill.png" alt="Bill Toggle Button" />
         </label>
         <ClientTop />
         <Router>
-          <ClientMenu />
+          <ClientMenu lang={this.state.lang} />
           <div className="ClientMain translateX-3">
             <Switch>
               <Route path="/client/food/combo" component={ClientCombo} />
@@ -75,7 +84,7 @@ export default class Client extends React.Component {
             </Switch>
           </div>
         </Router>
-        <ClientSide member={this.state.member} loginFunc={this.login}/>
+        <ClientSide member={this.state.member} loginFunc={this.login} lang={this.state.lang} changeLang={this.changeLang}/>
         <ClientBill/>
       </div>
     )
