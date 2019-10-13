@@ -14,6 +14,7 @@ Team: 1
 | Flask                 | 1.1.1   | Server Framework           |
 | Jinja2                | 2.10.3  | Python Templating Language |
 | Flask-SocketIO        | 4.2.1   | Socket Framework           |
+| Flask-Cors            | 3.0.8   | Handle CROS                |
 | eventlet              | 0.25.1  | Networking Library         |
 | Node.js               | 12.10.0 | JS Environment             |
 | npm                   | 6.10.3  | Node Package Manager       |

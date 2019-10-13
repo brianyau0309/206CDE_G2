@@ -7,14 +7,14 @@ const vocabulary_chi = {'Lang': '中文',　'Combo': '套餐', 'Pizza': '薄餅'
 export default class ClientMenu extends React.Component {
   constructor(props) {
     super(props)
-    this.state = { 'vocabulary': vocabulary_eng }
+    this.state = { 'vocabulary': vocabulary_eng, 'lang': 'eng' }
   }
 
-  componentWillReceiveProps() {
-    if (this.props.lang === 'eng') {
-      this.setState({ 'vocabulary': vocabulary_eng})
-    } else {
-      this.setState({ 'vocabulary': vocabulary_chi})
+  static getDerivedStateFromProps(props, state) {
+    if (props.lang !== state.lang && state.lang === "eng") {
+      return { 'vocabulary': vocabulary_chi, 'lang': 'chi'}
+    } else if (props.lang !== state.lang && state.lang === "chi") {
+      return { 'vocabulary': vocabulary_eng, 'lang': 'eng'}
     }
   }
 

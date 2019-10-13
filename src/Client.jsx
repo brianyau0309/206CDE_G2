@@ -1,5 +1,4 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
 import { BrowserRouter as Router, Route, Switch, Redirect, withRouter } from 'react-router-dom'
 
 import ClientTop from './ClientTop.jsx'
@@ -12,7 +11,7 @@ import ClientSide from './ClientSide.jsx'
 export default class Client extends React.Component {
   constructor() {
     super()
-    this.state = { 'member': 'Guest', 'lang': 'eng' }
+    this.state = { 'member': null, 'lang': 'eng' }
     this.login = this.login.bind(this)
     this.getMemberInfo = this.getMemberInfo.bind(this)
     this.changeLang = this.changeLang.bind(this)
@@ -54,11 +53,13 @@ export default class Client extends React.Component {
 
   getMemberInfo() {
     fetch(`/myinfo`, {
-      method: 'POST'
+      method: 'POST',
+      mode: 'cors',
+      credentials: 'include'
     }).then(res => {
       if (res.ok) {
         res.json().then(info => {
-          this.setState({ 'member': info.member_id })
+          this.setState({ 'member': info.member_id, 'lang': this.state.lang })
         })
       }
     })
@@ -78,14 +79,16 @@ export default class Client extends React.Component {
           <ClientMenu lang={this.state.lang} />
           <div className="ClientMain translateX-3">
             <Switch>
-              <Route path="/client/food/combo" component={ClientCombo} />
-              <Route path="/client/food/:category" component={ClientFood} />
+              <Route path="/client/food/combo">
+                <ClientCombo lang={this.state.lang}/>
+              </Route>
+              <Route path="/client/food/:category" render={(props) => <ClientFood {...props} lang={this.state.lang} />} />
               <Redirect from="/client" to="/client/food/combo" />
             </Switch>
           </div>
         </Router>
         <ClientSide member={this.state.member} loginFunc={this.login} lang={this.state.lang} changeLang={this.changeLang}/>
-        <ClientBill/>
+        <ClientBill lang={this.state.lang}/>
       </div>
     )
   }

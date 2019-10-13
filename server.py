@@ -1,8 +1,17 @@
+#encoding=utf-8
+# -*- coding: utf-8 -*-  
+import os   
+os.environ['NLS_LANG'] = 'SIMPLIFIED CHINESE_CHINA.UTF8'   
 from flask import Flask, session, request, render_template, jsonify
+from flask_cors import cross_origin
+from OracleConn import OracleConn, SQL
 from flask_socketio import SocketIO, send
+
+db = OracleConn()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'SecretKeyHERE!'
+app.config['JSON_AS_ASCII'] = False
 
 socketio = SocketIO(app)
 
@@ -17,20 +26,19 @@ def client(path):
 
 @app.route('/api/food/<path:category>')
 def foodAPI(category):
-    food = [{'food_id': 'F001', 'name': category+' A', 'description': 'This is '+category+' A', 'price': 10.0},{'food_id': 'F002', 'name': category+' B', 'description': 'This is '+category+' B', 'price': 20.0},{'food_id': 'F003', 'name': category+' C', 'description': 'This is '+category+' C', 'price': 30.0}]
-    priceGt = request.args.get('priceGt')
-    output = []
-    if priceGt:
-        priceGt = float(priceGt)
-        for i in food:
-            if i.get('price') >= priceGt:
-                output.append(i)
+    lang = 'eng'
+    if request.args.get('lang'):
+        lang = request.args.get('lang')
+        
+    if category == 'vegetarian':
+        output = db.exe_fetch(SQL['getVegetarianFood'].format(lang=lang), 'all')
     else:
-        output = food
+        output = db.exe_fetch(SQL['getFood'].format(category=category,lang=lang), 'all')
 
     return jsonify({'food': output})
 
 @app.route('/login', methods = ["post"]) #Login process
+@cross_origin()
 def login():
     user = session.get('clientID')
     print(user)
@@ -38,6 +46,7 @@ def login():
     return jsonify({'login': 'success'})
 
 @app.route('/myinfo', methods = ["post"]) #Login process
+@cross_origin()
 def myinfo():
     user = session.get('clientID')
     print(user, 'checking his information')
