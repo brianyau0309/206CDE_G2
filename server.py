@@ -43,6 +43,24 @@ def ordersAPI():
     
     return jsonify({ 'order': output })
 
+@app.route('/api/payment')
+def paymentAPI():
+    output = db.exe_fetch(SQL['getPayment'], 'all')
+
+    return jsonify({'payment': output})
+
+@app.route('/api/staff')
+def staffAPI():
+    output = db.exe_fetch(SQL['getStaff'], 'all')
+
+    return jsonify({'staff': output})
+
+@app.route('/api/table')
+def tableAPI():
+    output = db.exe_fetch(SQL['getTable'])
+    
+    return jsonify({'table': output})
+
 @app.route('/loginpage')
 @cross_origin()
 def loginpage():

@@ -76,5 +76,35 @@ SQL = {
   WHERE
     a.staff = b.staff_id and
     a.payment_method = c.payment_method_id
+  ''',
+  
+  'getPayment': '''
+  SELECT 
+    a.payment_method_id,
+    a.payment_method_name,
+    a.discount
+  FROM 
+    payment_method a
+  ''',
+  
+  'getStaff': '''
+  SELECT 
+    a.staff_id,
+    a.password,
+    a.staff_surname,
+    a.staff_lastname,
+    a.sex,
+    a.position
+  FROM 
+    staff a
+  ''',
+  
+  'getTable': '''
+  SELECT 
+    a.table_id,
+    a.table_available,
+    a.table_sit
+  FROM 
+    table_list a
   '''
 }
