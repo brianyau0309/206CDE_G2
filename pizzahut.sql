@@ -131,7 +131,8 @@ CREATE TABLE order_table(
 CREATE TABLE food_remark(
   remark_id CHAR(4) NOT NULL,
   food CHAR(4) NOT NULL,
-  remark VARCHAR(20) NOT NULL
+  remark VARCHAR(20) NOT NULL,
+  options CHAR(10) NOT NULL
 );
 -- food_remark end --
 
@@ -441,3 +442,15 @@ VALUES('drink');
 INSERT INTO category(category_name)
 VALUES('dessert');
 -- category end --
+INSERT INTO staff(staff_password, staff_surname,staff_lastname,sex,position) 
+  VALUES('ww','Walter','Wong','M','waiters');
+INSERT INTO membership(membership_name,discount)
+  VALUES('normal',1);
+INSERT INTO MEMBERS(member_password,member_surname,member_lastname,sex,birthday,member_tel,membership,member_point)
+  VALUES('abcd','Calvin','Chau','M','18-OCT-99','12345678','1',0);
+INSERT INTO payment_method(payment_method_name,price_rate)
+  VALUES('cash',1);
+INSERT INTO table_list(table_available,table_sit)
+  VALUES('Y',4);
+INSERT INTO FOOD_REMARK(food,remark,options)
+  VALUES('F001','ham','add');
