@@ -62,5 +62,19 @@ SQL = {
     a.category = b.category_id and
     a.available = 'Y' and
     a.vegetarian = 'Y'
+  ''',
+  'getOrders': '''
+  SELECT
+    a.order_id,  
+    b.staff_surname||' '||b.staff_lastname as staff_name,
+    c.payment_method_name,
+    a.order_state,
+    a.order_date,
+    a.total_price
+  FROM 
+    orders a, staff b, payment_method c 
+  WHERE
+    a.staff = b.staff_id and
+    a.payment_method = c.payment_method_id
   '''
 }

@@ -35,7 +35,18 @@ def foodAPI(category):
     else:
         output = db.exe_fetch(SQL['getFood'].format(category=category,lang=lang), 'all')
 
-    return jsonify({'food': output})
+    return jsonify({ 'food': output })
+
+@app.route('/api/orders')
+def ordersAPI():
+    output = db.exe_fetch(SQL['getOrders'], 'all')
+    
+    return jsonify({ 'order': output })
+
+@app.route('/loginpage')
+@cross_origin()
+def loginpage():
+    return render_template("loginpage.html")
 
 @app.route('/login', methods = ["post"]) #Login process
 @cross_origin()

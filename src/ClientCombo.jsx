@@ -7,7 +7,7 @@ const ComboContainer = (props) => (
     <div className="product_detail">
       {props.combo.DESCRIPTION_CHI ? props.combo.DESCRIPTION_CHI : props.combo.DESCRIPTION_ENG}
     </div>
-    <div className="product_price"><span>HKD {props.combo.FOOD_PRICE}</span></div>
+    <div className="product_price"><span>HKD {Number(props.combo.FOOD_PRICE).toFixed(1)}</span></div>
   </div>
 )
 

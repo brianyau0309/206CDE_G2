@@ -7,7 +7,7 @@ const FoodContainer = (props) => (
     <div className="product_detail">
       {props.food.DESCRIPTION_CHI ? props.food.DESCRIPTION_CHI : props.food.DESCRIPTION_ENG}
     </div>
-    <div className="product_price"><span>HKD {props.food.FOOD_PRICE}</span></div>
+    <div className="product_price"><span>HKD {Number(props.food.FOOD_PRICE).toFixed(1)}</span></div>
   </div>
 )
 

@@ -1,9 +1,10 @@
+@import url('https://fonts.googleapis.com/css?family=Noto+Sans+TC&display=swap');
 * {
   margin: 0;
   padding: 0;
 }
 .Client {
-  font-family: 'Georgia';
+  font-family: 'Noto Sans TC', sans-serif;
   display: grid;
   width: 100%;
   height: 100vh;
@@ -161,7 +162,7 @@
   margin: 0 auto;
   padding-bottom: 3px;
   height: 10%;
-  font-size: 2vh;
+  font-size: 1.9vh;
   font-weight: bold;
   padding-left: 1px;
   border-bottom: 1px solid lightgray;
@@ -190,7 +191,7 @@
   padding-bottom: 1px;
 }
 .food_container .product_detail {
-  height: 18%;
+  height: 20%;
   margin-top: 1px;
   font-size: 1.1vh;
 }
@@ -213,7 +214,7 @@
   position: fixed;
   top: 0;
   left: 0;
-  background: rgba(0,0,0,.8);
+  background: #FFF;
   transition: width .3s;
   overflow: hidden;
 }
@@ -222,15 +223,15 @@
   width: 100%;
   font-size: 4vh;
   white-space: nowrap;
-  color: #FFF;
+  color: #444;
 }
-.ClientSide > h1 {
-  text-align: center;
-  margin-top: 2vh;
-  font-size: 6vh;
-  font-style: italic;
+#side_logo {
+  display: block;
+  width: 10vw; 
+  margin: 2vh auto;
 }
 .ClientSide > h3 {
+  text-align: center;
   font-size: 4vh;
 }
 .ClientSide > ul {
@@ -240,9 +241,23 @@
 .ClientSide > ul > li {
   text-align: center;
   padding-top: 1vh;
-  border-top: 2px solid lightgray;
+  border-top: 1px solid lightgray;
 }
-
+#login_toggle {
+  position: absolute;
+  opacity: 0;
+  z-index: -1;
+}
+.login_panel {
+  background: #000;
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+  transition: height .3s;
+}
+#login_toggle:checked  ~ .login_panel {
+  height: 12vh;
+}
 
 .ClientBill {
   width: 100vw;
@@ -278,4 +293,74 @@
   width: 100%;
   height: 15vh;
   font-size: 3vh;
+}
+
+@media only screen and (min-width: 780px) {
+  .Client {
+    display: grid;
+    width: 100%;
+    height: 100vh;
+    grid-template-columns: 75% 25%;
+    grid-template-rows: 5% 10% 1fr;
+    grid-template-areas:
+      'top bill'
+      'menu bill'
+      'main bill';
+    overflow: hidden;
+  }
+  #logo {
+    width: 17vw;
+    transform: translateX(-14%);
+  }
+  #side_btn {
+    width: 4vw;
+  }
+  #side_toggle:checked ~ .ClientSide {
+    width: 30%;
+  }
+  #side_toggle:checked ~ .ClientTop,
+  #side_toggle:checked ~ .ClientMain,
+  #side_toggle:checked ~ .ClientMenu,
+  #side_toggle:checked ~ .cover,
+  #side_toggle:checked ~ .ClientBill {
+    transform: translateX(30vw);  
+  }
+  .ClientMenu > a > li > img {
+    width: 3vw;
+    height: 3vw;
+  }
+  .ClientMenu::-webkit-scrollbar { 
+    display: none; 
+  }
+  .combo_container {
+    width: 49%;
+  }
+  #bill_btn {
+    display: none;
+  }
+  .translateX-3 {
+    transition: transform .35s;
+  }
+  .ClientBill {
+    transition: transform .35s;
+    position: unset;
+    width: 100%;
+    grid-area: bill;
+  }
+  .food_container {
+    width: 24%;
+  }
+  .bill_title {
+    height: 4vw
+  }
+  .bill_title > label{
+    display: none;
+  }
+  .bill_title > span{
+    font-size: 3vh;
+    transform: translateX(0%);
+  }
+  .bill_info {
+    font-size: 1.5vh;
+  }
 }
