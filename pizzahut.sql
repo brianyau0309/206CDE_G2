@@ -85,8 +85,8 @@ CREATE TABLE members(
 CREATE TABLE staff(
   staff_id CHAR(4) NOT NULL,
   staff_password VARCHAR2(30) NOT NULL,
-  staff_surname CHAR(20) NOT NULL,
-  staff_lastname CHAR(30) NOT NULL,
+  staff_surname VARCHAR(20) NOT NULL,
+  staff_lastname VARCHAR(30) NOT NULL,
   sex CHAR(1) NOT NULL,
   position VARCHAR2(20) NOT NULL
 );
@@ -106,7 +106,7 @@ CREATE TABLE orders(
   order_id CHAR(8) NOT NULL,
   member CHAR(8),
   staff CHAR(4) NOT NULL,
-  payment_method CHAR(2) NOT NULL,
+  payment_method CHAR(2),
   order_state CHAR(6) NOT NULL,
   order_date DATE NOT NULL,
   total_price NUMBER(6,1) NOT NULL
@@ -132,7 +132,9 @@ CREATE TABLE food_remark(
   remark_id CHAR(4) NOT NULL,
   food CHAR(4) NOT NULL,
   remark VARCHAR(20) NOT NULL,
-  options CHAR(10) NOT NULL
+  options CHAR(10) NOT NULL,
+  remark_chi NVARCHAR2(50) NOT NULL,
+  option_chi NVARCHAR2(10) NOT NULL
 );
 -- food_remark end --
 
@@ -375,7 +377,7 @@ CREATE TRIGGER orders_pk
 BEFORE INSERT ON orders
 FOR EACH ROW
 BEGIN
-  SELECT orders_pk.NEXTVAL
+  SELECT LPAD(orders_pk.NEXTVAL,8,'0')
   INTO   :new.order_id
   FROM   dual;
 END;
