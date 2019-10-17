@@ -47,6 +47,7 @@ export default class ClientFood extends React.Component {
       <div className="ClientFood translateX-3">
         {FoodList}
         <div className="food_container placeholder"></div>
+        <div className="food_container placeholder option"></div>
       </div>
     )
   }

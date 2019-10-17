@@ -11,10 +11,16 @@ import ClientSide from './ClientSide.jsx'
 export default class Client extends React.Component {
   constructor() {
     super()
-    this.state = { 'member': null, 'lang': 'eng' }
+    this.state = {
+                   'member': null, 
+                   'lang': 'eng',
+                   'bill_btn': 'active', 
+                   'PageHeight': 0
+                  }
     this.login = this.login.bind(this)
     this.getMemberInfo = this.getMemberInfo.bind(this)
     this.changeLang = this.changeLang.bind(this)
+    this.changeBillBtn = this.changeBillBtn.bind(this)
   }
 
   componentDidMount() {
@@ -65,6 +71,16 @@ export default class Client extends React.Component {
     })
   }
 
+  changeBillBtn() {
+    let newPageHeight = document.querySelector('.ClientMain').scrollTop
+    if (newPageHeight > this.state.PageHeight) {
+      this.setState({ 'bill_btn': 'deactive'})
+    } else {
+      this.setState({ 'bill_btn': 'active'})
+    }
+    this.setState({'PageHeight': newPageHeight})
+  }
+
   render() {
     return(
       <div className="Client">
@@ -72,17 +88,17 @@ export default class Client extends React.Component {
         <label for="side_toggle" className="cover"></label>
         <input id="bill_toggle" type="checkbox" />
         <label for="bill_toggle">
-          <img id="bill_btn" src="https://img.icons8.com/carbon-copy/100/000000/bill.png" alt="Bill Toggle Button" />
+          <img id="bill_btn" className={(this.state.bill_btn === 'active') ? 'bill_btn_active' : 'bill_btn_deactive'} src="https://img.icons8.com/carbon-copy/100/000000/bill.png" alt="Bill Toggle Button" />
         </label>
         <ClientTop />
         <Router>
           <ClientMenu lang={this.state.lang} />
-          <div className="ClientMain translateX-3">
+          <div className="ClientMain translateX-3" onScroll={this.changeBillBtn}>
             <Switch>
               <Route path="/client/food/combo">
-                <ClientCombo lang={this.state.lang}/>
+                <ClientCombo lang={this.state.lang} />
               </Route>
-              <Route path="/client/food/:category" render={(props) => <ClientFood {...props} lang={this.state.lang} />} />
+                <Route path="/client/food/:category" render={(props) => <ClientFood {...props} lang={this.state.lang} />}/>
               <Redirect from="/client" to="/client/food/combo" />
             </Switch>
           </div>

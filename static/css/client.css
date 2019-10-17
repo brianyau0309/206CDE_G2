@@ -49,12 +49,18 @@
 #bill_btn {
   background: rgba(255,0,0,.5);
   position: fixed;
-  top: 90%;
   left: 85%;
   width: 13vw;
   height: 13vw;
   cursor: pointer;
   border-radius: 50%;
+  transition: top .2s
+}
+.bill_btn_active {
+  top: 90%;
+}
+.bill_btn_deactive {
+  top: 100%;
 }
 #side_toggle ,
 #bill_toggle {
@@ -168,9 +174,15 @@
   border-bottom: 1px solid lightgray;
   overflow: scroll;
 }
+.product_title::-webkit-scrollbar,
+.product_detail::-webkit-scrollbar, 
+.ClientFood::-webkit-scrollbar, 
+.ClientCombo::-webkit-scrollbar {
+  display: none;
+}
 .product_detail {
   width: 96%;
-  height: 20%;
+  height: 19%;
   margin: auto;
   margin-top: 5px;
   font-size: 1.5vh;
@@ -191,7 +203,7 @@
   padding-bottom: 1px;
 }
 .food_container .product_detail {
-  height: 20%;
+  height: 19%;
   margin-top: 1px;
   font-size: 1.1vh;
 }
@@ -227,7 +239,7 @@
 }
 #side_logo {
   display: block;
-  width: 10vw; 
+  width: 20vw; 
   margin: 2vh auto;
 }
 .ClientSide > h3 {
@@ -237,6 +249,7 @@
 .ClientSide > ul {
   font-size: 3vh;
   margin-top: 2vh;
+  height: 67vh;
 }
 .ClientSide > ul > li {
   text-align: center;
@@ -256,7 +269,7 @@
   transition: height .3s;
 }
 #login_toggle:checked  ~ .login_panel {
-  height: 12vh;
+  height: 15vh;
 }
 
 .ClientBill {
@@ -294,6 +307,17 @@
   height: 15vh;
   font-size: 3vh;
 }
+.lang {
+  font-size: 3vh;
+  width: 100%;
+  text-align: center;
+}
+.ta-l {
+  text-align: left;
+}
+.ta-r {
+  text-align: right;
+}
 
 @media only screen and (min-width: 780px) {
   .Client {
@@ -325,6 +349,9 @@
   #side_toggle:checked ~ .ClientBill {
     transform: translateX(30vw);  
   }
+  #side_logo {
+    width: 10vw;
+  }
   .ClientMenu > a > li > img {
     width: 3vw;
     height: 3vw;
@@ -334,6 +361,7 @@
   }
   .combo_container {
     width: 49%;
+    height: 38vh;
   }
   #bill_btn {
     display: none;
@@ -350,13 +378,16 @@
   .food_container {
     width: 24%;
   }
+  .food_container option {
+    display: block;
+  }
   .bill_title {
     height: 4vw
   }
-  .bill_title > label{
+  .bill_title > label {
     display: none;
   }
-  .bill_title > span{
+  .bill_title > span {
     font-size: 3vh;
     transform: translateX(0%);
   }

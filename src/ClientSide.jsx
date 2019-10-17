@@ -3,10 +3,6 @@ import React from 'react'
 const vocabulary_eng = {'ToLang': '中文', 'Hello': 'Hello', 'Guest': 'Guest', 'Login': 'Member Login', 'Payment': 'Payment Method'}
 const vocabulary_chi = {'ToLang': 'English', 'Hello': '你好', 'Guest': '客人', 'Login': '會員登入', 'Payment': '付款方式'}
 
-const hello = () => (
-  <h3>{this.state.vocabulary.hello} {this.props.member}!</h3>
-)
-
 export default class ClientSide extends React.Component {
   constructor(props) {
     super(props)
@@ -34,14 +30,25 @@ export default class ClientSide extends React.Component {
               {this.state.vocabulary.Login}
             </label>
             <form className="login_panel">
-              Member ID: <input type="text"/><br/>
-              Password: <input type="password"/><br/>
-              <button>Login</button>
+              <table>
+                <tr>
+                  <td className="ta-r">Member ID: </td>
+                  <td className="ta-l"><input type="text" /></td>
+                </tr>
+                <tr>
+                  <td className="ta-r">Password: </td>
+                  <td className="ta-l"><input type="password"/></td>
+                </tr>
+                <tr>
+                  <td colspan='2'><button>Login</button></td>
+                </tr>
+              </table>
             </form>
           </li>
-          <li className="side_li">{this.state.vocabulary.Payment}</li>
-          <li className="side_li" onClick={this.props.changeLang}>{this.state.vocabulary.ToLang}</li>
+          {this.props.member ? () => (<li className="side_li">member</li>) : ''}
+          <li className="side_li" onClick={this.props.login}>{this.state.vocabulary.Payment}</li>
         </ul>
+        <div className="lang" onClick={this.props.changeLang}>{this.state.vocabulary.ToLang}</div>
       </div>
     )
   }

@@ -80,31 +80,31 @@ SQL = {
   
   'getPayment': '''
   SELECT 
-    a.payment_method_id,
-    a.payment_method_name,
-    a.discount
+    payment_method_id,
+    payment_method_name,
+    price_rate
   FROM 
-    payment_method a
+    payment_method
   ''',
   
   'getStaff': '''
   SELECT 
-    a.staff_id,
-    a.password,
-    a.staff_surname,
-    a.staff_lastname,
-    a.sex,
-    a.position
+    staff_id,
+    staff_password,
+    staff_surname,
+    staff_lastname,
+    sex,
+    position
   FROM 
-    staff a
+    staff
   ''',
   
   'getTable': '''
   SELECT 
-    a.table_id,
-    a.table_available,
-    a.table_sit
+    table_id,
+    table_available,
+    table_sit
   FROM 
-    table_list a
+    table_list
   '''
 }

@@ -24,6 +24,7 @@ def hello():
 def client(path):
     return render_template("client.html")
 
+# API
 @app.route('/api/food/<path:category>')
 def foodAPI(category):
     lang = 'eng'
@@ -60,6 +61,7 @@ def tableAPI():
     output = db.exe_fetch(SQL['getTable'])
     
     return jsonify({'table': output})
+# API end
 
 @app.route('/loginpage')
 @cross_origin()
@@ -81,10 +83,12 @@ def myinfo():
     print(user, 'checking his information')
     return jsonify({'member_id': user})
 
+#socketio
 @socketio.on('message')
 def handleMessage(msg):
     print('Message: ', msg)
     send(msg, broadcast=True)
+#socketio
 
 if __name__ == '__main__':
     ip = input('IP: ')
