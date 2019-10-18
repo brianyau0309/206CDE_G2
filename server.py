@@ -25,7 +25,12 @@ def hello():
 def client(path):
     return render_template("client.html")
 
-# API
+@app.route('/staff/', defaults={'path': ''})
+@app.route('/staff/<path:path>')
+def staff(path):
+    return render_template("staff.html")
+    
+#API
 @app.route('/api/food/<path:category>')
 def foodAPI(category):
     lang = 'eng'
@@ -120,7 +125,39 @@ def myinfo():
     print(user, 'checking his information')
     return jsonify({'member_id': user})
 
-#socketio
+@app.route('/create_order') #create invoice
+@cross_origin()
+def create_order():
+    order_date = datetime.now().strftime('%Y/%m/%d %H:%M:%S')
+    print(SQL['createOrder']%order_date)
+    try:
+        db.cursor.execute(SQL['createOrder']%order_date)
+        last_id = db.exe_fetch(SQL['getOrderId'])
+        print(str(last_id.get('ORDER_ID')))
+        db.cursor.execute(SQL['createTable']%last_id)
+        db.cursor.execute('commit')
+        return { 'result': 'Success' } 
+    except:
+        return { 'result': 'Error' }
+    
+@app.route('/order_food', methods = ["post"]) #ordering food from the menu
+@cross_origin()
+def order_food():
+    orderID = request.form.get('orderID')
+    food = request.form.get('food')
+    food_chose = []
+    food_chose.append(food)
+    count_sequence = 0
+    for i in food_chose:
+        try:
+            count_sequence +=1
+            db.cursor.execute(SQL['orderFood']%(orderID,str(i),count_sequence))
+        except:
+            break
+            return { 'result': 'Error' }
+    db.cursor.execute('commit')
+    return { 'result': 'Success' }
+#socket
 @socketio.on('message')
 def handleMessage(msg):
     print('Message: ', msg)

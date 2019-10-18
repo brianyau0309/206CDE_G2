@@ -1,10 +1,13 @@
 const path = require("path")
 
 module.exports = {
-  entry: path.resolve(__dirname, 'src/App.jsx'),
+  entry: {
+    'client': [path.resolve(__dirname, 'src/client/App.jsx')],
+    'staff': [path.resolve(__dirname, 'src/staff/App.jsx')]
+  },
   output: {
     path: path.resolve(__dirname, 'static/js'),
-    filename: 'client_bundle.js',
+    filename: '[name].js',
     publicPath: '/'
   },
   module: {
