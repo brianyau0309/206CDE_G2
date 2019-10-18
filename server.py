@@ -6,6 +6,7 @@ from flask import Flask, session, request, render_template, jsonify
 from flask_cors import cross_origin
 from OracleConn import OracleConn, SQL
 from flask_socketio import SocketIO, send
+from datetime import datetime
 
 db = OracleConn()
 
@@ -61,6 +62,42 @@ def tableAPI():
     output = db.exe_fetch(SQL['getTable'])
     
     return jsonify({'table': output})
+
+@app.route('/api/food')
+def allFoodAPI():
+    condition = ''
+    food = request.args.get('food')
+    if food != None:
+        condition = "WHERE food_id = '%s'"%food
+    output = db.exe_fetch("SELECT * FROM food {condition}".format(condition=condition), 'all')
+    return jsonify({ 'food': output })
+
+@app.route('/api/food_remark')
+def food_remarkAPI():
+    condition = ''
+    food = request.args.get('food')
+    if (food != None):
+        condition = "WHERE food = '%s'"%food
+    output = db.exe_fetch(SQL['getFoodRemark'].format(condition=condition), 'all')
+
+    return jsonify({ 'food_remark': output})
+
+@app.route('/api/combo_price')
+def combo_priceAPI():
+    condition = ''
+    combo = request.args.get('combo')
+    food = request.args.get('food')
+    if (combo != None and food != None):
+        condition = "WHERE combo_id = '%s' and food_id = '%s'"%(combo,food)
+    print(SQL['getComboPrice'].format(condition=condition))
+    output = db.exe_fetch(SQL['getComboPrice'].format(condition=condition), 'all')
+
+    return jsonify({ 'food_remark': output})
+
+@app.route('/api/lastid')
+def lastid():
+    lastid = db.exe_fetch('select order_id from (SELECT order_id FROM orders ORDER BY order_date desc) WHERE rownum = 1')
+    return jsonify({'lastid': lastid.get('ORDER_ID')})
 # API end
 
 @app.route('/loginpage')

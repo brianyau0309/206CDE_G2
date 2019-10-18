@@ -29,7 +29,7 @@ class OracleConn():
 
   def exe_commit(self, SQL):
     self.cursor.execute(SQL)
-    self.connection.commit()
+    self.cursor.execute('commit')
 
   def close(self):
     self.conn.close;
@@ -66,16 +66,15 @@ SQL = {
   'getOrders': '''
   SELECT
     a.order_id,  
+    a.member,
     b.staff_surname||' '||b.staff_lastname as staff_name,
-    c.payment_method_name,
     a.order_state,
     a.order_date,
     a.total_price
   FROM 
-    orders a, staff b, payment_method c 
+    orders a, staff b 
   WHERE
-    a.staff = b.staff_id and
-    a.payment_method = c.payment_method_id
+    a.staff = b.staff_id
   ''',
   
   'getPayment': '''
@@ -106,5 +105,21 @@ SQL = {
     table_sit
   FROM 
     table_list
+  ''',
+
+  'getFoodRemark': '''
+  SELECT
+    *
+  From
+    food_remark
+  {condition}
+  ''',
+
+  'getComboPrice': '''
+  SELECT
+    *
+   FROM
+    combo_price
+   {condition}
   '''
 }
