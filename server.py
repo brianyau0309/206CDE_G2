@@ -6,6 +6,7 @@ from flask import Flask, session, request, render_template, jsonify
 from flask_cors import cross_origin
 from OracleConn import OracleConn, SQL
 from flask_socketio import SocketIO, send
+from datetime import datetime
 
 db = OracleConn()
 
@@ -23,6 +24,11 @@ def hello():
 @app.route('/client/<path:path>')
 def client(path):
     return render_template("client.html")
+
+@app.route('/staff/', defaults={'path': ''})
+@app.route('/staff/<path:path>')
+def staff(path):
+    return render_template("staff.html")
 
 @app.route('/api/food/<path:category>')
 def foodAPI(category):
@@ -80,6 +86,39 @@ def myinfo():
     user = session.get('clientID')
     print(user, 'checking his information')
     return jsonify({'member_id': user})
+
+@app.route('/create_order') #create invoice
+@cross_origin()
+def create_order():
+    order_date = datetime.now().strftime('%Y/%m/%d %H:%M:%S')
+    print(SQL['createOrder']%order_date)
+    try:
+        db.cursor.execute(SQL['createOrder']%order_date)
+        last_id = db.exe_fetch(SQL['getOrderId'])
+        print(str(last_id.get('ORDER_ID')))
+        db.cursor.execute(SQL['createTable']%last_id)
+        db.cursor.execute('commit')
+        return { 'result': 'Success' } 
+    except:
+        return { 'result': 'Error' }
+    
+@app.route('/order_food', methods = ["post"]) #ordering food from the menu
+@cross_origin()
+def order_food():
+    orderID = request.form.get('orderID')
+    food = request.form.get('food')
+    food_chose = []
+    food_chose.append(food)
+    count_sequence = 0
+    for i in food_chose:
+        try:
+            count_sequence +=1
+            db.cursor.execute(SQL['orderFood']%(orderID,str(i),count_sequence))
+        except:
+            break
+            return { 'result': 'Error' }
+    db.cursor.execute('commit')
+    return { 'result': 'Success' }
 
 @socketio.on('message')
 def handleMessage(msg):

@@ -29,7 +29,7 @@ class OracleConn():
 
   def exe_commit(self, SQL):
     self.cursor.execute(SQL)
-    self.connection.commit()
+    self.cursor.execute('commit')
 
   def close(self):
     self.conn.close;
@@ -106,5 +106,28 @@ SQL = {
     a.table_sit
   FROM 
     table_list a
+  ''',
+
+  'createOrder':'''
+  INSERT INTO orders(order_id,staff,order_state,order_date,total_price) 
+    values(LPAD(orders_pk.NEXTVAL,8,'0'),'S001','in sit',TO_DATE('%s','yyyy/mm/dd hh24:mi:ss'),0)
+  ''',
+  'createTable':'''
+  INSERT INTO order_table 
+    values(LPAD(orders_pk.CURRVAL,8,'0'),'T01')
+  ''',
+
+  'getOrderId':'''
+  select 
+    order_id 
+  from 
+    (SELECT order_id FROM orders ORDER BY order_date desc) 
+  WHERE
+    rownum = 1
+  ''',
+
+  'orderFood':'''
+  INSERT INTO order_food
+    values('%s','%s','%d','preparing')
   '''
 }
