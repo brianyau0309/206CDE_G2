@@ -38,7 +38,7 @@ CREATE TABLE food(
   category CHAR(2) NOT NULL,
   food_eng_name VARCHAR2(50) NOT NULL,
   food_chi_name NVARCHAR2(20) NOT NULL,
-  description_eng VARCHAR2(100) NOT NULL,
+  description_eng VARCHAR2(200) NOT NULL,
   description_chi NVARCHAR2(50) NOT NULL,
   food_price NUMBER(4,1) NOT NULL,
   vegetarian CHAR(1) NOT NULL,
@@ -109,8 +109,8 @@ CREATE TABLE orders(
   payment_method CHAR(2),
   order_state CHAR(6) NOT NULL,
   order_date DATE NOT NULL,
-  total_price NUMBER(6,1) NOT NULL
-);
+  total_price NUMBER(6,1)
+;
 --  orders  --
 
 --  table_list  --

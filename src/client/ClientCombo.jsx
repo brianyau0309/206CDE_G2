@@ -47,7 +47,7 @@ export default class ClientCombo extends React.Component {
   render() {
     const ComboList = this.state.combo.map(combo => <ComboContainer combo={combo}/>)
     return(
-      <div className="ClientCombo translateX-3">
+      <div className="ClientCombo translateX-3" >
         {ComboList}
       </div>
     )

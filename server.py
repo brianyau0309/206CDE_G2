@@ -29,7 +29,8 @@ def client(path):
 @app.route('/staff/<path:path>')
 def staff(path):
     return render_template("staff.html")
-
+    
+#API
 @app.route('/api/food/<path:category>')
 def foodAPI(category):
     lang = 'eng'
@@ -66,6 +67,7 @@ def tableAPI():
     output = db.exe_fetch(SQL['getTable'])
     
     return jsonify({'table': output})
+# API end
 
 @app.route('/loginpage')
 @cross_origin()
@@ -119,11 +121,12 @@ def order_food():
             return { 'result': 'Error' }
     db.cursor.execute('commit')
     return { 'result': 'Success' }
-
+#socket
 @socketio.on('message')
 def handleMessage(msg):
     print('Message: ', msg)
     send(msg, broadcast=True)
+#socketio
 
 if __name__ == '__main__':
     ip = input('IP: ')
