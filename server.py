@@ -148,23 +148,19 @@ def create_order():
     except:
         return { 'result': 'Error' }
     
-@app.route('/order_food', methods = ["post"]) #ordering food from the menu
+@app.route('/api/order_food', methods = ["post"]) #ordering food from the menu
 @cross_origin()
 def order_food():
-    orderID = request.form.get('orderID')
-    food = request.form.get('food')
-    food_chose = []
-    food_chose.append(food)
-    count_sequence = 0
-    for i in food_chose:
-        try:
-            count_sequence +=1
-            db.cursor.execute(SQL['orderFood']%(orderID,str(i),count_sequence))
-        except:
-            break
-            return { 'result': 'Error' }
-    db.cursor.execute('commit')
-    return { 'result': 'Success' }
+    if request.method == 'POST':
+        ordering = request.json.get('new_order')
+        orderID = ordering.get('order')
+        food = ordering.get('food')
+        remark = ordering.get('remark')
+        price = ordering.get('price')
+        print(ordering)
+
+        return jsonify({'ordering': ordering})
+
 
 @app.route('/api/form', methods=["GET", "POST"])
 @cross_origin()
@@ -177,8 +173,7 @@ def form():
         print(abc.get('food'))
         print(abc.get('remark'))
         print(abc.get('price'))
-        return jsonify({'abc' : abc})
-
+        return jsonify({'abc' : abc})        
 
 #socket
 @socketio.on('message')

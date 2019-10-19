@@ -84,6 +84,11 @@ export default class ClientFoodRemark extends React.Component {
     let remark = this.state.order_remark
     let price = this.state.price
     console.log({'new_order': {'order': order, 'food': food, 'remark': remark, 'price': price}})
+    fetch(`/api/order_food`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({'new_order': {'order': order, 'food': food, 'remark': remark, 'price': price}})
+    }).then(res => res.json().then(result => console.log(result.ordering)))
   }
 
   render() {

@@ -141,16 +141,45 @@ SQL = {
     rownum = 1
   ''',
 
-  'orderFood':'''
-  INSERT INTO order_food
-    values('%s','%s','%d','preparing')
-  ''',
-  
   'getOrderTable': '''
   SELECT
     *
   From
     order_table
   {condition}
-  ''' 
+  ''' ,
+
+  'orderFood':'''
+  INSERT INTO order_food
+    values('%s','%s',%d,'preparing')
+  ''',
+
+  'orderRemark':'''
+  INSERT INTO order_remark
+    values('%s','%s',%d,'%s')
+  ''',
+
+  'getFoodPrice':'''
+  select 
+    food_price 
+  from 
+    food
+  WHERE
+    food_id = '%s'
+  ''',
+
+  'updateTotalPrice':'''
+  UPDATE orders
+    SET total_price += %f
+    where order_id = '%s'
+  ''',
+
+  'getSequence':'''
+  select 
+    order_sequence 
+  from 
+    (SELECT order_sequence FROM order_food ORDER BY desc)
+  WHERE
+    orders = '%s' & rownum = 1
+  '''
 }
