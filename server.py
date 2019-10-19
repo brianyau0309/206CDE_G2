@@ -90,17 +90,15 @@ def food_remarkAPI():
 
     return jsonify({ 'food_remark': output})
 
-@app.route('/api/combo_price')
-def combo_priceAPI():
+@app.route('/api/combo_choice')
+def combo_choiceAPI():
     condition = ''
     combo = request.args.get('combo')
-    food = request.args.get('food')
-    if (combo != None and food != None):
-        condition = "WHERE combo_id = '%s' and food_id = '%s'"%(combo,food)
-    print(SQL['getComboPrice'].format(condition=condition))
-    output = db.exe_fetch(SQL['getComboPrice'].format(condition=condition), 'all')
+    if combo != None:
+        condition = "and a.food_id = '%s'"%combo
+    output = db.exe_fetch(SQL['getComboChoice'].format(condition=condition), 'all')
 
-    return jsonify({ 'food_remark': output})
+    return jsonify({ 'combo_choice': output })
 
 @app.route('/api/order_table')
 def order_table():
@@ -171,24 +169,13 @@ def order_food():
         food = ordering.get('food')
         remark = ordering.get('remark')
         price = ordering.get('price')
-        curr_total_price = db.exe_fetch(SQL['getTotalPrice']%orderID).get(order_id)
+        curr_total_price = db.exe_fetch(SQL['getTotalPrice']%orderID).get('TOTAL_PRICE')
         total_price =  curr_total_price + price
-        
-        try:
-            sequence = db.exe_fetch(SQL['getSequence']%orderID, 'one').get(order_sequence)
-        except:
-            sequence = 0
-        
-        try:
-            db.cursor.execute(SQL['orderFood']%(orderID,food,int(sequence) + 1))
-            for i in remark:
-                db.cursor.execute(SQL['orderRemark']%(orderID,food,int(sequence) + 1),i))
+        food_seq = db.exe_fetch(SQL['getSequence']%(orderID,food)).get('ORDER_SEQUENCE') 
+        if food_seq == None:
+            food_seq = 0
 
-            db.cursor.execute(SQL['updateTotalPrice']%(total_price,orderID))
-            db.cursor.execute('commit')
-            return jsonify({'result': 'Success'})
-        except:
-            pass
+        print(ordering, curr_total_price, total_price, food_seq+1)
 
         return jsonify({'result': 'Error'})
 
@@ -226,6 +213,10 @@ def cancel_food():
         db.cursor.execute(SQL['cancelDishState']%(orderID,sequence))
         db.cursor.execute('commit')
         return jsonify({'cancel': cancel})
+    except:
+        pass
+
+    return jsonify({'cancel': cancel})
 
 @app.route('/finish_cook', methods = ["post"]) #cooked the ordered food
 @cross_origin()

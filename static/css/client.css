@@ -319,7 +319,8 @@
   text-align: right;
 }
 
-.ClientFoodRemark {
+.ClientFoodRemark,
+.ClientComboChoice {
   width: 100%;
   height: 100vh;
   position: fixed;
@@ -330,29 +331,35 @@
   transition: top .3s;
   z-index: 5;
 }
-
-.ClientFoodRemarkActive {
+.ClientFoodRemarkActive, 
+.ClientComboChoiceActive {
   top: 0;
 }
-.remark_title {
+.remark_title,
+.choice_title {
   position: sticky;
   height: 7vh;
   background: white;
   text-align: center;
 }
-.remark_title > * {
+.remark_title > *,
+.choice_title > img {
   display: inline-block;
 }
-.remark_title > img {
+.remark_title > img,
+.choice_title > img {
   margin-top: 1vw;
   width: 7vw;
   height: 7vw;
   float: left;
+  transform: rotate(-90deg);
 }
-.remark_title > h1 {
+.remark_title > h1,
+.choice_title > h1 {
   font-size: 6vw;
 }
-.remark_img {
+.remark_img,
+.choice_img {
   display: block;
   margin: 2vh auto;
 }

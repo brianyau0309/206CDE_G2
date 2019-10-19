@@ -1,9 +1,10 @@
 import React from 'react'
+import ClientComboChoice from './ClientComboChoice.jsx'
 
 const ComboContainer = (props) => {
   const localpath = window.location.origin + '/static/image/food/'
   return (
-    <div className="combo_container">
+    <div className="combo_container" onClick={() => props.choiceToggle(props.combo.FOOD_ID)}>
       <img className="product_image" src={localpath + props.combo.FOOD_ID + '.png'} />
       <div className="product_title">{props.combo.FOOD_CHI_NAME ? props.combo.FOOD_CHI_NAME : props.combo.FOOD_ENG_NAME}</div>
       <div className="product_detail">
@@ -17,8 +18,9 @@ const ComboContainer = (props) => {
 export default class ClientCombo extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { 'combo': [], 'lang': 'eng' }
+    this.state = { 'combo': [], 'lang': 'eng', 'combo_choosing': '','choice': false }
     this.loadData = this.loadData.bind(this)
+    this.choiceToggle = this.choiceToggle.bind(this)
   }
   
   componentDidMount() {
@@ -47,11 +49,20 @@ export default class ClientCombo extends React.Component {
     })
   }
 
+  choiceToggle(combo) {
+    if (this.state.choice) {
+      this.setState({ 'choice': false })
+    } else {
+      this.setState({ 'combo_choosing': combo,'choice': true })
+    }
+  }
+
   render() {
-    const ComboList = this.state.combo.map(combo => <ComboContainer combo={combo}/>)
+    const ComboList = this.state.combo.map(combo => <ComboContainer combo={combo} choiceToggle={this.choiceToggle}/>)
     return(
       <div className="ClientCombo translateX-3" >
         {ComboList}
+        <ClientComboChoice open={this.state.choice} combo={this.state.combo_choosing} choiceToggle={this.choiceToggle}/>
       </div>
     )
   }

@@ -23,7 +23,13 @@ class OracleConn():
   def exe_fetch(self, SQL, fetch = 'one'):
     self.cursor.execute(SQL)
     if fetch == 'one':
-      return rows_to_dict_list(self.cursor)[0]
+      try:
+        out = rows_to_dict_list(self.cursor)[0]
+      except:
+        out = {}
+
+      return out
+
     elif fetch == 'all':
       return rows_to_dict_list(self.cursor)
 
@@ -115,12 +121,21 @@ SQL = {
   {condition}
   ''',
 
-  'getComboPrice': '''
+  'getComboChoice': '''
   SELECT
-    *
-   FROM
-    combo_price
-  {condition}
+      a.combo, a.food_chi_name, a.food, c.category_name, a.types, a.price
+  FROM
+      (SELECT
+        a.food_id as combo, a.food_chi_name, b.food_id as food, b.types, b.price 
+      FROM 
+        food a, combo_price b 
+      WHERE
+        a.food_id = b.combo_id {condition}) a,
+        food b, 
+        category c
+  WHERE
+    a.food = b.food_id and
+    b.category = c.category_id
   ''',
 
   'createOrder':'''
@@ -176,12 +191,13 @@ SQL = {
   ''',
 
   'getSequence':'''
-  select 
-    order_sequence 
-  from 
-    (SELECT order_sequence FROM order_food ORDER BY desc)
+  SELECT
+    MAX(order_sequence) order_sequence
+  FROM
+    order_food
   WHERE
-    orders = '%s' & rownum = 1
+    orders = '%s' and
+    food = '%s'
   ''',
 
   'updatePayment':'''
