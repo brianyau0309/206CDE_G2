@@ -96,31 +96,40 @@ def create_order():
     print(SQL['createOrder']%order_date)
     try:
         db.cursor.execute(SQL['createOrder']%order_date)
-        last_id = db.exe_fetch(SQL['getOrderId'])
-        print(str(last_id.get('ORDER_ID')))
-        db.cursor.execute(SQL['createTable']%last_id)
+        db.cursor.execute(SQL['createTable'])
         db.cursor.execute('commit')
         return { 'result': 'Success' } 
     except:
         return { 'result': 'Error' }
     
-@app.route('/order_food', methods = ["post"]) #ordering food from the menu
+@app.route('api/order_food', methods = ["get","post"]) #ordering food from the menu
 @cross_origin()
 def order_food():
-    orderID = request.form.get('orderID')
-    food = request.form.get('food')
-    food_chose = []
-    food_chose.append(food)
-    count_sequence = 0
-    for i in food_chose:
+    if request.method == 'GET':
+        return { 'result': 'None' } 
+    elif request.method == 'POST':
+        ordering = request.json.get('order_food')
+        orderID = ordering.get('order_id')
+        food = ordering.get('food')
+        remark = ordering.get('remark')
+        remark_price = ordering.get('remark_price')
+        combo_price = ordering.get('combo_price')
+        price = ordering.get('price')
+        print(ordering)
         try:
-            count_sequence +=1
-            db.cursor.execute(SQL['orderFood']%(orderID,str(i),count_sequence))
+            sequence = db.exe_fetch(SQL['getSequence']%orderID, 'one').get(order_sequence)
         except:
-            break
-            return { 'result': 'Error' }
-    db.cursor.execute('commit')
-    return { 'result': 'Success' }
+            pass
+            sequence = 0
+        db.cursor.execute(SQL['orderFood']%(orderID,food,int(sequence)+1))
+        for i in remark:
+            db.cursor.execute(SQL['orderRemark']%(orderID,food,int(sequence+1),i))
+        db.cursor.execute('commit')
+        return jsonify({'ordering': ordering})
+
+    
+        
+
 #socket
 @socketio.on('message')
 def handleMessage(msg):
