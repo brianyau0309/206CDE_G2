@@ -89,14 +89,16 @@ def myinfo():
     print(user, 'checking his information')
     return jsonify({'member_id': user})
 
-@app.route('/create_order') #create invoice
+@app.route('/create_order', methods = ["post"]) #create invoice
 @cross_origin()
 def create_order():
     order_date = datetime.now().strftime('%Y/%m/%d %H:%M:%S')
     print(SQL['createOrder']%order_date)
+    table = request.json.get('table')
     try:
         db.cursor.execute(SQL['createOrder']%order_date)
-        db.cursor.execute(SQL['createTable'])
+        db.cursor.execute(SQL['createTable']%table)
+        db.cursor.execute(SQL['tableNotAvailable']%table)
         db.cursor.execute('commit')
         return { 'result': 'Success' } 
     except:
@@ -115,6 +117,11 @@ def order_food():
         remark_price = ordering.get('remark_price')
         combo_price = ordering.get('combo_price')
         price = ordering.get('price')
+        curr_total_price = db.exe_fetch(SQL['getTotalPrice']%orderID).get(order_id)
+        total_remark_price = 0
+        for i in remark_price:
+            total_remark_price += i
+        total_price = total_remark_price + combo_price + price + curr_total_price
         print(ordering)
         try:
             sequence = db.exe_fetch(SQL['getSequence']%orderID, 'one').get(order_sequence)
@@ -124,11 +131,66 @@ def order_food():
         db.cursor.execute(SQL['orderFood']%(orderID,food,int(sequence)+1))
         for i in remark:
             db.cursor.execute(SQL['orderRemark']%(orderID,food,int(sequence+1),i))
+        db.cursor.execute(SQL['updateTotalPrice']%(total_price,orderID))
         db.cursor.execute('commit')
         return jsonify({'ordering': ordering})
 
-    
-        
+@app.route('/pay', methods = ["post"]) #pay the bill
+@cross_origin()
+def pay():
+    payment = request.json.get('payment')
+    orderID = payment.get('orderID')
+    method = payment.get('method')
+    table = payment.get('table')
+    db.execute(SQL['updatePayment']%(method,orderID))
+    db.execute(SQL['updateOrderState']%(method,orderID))
+    db.execute(SQL['tableAvailable']%table)
+    db.execute('commit')
+    return jsonify({'payment': payment})
+
+@app.route('/cancel_food', methods = ["post"]) #cancel the ordered food
+@cross_origin()
+def cancel_food():
+    cancel = request.json.get('cancel')
+    orderID = cancel.get('order_id')
+    sequence = cancel.get('sequence')
+    try:
+        food = db.exe_fetch(SQL['getOrderRemark']%(orderID,sequence)).get(food)
+        remark = db.exe_fetch(SQL['getOrderRemark']%(orderID,sequence)).get(remark)
+        remark_price = db.exe_fetch(SQL['getRemarkPrice']%remark, 'all').get(price)
+        combo_price = db.exe_fetch(SQL['getComboPrice']%food).get(price)
+        price = db.exe_fetch(SQL['getPrice']%food).get(price)
+        curr_total_price = db.exe_fetch(SQL['getTotalPrice']%orderID).get(order_id)
+        total_remark_price = 0
+        for i in remark_price:
+            total_remark_price += i
+        total_price = curr_total_price - (total_remark_price + combo_price + price)
+        db.cursor.execute(SQL['updateTotalPrice']%(total_price_orderID))
+        db.cursor.execute(SQL['cancelDishState']%(orderID,sequence))
+        db.cursor.execute('commit')
+        return jsonify({'cancel': cancel})
+
+@app.route('/finish_cook', methods = ["post"]) #cooked the ordered food
+@cross_origin()
+def finish_cook():
+    cooked = request.json.get('cooked')
+    orderID = cooked.get('orderID')
+    food = cooked.get('food')
+    sequence = cooked.get('sequence')
+    db.execute(SQL['foodCooked']%(orderID,food,sequence))
+    db.execute('commit')
+    return jsonify({'cooked': cooked})
+
+@app.route('/food_served', methods = ["post"]) #served the ordered food
+@cross_origin()
+def food_served():
+    served = request.json.get('served')
+    orderID = served.get('orderID')
+    food = served.get('food')
+    sequence = served.get('sequence')
+    db.execute(SQL['foodServed']%(orderID,food,sequence))
+    db.execute('commit')
+    return jsonify({'served': served})
 
 #socket
 @socketio.on('message')

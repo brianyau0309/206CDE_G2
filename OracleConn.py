@@ -112,9 +112,10 @@ SQL = {
   INSERT INTO orders(order_id,staff,order_state,order_date,total_price) 
     values(LPAD(orders_pk.NEXTVAL,8,'0'),'S001','in sit',TO_DATE('%s','yyyy/mm/dd hh24:mi:ss'),0)
   ''',
+
   'createTable':'''
   INSERT INTO order_table 
-    values(LPAD(orders_pk.CURRVAL,8,'0'),'T01')
+    values(LPAD(orders_pk.CURRVAL,8,'0'),'%s')
   ''',
 
   'getOrderId':'''
@@ -130,6 +131,7 @@ SQL = {
   INSERT INTO order_food
     values('%s','%s',%d,'preparing')
   ''',
+
   'orderRemark':'''
   INSERT INTO order_remark
     values('%s','%s',%d,'%s')
@@ -146,7 +148,7 @@ SQL = {
 
   'updateTotalPrice':'''
   UPDATE orders
-    SET total_price += %f
+    SET total_price = %f
     where order_id = '%s'
   ''',
 
@@ -157,5 +159,86 @@ SQL = {
     (SELECT order_sequence FROM order_food ORDER BY desc)
   WHERE
     orders = '%s' & rownum = 1
+  ''',
+
+  'updatePayment':'''
+  UPDATE orders
+    SET payment_method = %d
+    where order_id = '%s'
+  ''',
+
+  'getTotalPrice':'''
+  select 
+    total_price
+  from 
+    orders
+  WHERE
+    order_id = '%s'
+  ''',
+
+  'tableNotAvailable':'''
+  update table_list
+    SET table_available = 'N'
+    where table_id = '%s'
+  ''',
+
+   'tableAvailable':'''
+  update table_list
+    SET table_available = 'Y'
+    where table_id = '%s'
+  ''',
+
+  'getOrderRemark':'''
+  select 
+    *
+  from 
+    order_remark
+  WHERE
+    order_id = '%s' & order_sequence = %d
+  ''',
+
+  'getRemarkPrice':'''
+  select 
+    price
+  from 
+    food_remark
+  WHERE
+    remark_id = '%s'
+  ''',
+
+  'getComboPrice':'''
+  select 
+    price
+  from 
+    combo_price
+  WHERE
+    food = '%s'
+  ''',
+
+  'getPrice':'''
+  select 
+    price
+  from 
+    food
+  WHERE
+    food_id = '%s'
+  ''',
+
+  'cancelDishState':'''
+  update order_food
+  set dish_state = 'cancel'
+  where orders = '%s' & order_sequence = %d
+  ''',
+
+  'foodCooked':'''
+  update order_food
+  set dish_state = '='cooked'
+  where orders = '%s' & food = '%s' & order_sequence = %d
+  ''',
+
+  'foodServed':'''
+  update order_food
+  set dish_state = '='served'
+  where orders = '%s' & food = '%s' & order_sequence = %d
   '''
 }
