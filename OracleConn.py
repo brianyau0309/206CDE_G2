@@ -23,7 +23,7 @@ class OracleConn():
   def exe_fetch(self, SQL, fetch = 'one'):
     self.cursor.execute(SQL)
     if fetch == 'one':
-      return rows_to_dict_list(self.cursor)
+      return rows_to_dict_list(self.cursor)[0]
     elif fetch == 'all':
       return rows_to_dict_list(self.cursor)
 

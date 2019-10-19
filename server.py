@@ -120,20 +120,32 @@ def order_table():
 def loginpage():
     return render_template("loginpage.html")
 
-@app.route('/login', methods = ["post"]) #Login process
+@app.route('/login', methods = ["POST"]) #Login process
 @cross_origin()
 def login():
-    user = session.get('clientID')
-    print(user)
-    session['clientID'] = 'Test_ID'
-    return jsonify({'login': 'success'})
+    loginInfo = request.json.get('login')
+    db.cursor.execute("SELECT member_password FROM members WHERE member_id = '%s'"%loginInfo.get('id'))
+    member_password = db.cursor.fetchone()
+    
+    if member_password != None:
+        if member_password[0] == loginInfo.get('password'):
+            session['member'] = loginInfo.get('id')
+            return jsonify({ 'result': 'Success' })
+        
+    return jsonify({ 'result': 'Fail'})
 
 @app.route('/myinfo', methods = ["post"]) #Login process
 @cross_origin()
 def myinfo():
-    user = session.get('clientID')
+    user = session.get('member')
     print(user, 'checking his information')
-    return jsonify({'member_id': user})
+
+    if user != None:
+        userInfo = db.exe_fetch("SELECT * FROM members WHERE member_id = '%s'"%user)
+        print(userInfo)
+        return jsonify({'result': userInfo})
+    
+    return jsonify({ 'result': 'Fail'})
 
 @app.route('/create_order') #create invoice
 @cross_origin()

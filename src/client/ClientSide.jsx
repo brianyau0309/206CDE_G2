@@ -18,12 +18,16 @@ export default class ClientSide extends React.Component {
   }
 
   render() {
-    const logoPng = window.location.origin + "/static/image/client/header.png"
     return(
       <div className="ClientSide">
         <img id="side_logo" src="https://upload.wikimedia.org/wikipedia/zh/thumb/9/99/Pizza_Hut.svg/200px-Pizza_Hut.svg.png" alt="Pizza Hut" />
-        <h3>{this.state.vocabulary.Hello} {this.props.member ? this.props.member : this.state.vocabulary.Guest}!</h3>
+        <h3>{this.state.vocabulary.Hello} {this.props.memberName ? this.props.memberName : this.state.vocabulary.Guest}!</h3>
         <ul className="side_list">
+          {this.props.memberName ? 
+          <li className="side_li">
+              User Info
+          </li>
+          :
           <li className="side_li">
             <input type="checkbox" id="login_toggle"/>
             <label for="login_toggle">
@@ -33,19 +37,19 @@ export default class ClientSide extends React.Component {
               <table>
                 <tr>
                   <td className="ta-r">Member ID: </td>
-                  <td className="ta-l"><input type="text" /></td>
+                  <td className="ta-l"><input id="login_id" type="text" /></td>
                 </tr>
                 <tr>
                   <td className="ta-r">Password: </td>
-                  <td className="ta-l"><input type="password"/></td>
+                  <td className="ta-l"><input id="login_password" type="password"/></td>
                 </tr>
                 <tr>
-                  <td colspan='2'><button>Login</button></td>
+                  <td colspan='2'><button onClick={this.props.loginFunc}>Login</button></td>
                 </tr>
               </table>
             </form>
           </li>
-          {this.props.member ? () => (<li className="side_li">member</li>) : ''}
+          }
           <li className="side_li" onClick={this.props.login}>{this.state.vocabulary.Payment}</li>
         </ul>
         <div className="lang" onClick={this.props.changeLang}>{this.state.vocabulary.ToLang}</div>
