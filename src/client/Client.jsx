@@ -35,14 +35,22 @@ export default class Client extends React.Component {
     });
   }
 
-  login() {
+  login(e) {
+    e.preventDefault()
+    let id = document.querySelector('#login_id').value
+    let password = document.querySelector('#login_password').value
     fetch(`/login`, {
-      method: 'POST'
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({'login': {'id': id, 'password': password}})
     }).then(res => {
       if (res.ok) {
         res.json().then(loginResult => {
-          if (loginResult.login === 'success') {
+          if (loginResult.result === 'Success') {
+            console.log('Success')
             this.getMemberInfo()
+          } else {
+            console.log('Fail')
           }
         })
       }
@@ -65,7 +73,8 @@ export default class Client extends React.Component {
     }).then(res => {
       if (res.ok) {
         res.json().then(info => {
-          this.setState({ 'member': info.member_id, 'lang': this.state.lang })
+          console.log(info.result)
+          this.setState({ 'member': info.result, 'lang': this.state.lang })
         })
       }
     })
@@ -103,7 +112,7 @@ export default class Client extends React.Component {
             </Switch>
           </div>
         </Router>
-        <ClientSide member={this.state.member} loginFunc={this.login} lang={this.state.lang} changeLang={this.changeLang}/>
+        <ClientSide memberName={this.state.member ? this.state.member.MEMBER_SURNAME : null} loginFunc={this.login} lang={this.state.lang} changeLang={this.changeLang}/>
         <ClientBill lang={this.state.lang}/>
       </div>
     )

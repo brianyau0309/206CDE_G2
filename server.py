@@ -67,6 +67,52 @@ def tableAPI():
     output = db.exe_fetch(SQL['getTable'])
     
     return jsonify({'table': output})
+
+@app.route('/api/food')
+def allFoodAPI():
+    condition = ''
+    food = request.args.get('food')
+    if food != None:
+        condition = "WHERE food_id = '%s'"%food
+    
+    output = db.exe_fetch("SELECT * FROM food {condition}".format(condition=condition), 'all')
+    
+    return jsonify({ 'food': output })
+
+@app.route('/api/food_remark')
+def food_remarkAPI():
+    condition = ''
+    food = request.args.get('food')
+    if (food != None):
+        condition = "WHERE food = '%s'"%food
+    
+    output = db.exe_fetch(SQL['getFoodRemark'].format(condition=condition), 'all')
+
+    return jsonify({ 'food_remark': output})
+
+@app.route('/api/combo_price')
+def combo_priceAPI():
+    condition = ''
+    combo = request.args.get('combo')
+    food = request.args.get('food')
+    if (combo != None and food != None):
+        condition = "WHERE combo_id = '%s' and food_id = '%s'"%(combo,food)
+    print(SQL['getComboPrice'].format(condition=condition))
+    output = db.exe_fetch(SQL['getComboPrice'].format(condition=condition), 'all')
+
+    return jsonify({ 'food_remark': output})
+
+@app.route('/api/order_table')
+def order_table():
+    condition = ''
+    order = request.args.get('order')
+    if (order != None): 
+        condition = "WHERE order_id = '%s'"%order
+    
+    print(SQL['getOrderTable'].format(condition=condition))
+    output = db.exe_fetch(SQL['getOrderTable'].format(condition=condition))
+    
+    return jsonify({ 'order_table': output })
 # API end
 
 @app.route('/loginpage')
@@ -74,20 +120,32 @@ def tableAPI():
 def loginpage():
     return render_template("loginpage.html")
 
-@app.route('/login', methods = ["post"]) #Login process
+@app.route('/login', methods = ["POST"]) #Login process
 @cross_origin()
 def login():
-    user = session.get('clientID')
-    print(user)
-    session['clientID'] = 'Test_ID'
-    return jsonify({'login': 'success'})
+    loginInfo = request.json.get('login')
+    db.cursor.execute("SELECT member_password FROM members WHERE member_id = '%s'"%loginInfo.get('id'))
+    member_password = db.cursor.fetchone()
+    
+    if member_password != None:
+        if member_password[0] == loginInfo.get('password'):
+            session['member'] = loginInfo.get('id')
+            return jsonify({ 'result': 'Success' })
+        
+    return jsonify({ 'result': 'Fail'})
 
 @app.route('/myinfo', methods = ["post"]) #Login process
 @cross_origin()
 def myinfo():
-    user = session.get('clientID')
+    user = session.get('member')
     print(user, 'checking his information')
-    return jsonify({'member_id': user})
+
+    if user != None:
+        userInfo = db.exe_fetch("SELECT * FROM members WHERE member_id = '%s'"%user)
+        print(userInfo)
+        return jsonify({'result': userInfo})
+    
+    return jsonify({ 'result': 'Fail'})
 
 @app.route('/create_order', methods = ["post"]) #create invoice
 @cross_origin()
@@ -107,11 +165,9 @@ def create_order():
 @app.route('/order_food', methods = ["get","post"]) #ordering food from the menu
 @cross_origin()
 def order_food():
-    if request.method == 'GET':
-        return { 'result': 'None' } 
-    elif request.method == 'POST':
-        ordering = request.json.get('order_food')
-        orderID = ordering.get('order_id')
+    if request.method == 'POST':
+        ordering = request.json.get('new_order')
+        orderID = ordering.get('order')
         food = ordering.get('food')
         remark = ordering.get('remark')
         price = ordering.get('price')
