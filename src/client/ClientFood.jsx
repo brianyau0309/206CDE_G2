@@ -36,10 +36,10 @@ export default class ClientFood extends React.Component {
     if (prevProps.match.params.category){
       if (prevProps.match.params.category !== this.props.match.params.category) {
         this.loadData()
-        if (this.state.lang != this.props.lang) {
-          this.setState({ 'category': this.props.match.params.category, 'lang': this.props.lang }, () => this.loadData())
-        }
       }
+    }
+    if (this.state.lang != this.props.lang) {
+      this.setState({ 'category': this.props.match.params.category, 'lang': this.props.lang }, () => this.loadData())
     }
   }
 

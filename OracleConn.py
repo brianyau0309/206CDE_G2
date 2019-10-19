@@ -23,7 +23,7 @@ class OracleConn():
   def exe_fetch(self, SQL, fetch = 'one'):
     self.cursor.execute(SQL)
     if fetch == 'one':
-      return rows_to_dict_list(self.cursor)[0]
+      return rows_to_dict_list(self.cursor)
     elif fetch == 'all':
       return rows_to_dict_list(self.cursor)
 
@@ -120,8 +120,7 @@ SQL = {
     *
    FROM
     combo_price
-   {condition}
-    table_list a
+  {condition}
   ''',
 
   'createOrder':'''
@@ -145,5 +144,13 @@ SQL = {
   'orderFood':'''
   INSERT INTO order_food
     values('%s','%s','%d','preparing')
-  '''
+  ''',
+  
+  'getOrderTable': '''
+  SELECT
+    *
+  From
+    order_table
+  {condition}
+  ''' 
 }

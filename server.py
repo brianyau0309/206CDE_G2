@@ -74,7 +74,9 @@ def allFoodAPI():
     food = request.args.get('food')
     if food != None:
         condition = "WHERE food_id = '%s'"%food
+    
     output = db.exe_fetch("SELECT * FROM food {condition}".format(condition=condition), 'all')
+    
     return jsonify({ 'food': output })
 
 @app.route('/api/food_remark')
@@ -83,6 +85,7 @@ def food_remarkAPI():
     food = request.args.get('food')
     if (food != None):
         condition = "WHERE food = '%s'"%food
+    
     output = db.exe_fetch(SQL['getFoodRemark'].format(condition=condition), 'all')
 
     return jsonify({ 'food_remark': output})
@@ -99,10 +102,17 @@ def combo_priceAPI():
 
     return jsonify({ 'food_remark': output})
 
-@app.route('/api/lastid')
-def lastid():
-    lastid = db.exe_fetch('select order_id from (SELECT order_id FROM orders ORDER BY order_date desc) WHERE rownum = 1')
-    return jsonify({'lastid': lastid.get('ORDER_ID')})
+@app.route('/api/order_table')
+def order_table():
+    condition = ''
+    order = request.args.get('order')
+    if (order != None): 
+        condition = "WHERE order_id = '%s'"%order
+    
+    print(SQL['getOrderTable'].format(condition=condition))
+    output = db.exe_fetch(SQL['getOrderTable'].format(condition=condition))
+    
+    return jsonify({ 'order_table': output })
 # API end
 
 @app.route('/loginpage')
@@ -132,9 +142,7 @@ def create_order():
     print(SQL['createOrder']%order_date)
     try:
         db.cursor.execute(SQL['createOrder']%order_date)
-        last_id = db.exe_fetch(SQL['getOrderId'])
-        print(str(last_id.get('ORDER_ID')))
-        db.cursor.execute(SQL['createTable']%last_id)
+        db.cursor.execute(SQL['createTable'])
         db.cursor.execute('commit')
         return { 'result': 'Success' } 
     except:
@@ -157,6 +165,21 @@ def order_food():
             return { 'result': 'Error' }
     db.cursor.execute('commit')
     return { 'result': 'Success' }
+
+@app.route('/api/form', methods=["GET", "POST"])
+@cross_origin()
+def form():
+    if request.method == 'GET':
+        return ('Hello')
+    elif request.method == 'POST':
+        abc = request.json.get('new_order')
+        print(abc.get('order'))
+        print(abc.get('food'))
+        print(abc.get('remark'))
+        print(abc.get('price'))
+        return jsonify({'abc' : abc})
+
+
 #socket
 @socketio.on('message')
 def handleMessage(msg):
