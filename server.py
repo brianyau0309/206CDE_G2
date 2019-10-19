@@ -104,7 +104,7 @@ def create_order():
     except:
         return { 'result': 'Error' }
     
-@app.route('api/order_food', methods = ["get","post"]) #ordering food from the menu
+@app.route('/order_food', methods = ["get","post"]) #ordering food from the menu
 @cross_origin()
 def order_food():
     if request.method == 'GET':
@@ -114,26 +114,20 @@ def order_food():
         orderID = ordering.get('order_id')
         food = ordering.get('food')
         remark = ordering.get('remark')
-        remark_price = ordering.get('remark_price')
-        combo_price = ordering.get('combo_price')
         price = ordering.get('price')
-        curr_total_price = db.exe_fetch(SQL['getTotalPrice']%orderID).get(order_id)
-        total_remark_price = 0
-        for i in remark_price:
-            total_remark_price += i
-        total_price = total_remark_price + combo_price + price + curr_total_price
+        curr_total_price = db.exe_fetch(SQL['getTotalPrice']%orderID).get(total_price)
+        total_price = price + curr_total_price
         print(ordering)
         try:
             sequence = db.exe_fetch(SQL['getSequence']%orderID, 'one').get(order_sequence)
         except:
-            pass
             sequence = 0
         db.cursor.execute(SQL['orderFood']%(orderID,food,int(sequence)+1))
         for i in remark:
-            db.cursor.execute(SQL['orderRemark']%(orderID,food,int(sequence+1),i))
+            db.cursor.execute(SQL['orderRemark']%(orderID,food,int(sequence)+1,i))
         db.cursor.execute(SQL['updateTotalPrice']%(total_price,orderID))
         db.cursor.execute('commit')
-        return jsonify({'ordering': ordering})
+        return jsonify({'result':'Success'})
 
 @app.route('/pay', methods = ["post"]) #pay the bill
 @cross_origin()
@@ -169,6 +163,8 @@ def cancel_food():
         db.cursor.execute(SQL['cancelDishState']%(orderID,sequence))
         db.cursor.execute('commit')
         return jsonify({'cancel': cancel})
+    except:
+        return {'result':'error'}
 
 @app.route('/finish_cook', methods = ["post"]) #cooked the ordered food
 @cross_origin()
