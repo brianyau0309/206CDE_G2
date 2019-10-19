@@ -162,7 +162,7 @@ def create_order():
     except:
         return { 'result': 'Error' }
     
-@app.route('/order_food', methods = ["get","post"]) #ordering food from the menu
+@app.route('/api/order_food', methods = ["get","post"]) #ordering food from the menu
 @cross_origin()
 def order_food():
     if request.method == 'POST':
@@ -171,19 +171,23 @@ def order_food():
         food = ordering.get('food')
         remark = ordering.get('remark')
         price = ordering.get('price')
-        curr_total_price = db.exe_fetch(SQL['getTotalPrice']%orderID).get(total_price)
+        print(ordering)
+        curr_total_price = db.exe_fetch(SQL['getTotalPrice']%orderID).get('TOTAL_PRICE')
         total_price = price + curr_total_price
         print(ordering)
-        try:
-            sequence = db.exe_fetch(SQL['getSequence']%orderID, 'one').get(order_sequence)
-        except:
+        sequence = db.exe_fetch(SQL['getSequence']%(orderID,food)).get('ORDER_SEQUENCE')
+        print(sequence)
+        if sequence == None:
             sequence = 0
-        db.cursor.execute(SQL['orderFood']%(orderID,food,int(sequence)+1))
+        new_sequence = int(sequence) + 1
+        db.cursor.execute(SQL['orderFood']%(orderID,food,new_sequence))
         for i in remark:
-            db.cursor.execute(SQL['orderRemark']%(orderID,food,int(sequence)+1,i))
+            db.cursor.execute(SQL['orderRemark']%(orderID,food,new_sequence,i))
         db.cursor.execute(SQL['updateTotalPrice']%(total_price,orderID))
         db.cursor.execute('commit')
         return jsonify({'result':'Success'})
+    else:
+        return jsonify({'result':'error'})
 
 @app.route('/pay', methods = ["post"]) #pay the bill
 @cross_origin()

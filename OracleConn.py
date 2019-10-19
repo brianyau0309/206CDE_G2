@@ -176,12 +176,13 @@ SQL = {
   ''',
 
   'getSequence':'''
-  select 
-    order_sequence 
-  from 
-    (SELECT order_sequence FROM order_food ORDER BY desc)
+  SELECT
+    MAX(order_sequence) order_sequence
+  FROM
+    order_food
   WHERE
-    orders = '%s' & rownum = 1
+    orders = '%s' and
+    food = '%s'
   ''',
 
   'updatePayment':'''
@@ -217,7 +218,7 @@ SQL = {
   from 
     order_remark
   WHERE
-    order_id = '%s' & order_sequence = %d
+    order_id = '%s' and order_sequence = %d
   ''',
 
   'getRemarkPrice':'''
@@ -250,18 +251,18 @@ SQL = {
   'cancelDishState':'''
   update order_food
   set dish_state = 'cancel'
-  where orders = '%s' & order_sequence = %d
+  where orders = '%s' and order_sequence = %d
   ''',
 
   'foodCooked':'''
   update order_food
   set dish_state = '='cooked'
-  where orders = '%s' & food = '%s' & order_sequence = %d
+  where orders = '%s' and food = '%s' and order_sequence = %d
   ''',
 
   'foodServed':'''
   update order_food
   set dish_state = '='served'
-  where orders = '%s' & food = '%s' & order_sequence = %d
+  where orders = '%s' and food = '%s' and order_sequence = %d
   '''
 }
