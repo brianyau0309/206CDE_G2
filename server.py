@@ -147,14 +147,16 @@ def myinfo():
     
     return jsonify({ 'result': 'Fail'})
 
-@app.route('/create_order') #create invoice
+@app.route('/create_order', methods = ["post"]) #create invoice
 @cross_origin()
 def create_order():
     order_date = datetime.now().strftime('%Y/%m/%d %H:%M:%S')
     print(SQL['createOrder']%order_date)
+    table = request.json.get('table')
     try:
         db.cursor.execute(SQL['createOrder']%order_date)
-        db.cursor.execute(SQL['createTable'])
+        db.cursor.execute(SQL['createTable']%table)
+        db.cursor.execute(SQL['tableNotAvailable']%table)
         db.cursor.execute('commit')
         return { 'result': 'Success' } 
     except:
@@ -169,23 +171,83 @@ def order_food():
         food = ordering.get('food')
         remark = ordering.get('remark')
         price = ordering.get('price')
-        print(ordering)
+        curr_total_price = db.exe_fetch(SQL['getTotalPrice']%orderID).get(order_id)
+        total_price =  curr_total_price + price
+        
+        try:
+            sequence = db.exe_fetch(SQL['getSequence']%orderID, 'one').get(order_sequence)
+        except:
+            sequence = 0
+        
+        try:
+            db.cursor.execute(SQL['orderFood']%(orderID,food,int(sequence) + 1))
+            for i in remark:
+                db.cursor.execute(SQL['orderRemark']%(orderID,food,int(sequence) + 1),i))
 
-        return jsonify({'ordering': ordering})
+            db.cursor.execute(SQL['updateTotalPrice']%(total_price,orderID))
+            db.cursor.execute('commit')
+            return jsonify({'result': 'Success'})
+        except:
+            pass
 
+        return jsonify({'result': 'Error'})
 
-@app.route('/api/form', methods=["GET", "POST"])
+@app.route('/pay', methods = ["post"]) #pay the bill
 @cross_origin()
-def form():
-    if request.method == 'GET':
-        return ('Hello')
-    elif request.method == 'POST':
-        abc = request.json.get('new_order')
-        print(abc.get('order'))
-        print(abc.get('food'))
-        print(abc.get('remark'))
-        print(abc.get('price'))
-        return jsonify({'abc' : abc})        
+def pay():
+    payment = request.json.get('payment')
+    orderID = payment.get('orderID')
+    method = payment.get('method')
+    table = payment.get('table')
+    db.execute(SQL['updatePayment']%(method,orderID))
+    db.execute(SQL['updateOrderState']%(method,orderID))
+    db.execute(SQL['tableAvailable']%table)
+    db.execute('commit')
+    return jsonify({'payment': payment})
+
+@app.route('/cancel_food', methods = ["post"]) #cancel the ordered food
+@cross_origin()
+def cancel_food():
+    cancel = request.json.get('cancel')
+    orderID = cancel.get('order_id')
+    sequence = cancel.get('sequence')
+    try:
+        food = db.exe_fetch(SQL['getOrderRemark']%(orderID,sequence)).get(food)
+        remark = db.exe_fetch(SQL['getOrderRemark']%(orderID,sequence)).get(remark)
+        remark_price = db.exe_fetch(SQL['getRemarkPrice']%remark, 'all').get(price)
+        combo_price = db.exe_fetch(SQL['getComboPrice']%food).get(price)
+        price = db.exe_fetch(SQL['getPrice']%food).get(price)
+        curr_total_price = db.exe_fetch(SQL['getTotalPrice']%orderID).get(order_id)
+        total_remark_price = 0
+        for i in remark_price:
+            total_remark_price += i
+        total_price = curr_total_price - (total_remark_price + combo_price + price)
+        db.cursor.execute(SQL['updateTotalPrice']%(total_price_orderID))
+        db.cursor.execute(SQL['cancelDishState']%(orderID,sequence))
+        db.cursor.execute('commit')
+        return jsonify({'cancel': cancel})
+
+@app.route('/finish_cook', methods = ["post"]) #cooked the ordered food
+@cross_origin()
+def finish_cook():
+    cooked = request.json.get('cooked')
+    orderID = cooked.get('orderID')
+    food = cooked.get('food')
+    sequence = cooked.get('sequence')
+    db.execute(SQL['foodCooked']%(orderID,food,sequence))
+    db.execute('commit')
+    return jsonify({'cooked': cooked})
+
+@app.route('/food_served', methods = ["post"]) #served the ordered food
+@cross_origin()
+def food_served():
+    served = request.json.get('served')
+    orderID = served.get('orderID')
+    food = served.get('food')
+    sequence = served.get('sequence')
+    db.execute(SQL['foodServed']%(orderID,food,sequence))
+    db.execute('commit')
+    return jsonify({'served': served})
 
 #socket
 @socketio.on('message')

@@ -11,9 +11,9 @@ import StaffSide from './StaffSide.jsx'
 export default class Staff extends React.Component {
   constructor() {
     super()
-    this.state = { 'member': null, 'lang': 'eng' }
+    this.state = { 'staff': null, 'lang': 'eng' }
     this.login = this.login.bind(this)
-    this.getMemberInfo = this.getMemberInfo.bind(this)
+    this.getStaffInfo = this.getStaffInfo.bind(this)
     this.changeLang = this.changeLang.bind(this)
   }
 
@@ -51,7 +51,7 @@ export default class Staff extends React.Component {
     }
   }
 
-  getMemberInfo() {
+  getStaffInfo() {
     fetch(`/myinfo`, {
       method: 'POST',
       mode: 'cors',
@@ -59,7 +59,7 @@ export default class Staff extends React.Component {
     }).then(res => {
       if (res.ok) {
         res.json().then(info => {
-          this.setState({ 'member': info.member_id, 'lang': this.state.lang })
+          this.setState({ 'staff': info.staff_id, 'lang': this.state.lang })
         })
       }
     })
@@ -87,7 +87,7 @@ export default class Staff extends React.Component {
             </Switch>
           </div>
         </Router>
-        <StaffSide member={this.state.member} loginFunc={this.login} lang={this.state.lang} changeLang={this.changeLang}/>
+        <StaffSide staff={this.state.staff} loginFunc={this.login} lang={this.state.lang} changeLang={this.changeLang}/>
         <StaffBill lang={this.state.lang}/>
       </div>
     )
