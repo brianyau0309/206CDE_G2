@@ -10,10 +10,12 @@ def rows_to_dict_list(cursor):
 
 class OracleConn():
   def __init__(self):
-    print('Oracle Connection')
-    ip = input('Server Adress: ')
-    account = input('Account: ')
-    password = input('Password: ')
+    loginfile = open("oracleAC.txt")
+    data = loginfile.readline()
+    data = data.split(',')
+    ip = data[0]
+    account = data[1]
+    password = data[2]
 
     self.conn = cx_Oracle.connect(account + '/' + password + '@' + ip + '/xe')
     print('Oracle Version', self.conn.version)
@@ -123,10 +125,10 @@ SQL = {
 
   'getComboChoice': '''
   SELECT
-      a.combo, a.food_chi_name, a.food, c.category_name, a.types, a.price
+      a.combo, b.food_chi_name, a.food, c.category_name, a.types, a.price
   FROM
       (SELECT
-        a.food_id as combo, a.food_chi_name, b.food_id as food, b.types, b.price 
+        a.food_id as combo, b.food_id as food, b.types, b.price 
       FROM 
         food a, combo_price b 
       WHERE
@@ -136,6 +138,17 @@ SQL = {
   WHERE
     a.food = b.food_id and
     b.category = c.category_id
+  ''',
+  'getComboPerson':'''
+  SELECT
+    b.category_name, 
+    a.quantity 
+  FROM 
+    combo_person a,
+    category b 
+  WHERE 
+    a.category = b.category_id 
+    {condition}
   ''',
 
   'createOrder':'''

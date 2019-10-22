@@ -24,7 +24,7 @@
   margin-top: 5px;
 }
 #logo {
-  width: 35vw;
+  width: 33vw;
   transform: translateX(-8%)
 }
 #side_btn {
@@ -338,6 +338,8 @@
 .remark_title,
 .choice_title {
   position: sticky;
+  position: sticky;
+  top: 0;
   height: 7vh;
   background: white;
   text-align: center;
@@ -349,6 +351,7 @@
 .remark_title > img,
 .choice_title > img {
   margin-top: 1vw;
+  margin-left: 1.5vw;
   width: 7vw;
   height: 7vw;
   float: left;
@@ -356,6 +359,7 @@
 }
 .remark_title > h1,
 .choice_title > h1 {
+  transform: translateX(-10%);
   font-size: 6vw;
 }
 .remark_img,
@@ -367,7 +371,63 @@
   font-size: 4vw;
   text-align: center;
 }
-
+.combo_food_li {
+  width: 98%;
+  margin: auto;
+}
+.combo_food_checkbox {
+  display: inline;
+  position: absolute;
+  opacity: 0;
+}
+.inline {
+  display: inline;
+}
+.combo_food_container {
+  display: inline-block;
+  border: 1px solid lightgray;
+  width: 31%;
+  height: 22vh;
+  margin: 1vh 1vw;
+}
+.combo_food_image {
+  width: 100%;
+  height: 75%;
+  border-bottom: 1px solid lightgray;
+}
+.combo_food_title {
+  width: 96%;
+  margin: 0 auto;
+  height: 10%;
+  font-size: 1.3vh;
+  font-weight: bold;
+  padding-bottom: 1px;
+  padding-left: 1px;
+  border-bottom: 1px solid lightgray;
+  overflow: scroll;
+}
+.combo_food_price {
+  width: 100%;
+  height: 5%;
+}
+.combo_food_price span {
+  padding-right: 5px;
+  float: right;
+  font-size: 1.5vh;
+}
+.combo_food_checkbox:checked ~ .combo_food_container {
+  background: #EEE;
+}
+.bottom_btn {
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  height: 6vh;
+  border: 0;
+  background: red;
+  color: white;
+  font-size: 3vh;
+}
 
 @media only screen and (min-width: 780px) {
   .Client {

@@ -13,7 +13,7 @@ const FoodContainer = (props) => {
       <div className="product_price"><span>HKD {Number(props.food.FOOD_PRICE).toFixed(1)}</span></div>
     </div>
   )
-  }
+}
 export default class ClientFood extends React.Component {
   constructor(props) {
     super(props);

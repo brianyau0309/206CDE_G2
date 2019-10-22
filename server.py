@@ -96,9 +96,22 @@ def combo_choiceAPI():
     combo = request.args.get('combo')
     if combo != None:
         condition = "and a.food_id = '%s'"%combo
+
     output = db.exe_fetch(SQL['getComboChoice'].format(condition=condition), 'all')
 
     return jsonify({ 'combo_choice': output })
+
+@app.route('/api/combo_person')
+def combo_personAPI():
+    condition = ''
+    combo = request.args.get('combo')
+    if combo != None:
+        condition = "and a.combo = '%s'"%combo
+
+    print(SQL['getComboPerson'].format(condition=condition))
+    output = db.exe_fetch(SQL['getComboPerson'].format(condition=condition), 'all')
+
+    return jsonify({ 'combo_person': output })
 
 @app.route('/api/order_table')
 def order_table():
