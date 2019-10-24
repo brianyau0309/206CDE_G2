@@ -170,20 +170,53 @@ def order_food():
         orderID = ordering.get('order')
         food = ordering.get('food')
         remark = ordering.get('remark')
-        price = ordering.get('price')
-        print(ordering)
-        curr_total_price = db.exe_fetch(SQL['getTotalPrice']%orderID).get('TOTAL_PRICE')
-        total_price = price + curr_total_price
+        price = db.exe_fetch(SQL['getPrice']%food).get('FOOD_PRICE')
         print(ordering)
         sequence = db.exe_fetch(SQL['getSequence']%(orderID,food)).get('ORDER_SEQUENCE')
         print(sequence)
         if sequence == None:
             sequence = 0
         new_sequence = int(sequence) + 1
-        db.cursor.execute(SQL['orderFood']%(orderID,food,new_sequence))
+        db.cursor.execute(SQL['orderFood']%(orderID,food,new_sequence,price))
         for i in remark:
-            db.cursor.execute(SQL['orderRemark']%(orderID,food,new_sequence,i))
-        db.cursor.execute(SQL['updateTotalPrice']%(total_price,orderID))
+            remark_price = db.exe_fetch(SQL['getRemarkPrice']%i).get('PRICE')
+            print(remark_price)
+            db.cursor.execute(SQL['orderRemark']%(orderID,food,new_sequence,i,remark_price))
+        db.cursor.execute('commit')
+        return jsonify({'result':'Success'})
+    else:
+        return jsonify({'result':'error'})
+
+@app.route('/api/combo_order_food', methods = ["get","post"]) #ordering combo food from the menu
+@cross_origin()
+def combo_order_food():
+    if request.method == 'POST':
+        combo_ordering = request.json.get('combo_order')
+        combo = combo_ordering.get('combo')
+        orderID = combo_ordering.get('order')
+        foods = combo_ordering.get('food')
+        combo_price = db.exe_fetch(SQL['getComboOrderPrice'])
+        print(ordering)
+        combo_sequence = db.exe_fetch(SQL['getSequence']%(orderID,combo)).get('ORDER_SEQUENCE')
+        print(sequence)
+        if combo_sequence == None:
+            combo_sequence = 0
+        new_combo_sequence = int(combo_sequence) + 1
+        db.cursor.execute(SQL['orderFood']%(orderID,combo,new_combo_sequence,price))
+        for i in foods:
+            food = i.get('food')
+            remark = i.get('remark')
+            types = i.get('types')
+            price = db.exe_fetch(SQL['getComboFoodPrice']%(combo,food,types)).get('PRICE')
+            sequence = db.exe_fetch(SQL['getSequence']%(orderID,food)).get('ORDER_SEQUENCE')
+            if sequence == None:
+                sequence = 0
+            sequence += 1
+            db.cursor.execute(SQL['orderComboFood']%(orderID,food,sequence,price,combo,new_combo_sequence))
+            for j in remark:
+                remark_price = db.exe_fetch(SQL['getRemarkPrice']%j).get('PRICE')
+                print(remark_price)
+                db.cursor.execute(SQL['orderRemark']%(orderID,food,new_sequence,j,remark_price))
         db.cursor.execute('commit')
         return jsonify({'result':'Success'})
     else:
@@ -211,18 +244,10 @@ def cancel_food():
     try:
         food = db.exe_fetch(SQL['getOrderRemark']%(orderID,sequence)).get(food)
         remark = db.exe_fetch(SQL['getOrderRemark']%(orderID,sequence)).get(remark)
-        remark_price = db.exe_fetch(SQL['getRemarkPrice']%remark, 'all').get(price)
-        combo_price = db.exe_fetch(SQL['getComboPrice']%food).get(price)
-        price = db.exe_fetch(SQL['getPrice']%food).get(price)
-        curr_total_price = db.exe_fetch(SQL['getTotalPrice']%orderID).get(order_id)
-        total_remark_price = 0
-        for i in remark_price:
-            total_remark_price += i
-        total_price = curr_total_price - (total_remark_price + combo_price + price)
-        db.cursor.execute(SQL['updateTotalPrice']%(total_price_orderID))
-        db.cursor.execute(SQL['cancelDishState']%(orderID,sequence))
+        db.cursor.execute(SQL['deleteRemark']%(sequence,orderID,remark))
+        db.cursor.execute(SQL['deleteOrderFood']%(sequence,orderID,food))
         db.cursor.execute('commit')
-        return jsonify({'cancel': cancel})
+        return {'result':'success'}
     except:
         return {'result':'error'}
 

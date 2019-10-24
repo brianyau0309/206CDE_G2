@@ -2,19 +2,30 @@ import React from 'react'
 import { BrowserRouter as Router, Route, Switch, Redirect, withRouter } from 'react-router-dom'
 
 import StaffTop from './StaffTop.jsx'
-import StaffMenu from './StaffMenu.jsx'
-import StaffCombo from './StaffCombo.jsx'
-import StaffFood from './StaffFood.jsx'
-import StaffBill from './StaffBill.jsx'
-import StaffSide from './StaffSide.jsx'
 
+const FoodContainer = (props) => {
+  return(
+    <label id='food'>{props.food.FOOD_ENG_NAME}</label>
+    <button id='food' onClick={() => props.remarkToggle(props.food.FOOD_ID)}/>
+  )
+  }
 export default class Staff extends React.Component {
   constructor() {
     super()
-    this.state = { 'staff': null, 'lang': 'eng' }
+    this.state = { 'staff': null, 
+    'lang': 'eng', 
+    'food':'',
+    'food_info': {},
+    'remark': false,
+    'food_remark': [],
+    'order_remark': [],
+    'price': 0}
     this.login = this.login.bind(this)
     this.getStaffInfo = this.getStaffInfo.bind(this)
-    this.changeLang = this.changeLang.bind(this)
+    this.getFoodInfo = this.getFoodInfo.bind(this)
+    this.getFoodRemark = this.getFoodRemark.bind(this)
+    this.onSubmit = this.onSubmit.bind(this)
+    this.remarkOnChange = this.remarkOnChange.bind(this)
   }
 
   componentDidMount() {
@@ -36,19 +47,21 @@ export default class Staff extends React.Component {
       if (res.ok) {
         res.json().then(loginResult => {
           if (loginResult.login === 'success') {
-            this.getMemberInfo()
+            this.getStaffInfo()
           }
         })
       }
     })
   }
 
-  changeLang() {
-    if (this.state.lang === 'eng') {
-      this.setState({ 'lang': 'chi' })
-    } else {
-      this.setState({ 'lang': 'eng' })
-    }
+  getOrderID() {
+    fetch(`/api/orderID`,{method: 'POST'}).then(res => {
+      if (res.ok) {
+        res.json().then(result => {
+          this.setState({ 'orderID': result.food_remark })
+        })
+      }
+    })
   }
 
   getStaffInfo() {
@@ -65,7 +78,81 @@ export default class Staff extends React.Component {
     })
   }
 
+  getFoodInfo() {
+    fetch(`/api/food?food=${this.state.food}`).then(res => {
+      if (res.ok) {
+        res.json().then(result => {
+          this.setState({ 'food_info': result.food[0], 'price': result.food[0].FOOD_PRICE })
+        })
+      }
+    })
+  }
+
+  getFoodRemark() {
+    fetch(`/api/food_remark?food=${this.state.food}`).then(res => {
+      if (res.ok) {
+        res.json().then(result => {
+          this.setState({ 'food_remark': result.food_remark })
+        })
+      }
+    })
+  }
+
+  remarkOnChange() {
+    let temp = []
+    let remark_option = document.querySelectorAll('.remark_list input')
+    remark_option.forEach(option => {
+      if (option.checked)
+        temp.push(option.value)
+    })
+    this.setState({ 'order_remark': temp }, () => this.calPrice())
+  }
+
+  onSubmit() {
+    let order = '00000003'
+    let food = this.state.food
+    let remark = this.state.order_remark
+    fetch(`/api/order_food`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({'new_order': {'order': order, 'food': food, 'remark': remark}})
+    }).then(res => res.json().then(result => console.log(result.ordering)))
+  }
+
+  remarkToggle(food_id) {
+    if (this.state.remark) {
+      this.setState({ 'remark': false })
+    } else {
+      this.setState({ 'food_remark': food_id,'remark': true })
+    }
+  }
+
   render() {
+    const FoodList = this.state.food.map(food => <FoodContainer food={food} remarkToggle={this.remarkToggle} />)
+    let all_remark = this.state.food_remark
+    const remark_list = []
+
+    while (all_remark.length != 0) {
+      let remark_name = all_remark[0].REMARK
+      remark_list.push(all_remark.filter(remark => remark.REMARK === remark_name))
+      all_remark = all_remark.filter(remark => remark.REMARK !== remark_name)
+    }
+
+    const remark_component = remark_list.map(remark => (
+      <li>
+        <h1>{remark[0].REMARK}</h1>
+          {
+            remark.map(remark => 
+            (
+              <label>
+                {remark.OPTION_ENG}
+                <input type="radio" name={remark.REMARK} value={remark.REMARK_ID} onChange={this.remarkOnChange} />
+              </label>)
+            )
+          }
+      </li>
+    ))
+
     return(
       <div className="Staff">
         <input id="side_toggle" type="checkbox" />
@@ -76,19 +163,23 @@ export default class Staff extends React.Component {
         </label>
         <StaffTop />
         <Router>
-          <StaffMenu lang={this.state.lang} />
           <div className="StaffMain translateX-3">
-            <Switch>
-              <Route path="/staff/food/combo">
-                <StaffCombo lang={this.state.lang}/>
-              </Route>
-              <Route path="/staff/food/:category" render={(props) => <StaffFood {...props} lang={this.state.lang} />} />
-              <Redirect from="/staff" to="/staff/food/combo" />
-            </Switch>
+          <Switch>
+            
+          <input id="searchthing" type="text" placeholder="Search table"></input>
+          {FoodList}
+          <label for="combo_id">Combo_id</label>
+          <input id="combo_id" />
+          <label for="order_id">Order_id</label>
+          <input id="order_id" />
+          <label for="remark">remark</label>
+          <ul className="remark_list">
+          {remark_component}
+          </ul>
+          <button onClick={this.onSubmit}>Submit ({this.state.price})</button>
+          </Switch>
           </div>
         </Router>
-        <StaffSide staff={this.state.staff} loginFunc={this.login} lang={this.state.lang} changeLang={this.changeLang}/>
-        <StaffBill lang={this.state.lang}/>
       </div>
     )
   }
