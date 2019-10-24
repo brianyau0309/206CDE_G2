@@ -90,17 +90,15 @@ def food_remarkAPI():
 
     return jsonify({ 'food_remark': output})
 
-@app.route('/api/combo_price')
-def combo_priceAPI():
+@app.route('/api/combo_choice')
+def combo_choiceAPI():
     condition = ''
     combo = request.args.get('combo')
-    food = request.args.get('food')
-    if (combo != None and food != None):
-        condition = "WHERE combo_id = '%s' and food_id = '%s'"%(combo,food)
-    print(SQL['getComboPrice'].format(condition=condition))
-    output = db.exe_fetch(SQL['getComboPrice'].format(condition=condition), 'all')
+    if combo != None:
+        condition = "and a.food_id = '%s'"%combo
+    output = db.exe_fetch(SQL['getComboChoice'].format(condition=condition), 'all')
 
-    return jsonify({ 'food_remark': output})
+    return jsonify({ 'combo_choice': output })
 
 @app.route('/api/order_table')
 def order_table():
@@ -249,7 +247,9 @@ def cancel_food():
         db.cursor.execute('commit')
         return {'result':'success'}
     except:
-        return {'result':'error'}
+        pass
+
+    return jsonify({'cancel': cancel})
 
 @app.route('/finish_cook', methods = ["post"]) #cooked the ordered food
 @cross_origin()

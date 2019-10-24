@@ -118,7 +118,7 @@ export default class ClientFoodRemark extends React.Component {
       <div className={this.state.open ? "ClientFoodRemark ClientFoodRemarkActive" : "ClientFoodRemark"}>
         <div className="remark_title">
           <img src="https://img.icons8.com/carbon-copy/100/000000/back.png" onClick={this.props.remarkToggle} />
-          <h1 onClick={this.calPrice}>Your Order</h1>
+          <h1>Your Order</h1>
         </div>
         <img className="remark_img" src={this.state.food != '' ? window.location.origin + '/static/image/food/' + this.state.food + '.png' : ''} alt="food image"/>
         <div className="remark_food_name">{this.state.food_info.FOOD_ENG_NAME}</div>
