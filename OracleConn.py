@@ -200,12 +200,12 @@ SQL = {
 
   'orderFood':'''
   INSERT INTO order_food
-    values('%s','%s',%d,'preparing')
+    values('%s','%s',%d,'preparing',%f,NULL,NULL)
   ''',
 
   'orderRemark':'''
   INSERT INTO order_remark
-    values('%s','%s',%d,'%s')
+    values('%s','%s',%d,'%s',%f)
   ''',
 
   'getFoodPrice':'''
@@ -217,10 +217,10 @@ SQL = {
     food_id = '%s'
   ''',
 
-  'updateTotalPrice':'''
-  UPDATE orders
-    SET total_price = %f
-    where order_id = '%s'
+  'updatePrice':'''
+  UPDATE order_food
+    SET price = %f
+    where food = '%s'
   ''',
 
   'getSequence':'''
@@ -289,17 +289,25 @@ SQL = {
 
   'getPrice':'''
   select 
-    price
+    food_price
   from 
     food
   WHERE
     food_id = '%s'
   ''',
 
-  'cancelDishState':'''
-  update order_food
-  set dish_state = 'cancel'
-  where orders = '%s' and order_sequence = %d
+  'deleteRemark':'''
+  delete from order_remark
+  where order_sequence = %d
+  and orders = '%s'
+  and remark = '%s'
+  ''',
+
+  'deleteOrderFood':'''
+  delete from order_food
+  where order_sequence = %d
+  and orders ='%s'
+  and food = '%s'
   ''',
 
   'foodCooked':'''
@@ -312,5 +320,24 @@ SQL = {
   update order_food
   set dish_state = '='served'
   where orders = '%s' and food = '%s' and order_sequence = %d
+  ''',
+  
+  'getComboFoodPrice':'''
+  select price
+  from combo_price
+  where combo_id = '%s'
+  and food_id = '%s'
+  and types = '%s'
+  ''',
+
+  'orderComboFood':'''
+  INSERT INTO order_food
+    values('%s','%s',%d,'preparing',%f,,)
+    ''',
+
+  'getComboOrderPrice':'''
+  Select food_id
+  from food
+  where food_id = '%s'
   '''
 }
