@@ -16,8 +16,9 @@ class OracleConn():
     ip = data[0]
     account = data[1]
     password = data[2]
+    connect = account + '/' + password + '@' + ip + '/xe'
 
-    self.conn = cx_Oracle.connect(account + '/' + password + '@' + ip + '/xe')
+    self.conn = cx_Oracle.connect(connect)
     print('Oracle Version', self.conn.version)
 
     self.cursor = self.conn.cursor()
@@ -57,6 +58,7 @@ SQL = {
     a.available = 'Y' and
     b.category_name = '{category}'
   ''',
+
   'getVegetarianFood': '''
   SELECT 
     a.food_id,
@@ -71,6 +73,7 @@ SQL = {
     a.available = 'Y' and
     a.vegetarian = 'Y'
   ''',
+
   'getOrders': '''
   SELECT
     a.order_id,  
@@ -139,6 +142,23 @@ SQL = {
     a.food = b.food_id and
     b.category = c.category_id
   ''',
+
+  'getComboChoiceInfo': '''
+  SELECT
+    a.food_id,
+    b.food_chi_name,
+    b.food_eng_name,
+    c.category_name,
+    a.types,
+    a.price
+  FROM
+    combo_price a, food b, category c
+  WHERE
+    a.food_id = b.food_id AND
+    b.category = c.category_id
+    {condition}
+    ''',
+
   'getComboPerson':'''
   SELECT
     b.category_name, 

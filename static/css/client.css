@@ -343,6 +343,7 @@
   height: 7vh;
   background: white;
   text-align: center;
+  z-index: 1;
 }
 .remark_title > *,
 .choice_title > img {
@@ -375,20 +376,15 @@
   width: 98%;
   margin: auto;
 }
-.combo_food_checkbox {
-  display: inline;
-  position: absolute;
-  opacity: 0;
-}
-.inline {
-  display: inline;
-}
 .combo_food_container {
   display: inline-block;
   border: 1px solid lightgray;
   width: 31%;
   height: 22vh;
   margin: 1vh 1vw;
+}
+.combo_food_container.deactive {
+  opacity: .3;
 }
 .combo_food_image {
   width: 100%;
@@ -415,9 +411,6 @@
   float: right;
   font-size: 1.5vh;
 }
-.combo_food_checkbox:checked ~ .combo_food_container {
-  background: #EEE;
-}
 .bottom_btn {
   position: sticky;
   bottom: 0;
@@ -427,6 +420,53 @@
   background: red;
   color: white;
   font-size: 3vh;
+}
+.remark_price_panel {
+  font-size: 4vh;
+  text-align: center;
+}
+.remark_price_panel .left,
+.remark_price_panel .right {
+  vertical-align: middle;
+  margin: 0 5vw;
+  width: 5vh;
+  height: 5vh;
+}
+.remark_price_panel .right {
+  transform: rotate(180deg);
+}
+
+.qty_item {
+  display: inline-block;
+  background: white;
+  padding: 1vh 2vh;
+  margin: 1vh 1vh;
+  font-size: 2vh;
+  border: 1px solid gray;
+}
+.qty_item.active {
+  background: lightgray;
+}
+.remark_price_panel ~ h3 {
+  font-size: 5vh;
+  margin: 10px;
+}
+.reset_button {
+  display: block;
+  margin: 1vh 0;
+  padding: 0 1vh;
+  font-size: 2.5vh;
+  width: 10vh;
+  height: 5vh;
+  background: red;
+  border: 0;
+}
+.remark_list {
+  margin-bottom: 5vh;
+}
+.remark_list label {
+  margin: 0 10px;
+  font-size: 2vh;
 }
 
 @media only screen and (min-width: 780px) {

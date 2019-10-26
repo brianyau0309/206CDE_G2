@@ -107,8 +107,8 @@ export default class ClientFoodRemark extends React.Component {
             remark.map(remark => 
             (
               <label>
-                {remark.OPTION_ENG}
                 <input type="radio" name={remark.REMARK} value={remark.REMARK_ID} onChange={this.remarkOnChange} />
+                {remark.OPTION_ENG}
               </label>)
             )
           }

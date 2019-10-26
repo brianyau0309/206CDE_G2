@@ -83,8 +83,11 @@ def allFoodAPI():
 def food_remarkAPI():
     condition = ''
     food = request.args.get('food')
+    remark = request.args.get('remark')
     if (food != None):
-        condition = "WHERE food = '%s'"%food
+        condition = " WHERE food = '%s'"%food
+    if (remark != None):
+        condition = " WHERE remark_id = '%s'"%remark
     
     output = db.exe_fetch(SQL['getFoodRemark'].format(condition=condition), 'all')
 
@@ -95,11 +98,29 @@ def combo_choiceAPI():
     condition = ''
     combo = request.args.get('combo')
     if combo != None:
-        condition = "and a.food_id = '%s'"%combo
+        condition = "AND a.food_id = '%s'"%combo
 
     output = db.exe_fetch(SQL['getComboChoice'].format(condition=condition), 'all')
 
     return jsonify({ 'combo_choice': output })
+
+@app.route('/api/combo_choice_info')
+def combo_choice_infoAPI():
+    condition = ''
+    food = request.args.get('food')
+    combo = request.args.get('combo')
+    types = request.args.get('types')
+    if food != None:
+        condition += " AND a.food_id = '%s'"%food
+    if combo != None:
+        condition += " AND a.combo_id = '%s'"%combo
+    if types != None:
+        condition += " AND a.types = '%s'"%types
+    
+
+    output = db.exe_fetch(SQL['getComboChoiceInfo'].format(condition=condition), 'all')
+
+    return jsonify({ 'combo_choice_info': output })
 
 @app.route('/api/combo_person')
 def combo_personAPI():
