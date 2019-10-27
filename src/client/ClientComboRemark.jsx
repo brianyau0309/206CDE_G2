@@ -1,4 +1,5 @@
 import React from 'react'
+import { timingSafeEqual } from 'crypto';
 
 export default class ClientComboRemark extends React.Component {
   constructor(props) {
@@ -20,6 +21,7 @@ export default class ClientComboRemark extends React.Component {
     this.remarkOnChange = this.remarkOnChange.bind(this)
     this.calPrice = this.calPrice.bind(this)
     this.addOnClick = this.addOnClick.bind(this)
+    this.selfCloseRemark = this.selfCloseRemark.bind(this)
   }
 
   static getDerivedStateFromProps(props, state) {
@@ -28,10 +30,19 @@ export default class ClientComboRemark extends React.Component {
   
   componentDidUpdate(prevProps,prevState) {
     if (prevProps.food != this.props.food || prevProps.food_types != this.props.food_types) {
-      this.setState({'qty': 1, 'num_now': 1, 'order_remark': []})
-      this.resetRemark()
       this.getFoodInfo()
       this.getFoodRemark()
+      let selected_food = this.props.category_list.filter(item => item.food === this.state.food)
+      console.log('selected',selected_food)
+      if (selected_food.length !== 0) {
+        let temp = []
+        selected_food.forEach(food => {
+          temp.push(food.remark)
+        })
+        this.setState({'qty': selected_food.length, 'num_now': 1, 'order_remark': temp}, () => setTimeout(this.setRemark, 100))
+      } else {
+        this.setState({'qty': 1, 'num_now': 1, 'order_remark': []}, () => this.resetRemark())
+      }
     }
     if (prevState.num_now != this.state.num_now) {
       console.log(prevState.num_now, this.state.num_now)
@@ -60,14 +71,26 @@ export default class ClientComboRemark extends React.Component {
   }
 
   changeQTY(change) {
+    let list = this.props.category_list
     if (change === 'add') {
-      if (this.state.qty < this.props.food_person) {
+      if (this.props.food_types === 'extra') {
+        if (this.state.qty < 5) {
+          this.setState({'qty': this.state.qty+1})
+        }
+      } else if (this.state.qty < this.props.food_person - list.length + list.filter(item => item.food === this.state.food).length) {
+        let temp = this.state.order_remark
+        if (temp[this.state.qty] !== undefined) {temp[this.state.qty] = []}
+        this.setState({'order_remark': temp})
         this.setState({'qty': this.state.qty+1})
       }
     } 
     else if (change === 'minus') {
       if (this.state.qty > 0) {
-        this.setState({'qty': this.state.qty-1})
+        this.setState({'qty': this.state.qty-1}, () => {
+          if (this.state.num_now > this.state.qty) {
+            this.setState({'num_now': this.state.qty}, () => this.setRemark())
+          }
+        })
       }
     }
   }
@@ -95,7 +118,6 @@ export default class ClientComboRemark extends React.Component {
   }
 
   calPrice() {
-    console.log(this.state.order_remark)
     let price = this.state.food_info.PRICE
     let all_remark_price = 0
     this.state.order_remark.forEach(num => num.forEach(remark_id => {
@@ -110,6 +132,7 @@ export default class ClientComboRemark extends React.Component {
   }
 
   setRemark() {
+    console.log(this.state.order_remark)
     let remark_option = document.querySelectorAll('.remark_list input')
     remark_option.forEach(option => {
       option.checked = false
@@ -124,12 +147,29 @@ export default class ClientComboRemark extends React.Component {
   }
 
   addOnClick() {
+    console.log('clicked')
+    let temp = this.props.category_list
+    let category = this.props.food_category
+    if (this.props.food_types === 'extra') {
+      temp = this.props.extra_list
+      category = 'extra'
+    }
+
+    temp = temp.filter(item => item.food !== this.state.food)
     for (let i = 0; i < this.state.qty; i++) {
       let remark_list = this.state.order_remark[i]
       if (remark_list === undefined) {remark_list = []}
-      this.props.addFood(this.props.food_category,this.state.food,this.props.food_types,remark_list,this.state.price)
+      temp.push({'food': this.state.food, 'types': this.props.food_types, 'remark': remark_list, 'price': this.state.price})
     }
+    console.log(temp)
+    this.props.addFood(category, temp)
     this.props.closeRemark()
+  }
+
+  selfCloseRemark() {
+    let qty = this.props.category_list.filter(item => item.food === this.state.food).length
+    if (qty === 0) {qty = 1}
+    this.setState({'qty': qty, 'num_now': 1}, this.props.closeRemark())
   }
 
   render() {
@@ -163,10 +203,10 @@ export default class ClientComboRemark extends React.Component {
     return(
       <div className={this.state.open ? "ClientFoodRemark ClientFoodRemarkActive" : "ClientFoodRemark"}>
         <div className="remark_title">
-          <img src="https://img.icons8.com/carbon-copy/100/000000/back.png" onClick={this.props.closeRemark} />
-          <h1>Your Order</h1>
+          <img src="https://img.icons8.com/carbon-copy/100/000000/back.png" onClick={this.selfCloseRemark} />
+          <h1 onClick={() => console.log(this.state)}>Your Order</h1>
         </div>
-        <img className="remark_img" src={this.state.food !== '' ? window.location.origin + '/static/image/food/' + this.state.food + '.png' : ''} alt="food image"/>
+        <img onClick={this.setRemark} className="remark_img" src={this.state.food !== '' ? window.location.origin + '/static/image/food/' + this.state.food + '.png' : ''} alt="food image"/>
         <div className="remark_food_name">{this.state.food_info.FOOD_ENG_NAME}</div>
         
         <div className="remark_price_panel">
@@ -180,7 +220,7 @@ export default class ClientComboRemark extends React.Component {
         <ul className="remark_list">
           {remark_component}
         </ul>
-        <button className="bottom_btn" disabled={this.state.qty === 0 ? true : false} onClick={this.addOnClick}>Add (HKD {this.state.price})</button>
+        <button className="bottom_btn" onClick={this.addOnClick}>{this.props.food_types === "extra" ? this.props.extra_list.filter(item => item.food === this.state.food).length === 0 ? "Add" : "Change" : this.props.category_list.filter(item => item.food === this.state.food).length === 0 ?'Add' : 'Change'} (HKD {this.state.price})</button>
       </div>
     )
   }

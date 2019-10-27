@@ -386,6 +386,10 @@
 .combo_food_container.deactive {
   opacity: .3;
 }
+.combo_food_container.active {
+  background: #EEE;
+  border-color: lightgray;
+}
 .combo_food_image {
   width: 100%;
   height: 75%;

@@ -6,7 +6,7 @@ const ComboFoodContainer = (props) => {
   let category_name = props.food.CATEGORY_NAME
   if (category_name === 'rice' || category_name === 'pasta') {category_name = 'rice_pasta'}
   return(
-    <div className={props.category_max <= props.category_list.length && props.category_list.filter(item => item.food === props.food.FOOD).length === 0 ? "combo_food_container deactive" : "combo_food_container"} onClick={() => props.onclickComboFood((props.food.CATEGORY_NAME === "rice" || props.food.CATEGORY_NAME === "pasta" ? "rice_pasta" : props.food.CATEGORY_NAME),props.food.FOOD, props.food.TYPES)}>
+    <div className={props.category_max <= props.category_list.length && props.category_list.filter(item => item.food === props.food.FOOD).length === 0 ? "combo_food_container deactive" : props.category_list.filter(item => item.food === props.food.FOOD).length === 0 ? "combo_food_container" : "combo_food_container active"} onClick={() => props.onclickComboFood((props.food.CATEGORY_NAME === "rice" || props.food.CATEGORY_NAME === "pasta" ? "rice_pasta" : props.food.CATEGORY_NAME),props.food.FOOD, props.food.TYPES)}>
       <img className="combo_food_image" src={localpath + props.food.FOOD + '.png'} />
       <div className="combo_food_title">{props.food.FOOD_CHI_NAME ? props.food.FOOD_CHI_NAME : props.food.FOOD_ENG_NAME}</div>
       <div className="combo_food_price"><span>HKD {Number(props.food.PRICE).toFixed(1)}</span></div>
@@ -28,7 +28,7 @@ const ComboDetail = (props) => {
   let choices_list = choices.map(choice => <ComboFoodContainer food={choice} onclickComboFood={props.onclickComboFood} category_max={props.category_max} category_list={props.category_list} />)
   return (
     <li className="combo_food_li">
-      <h1 style={{textDecoration: "underline"}}>{props.category === 'rice/pasta' ? "RICE/PASTA" : props.category.toUpperCase()}</h1>
+      <h1 style={{textDecoration: "underline"}}>{props.category === 'rice/pasta' ? "RICE/PASTA" : props.category.toUpperCase()}<span style={{textDecoration: "none",}}>&nbsp;--&nbsp;{props.category_list.length}/{props.category_max}</span></h1>
       {choices_list}
     </li>
   )
@@ -41,7 +41,7 @@ export default class ClientComboChoice extends React.Component {
       'lang': 'eng',
       'food': '',
       'food_types': '',
-      'food_category': '',
+      'food_category': 'pizza',
       'remark': false,
       'open': false, 
       'combo': '',
@@ -63,6 +63,7 @@ export default class ClientComboChoice extends React.Component {
     this.closeRemark = this.closeRemark.bind(this)
     this.addFood = this.addFood.bind(this)
     this.orderOnSubmit = this.orderOnSubmit.bind(this)
+    this.selfCloseChoice = this.selfCloseChoice.bind(this)
   }
 
   static getDerivedStateFromProps(props, state) {
@@ -122,7 +123,10 @@ export default class ClientComboChoice extends React.Component {
   }
   onclickComboFood(category, id, types) {
     console.log(category, types)
-    if (types !== 'extra') {
+    if (types === 'extra') {category = 'extra'}
+    if (this.state[category].filter(f => f.food === id && f.types === types).length > 0) {
+        this.setState({'remark': true, 'food': id, 'food_types': types, 'food_category': category})
+    } else if (category !== 'extra') {
       if (this.state[category].length < this.state.combo_person[category]) {
         console.log('open remark','container'+id+types)
         this.setState({'remark': true, 'food': id, 'food_types': types, 'food_category': category})
@@ -135,6 +139,7 @@ export default class ClientComboChoice extends React.Component {
   }
 
   refreashPrice() {
+    console.log('after set state', this.state)
     let new_price = this.state.combo_info.FOOD_PRICE
     const temp = this.state.pizza.concat(this.state.rice_pasta,this.state.starter,this.state.drink,this.state.extra)
     temp.forEach(food => {
@@ -149,28 +154,21 @@ export default class ClientComboChoice extends React.Component {
     }
   }
 
-  addFood(category,food,types,remark,price) {
-    console.log(category,food,types,remark)
-    let temp = this.state[category]
-    if (types === 'extra') {
-      temp = this.state.extra
-      category = 'extra'
-    }
-    temp.push({'food': food, 'types': types, 'remark': remark, 'price': price})
-    console.log(temp)
-    this.setState({category: temp},() => this.refreashPrice())
+  addFood(category, food_list) {
+    console.log(category, food_list)
+    this.setState({ [category]: food_list },() => this.refreashPrice())
   }
 
   orderOnSubmit() {
-    let checking = true
+    let ready = true
     const checking_list = ['pizza','rice_pasta','starter','drink']
     checking_list.forEach(category => {
       if (this.state[category].length !== this.state.combo_person[category]) {
-        checking = false
+        ready = false
       }
     })
 
-    if (checking) {
+    if (ready) {
       const order = '00000003'
       const combo = this.state.combo
       const temp = this.state.pizza.concat(this.state.rice_pasta,this.state.starter,this.state.drink,this.state.extra)
@@ -178,6 +176,10 @@ export default class ClientComboChoice extends React.Component {
       console.log(output)
     }
   }
+   selfCloseChoice() {
+     this.setState({'pizza': [], 'rice_pasta': [], 'starter': [], 'drink': [], 'extra': [], 'price': 0})
+     this.props.choiceToggle()
+   }
 
   render() {
     const choices = this.state.combo_choice
@@ -188,7 +190,7 @@ export default class ClientComboChoice extends React.Component {
     return(
       <div className={this.state.open ? "ClientComboChoice ClientComboChoiceActive" : "ClientComboChoice"}>
         <div className="remark_title">
-          <img src="https://img.icons8.com/carbon-copy/100/000000/back.png" onClick={this.props.choiceToggle} />
+          <img src="https://img.icons8.com/carbon-copy/100/000000/back.png" onClick={this.selfCloseChoice} />
           <h1 onClick={()=> console.log(this.state)}>Combo</h1>
         </div>
         <img className="remark_img" src={this.state.combo != '' ? window.location.origin + '/static/image/food/' + this.state.combo + '.png' : ''} alt="combo image"/>
@@ -201,7 +203,7 @@ export default class ClientComboChoice extends React.Component {
           </li>
         </ul>
         <button className="bottom_btn" onClick={this.orderOnSubmit}>Add (HKD {this.state.price})</button>
-        <ClientComboRemark open={this.state.remark} combo={this.state.combo} food={this.state.food} food_category={this.state.food_category} food_types={this.state.food_types} category_list={this.state[this.state.food_category]} food_person={this.state.combo_person[this.state.food_category]} closeRemark={this.closeRemark} addFood={this.addFood}/>
+        <ClientComboRemark open={this.state.remark} combo={this.state.combo} food={this.state.food} food_category={this.state.food_category} food_types={this.state.food_types} category_list={this.state[this.state.food_category]} extra_list={this.state.extra} food_person={this.state.combo_person[this.state.food_category]} closeRemark={this.closeRemark} addFood={this.addFood} />
       </div>
     )
   }
