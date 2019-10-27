@@ -53,6 +53,7 @@ export default class ClientCombo extends React.Component {
     if (this.state.choice) {
       this.setState({ 'choice': false })
     } else {
+      document.querySelector('.ClientComboChoice').scrollTo(0,0)
       this.setState({ 'combo_choosing': combo,'choice': true })
     }
   }

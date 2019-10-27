@@ -174,6 +174,12 @@ export default class ClientComboChoice extends React.Component {
       const temp = this.state.pizza.concat(this.state.rice_pasta,this.state.starter,this.state.drink,this.state.extra)
       const output = {'order_combo': {'order': order, 'combo': combo, 'food': temp}}
       console.log(output)
+
+      fetch(`/api/combo_order_food`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({'order_combo': {'order': order, 'combo': combo, 'food': temp}})
+      }).then(res => res.json().then(result => console.log(result))).then(() => this.selfCloseChoice())
     }
   }
    selfCloseChoice() {
@@ -191,7 +197,7 @@ export default class ClientComboChoice extends React.Component {
       <div className={this.state.open ? "ClientComboChoice ClientComboChoiceActive" : "ClientComboChoice"}>
         <div className="remark_title">
           <img src="https://img.icons8.com/carbon-copy/100/000000/back.png" onClick={this.selfCloseChoice} />
-          <h1 onClick={()=> console.log(this.state)}>Combo</h1>
+          <h1 onClick={() => console.log(this.state)}>Combo</h1>
         </div>
         <img className="remark_img" src={this.state.combo != '' ? window.location.origin + '/static/image/food/' + this.state.combo + '.png' : ''} alt="combo image"/>
         <div className="remark_food_name">{this.state.lang === 'eng' ? this.state.combo_info.FOOD_ENG_NAME : this.state.combo_info.FOOD_CHI_NAME}</div>

@@ -332,12 +332,6 @@ SQL = {
 
   'orderComboFood':'''
   INSERT INTO order_food
-    values('%s','%s',%d,'preparing',%f,,)
-    ''',
-
-  'getComboOrderPrice':'''
-  Select food_id
-  from food
-  where food_id = '%s'
-  '''
+    values('%s','%s',%d,'preparing',%f,'%s',%d)
+    '''
 }

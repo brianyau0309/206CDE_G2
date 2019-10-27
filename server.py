@@ -223,32 +223,35 @@ def order_food():
 @cross_origin()
 def combo_order_food():
     if request.method == 'POST':
-        combo_ordering = request.json.get('combo_order')
-        combo = combo_ordering.get('combo')
-        orderID = combo_ordering.get('order')
-        foods = combo_ordering.get('food')
-        combo_price = db.exe_fetch(SQL['getComboOrderPrice'])
-        print(ordering)
-        combo_sequence = db.exe_fetch(SQL['getSequence']%(orderID,combo)).get('ORDER_SEQUENCE')
-        print(sequence)
+        ordering = request.json.get('order_combo')
+        order = ordering.get('order')
+        combo = ordering.get('combo')
+        foods = ordering.get('food')
+        price = db.exe_fetch(SQL['getFoodPrice']%combo).get('FOOD_PRICE')
+
+        combo_sequence = db.exe_fetch(SQL['getSequence']%(order,combo)).get('ORDER_SEQUENCE')
         if combo_sequence == None:
             combo_sequence = 0
         new_combo_sequence = int(combo_sequence) + 1
-        db.cursor.execute(SQL['orderFood']%(orderID,combo,new_combo_sequence,price))
+
+        db.cursor.execute(SQL['orderFood']%(order,combo,new_combo_sequence,price))
+
         for i in foods:
             food = i.get('food')
             remark = i.get('remark')
             types = i.get('types')
             price = db.exe_fetch(SQL['getComboFoodPrice']%(combo,food,types)).get('PRICE')
-            sequence = db.exe_fetch(SQL['getSequence']%(orderID,food)).get('ORDER_SEQUENCE')
+
+            sequence = db.exe_fetch(SQL['getSequence']%(order,food)).get('ORDER_SEQUENCE')
             if sequence == None:
                 sequence = 0
             sequence += 1
-            db.cursor.execute(SQL['orderComboFood']%(orderID,food,sequence,price,combo,new_combo_sequence))
+            print(food, remark, types, price, sequence)
+
+            db.cursor.execute(SQL['orderComboFood']%(order,food,sequence,price,combo,new_combo_sequence))
             for j in remark:
                 remark_price = db.exe_fetch(SQL['getRemarkPrice']%j).get('PRICE')
-                print(remark_price)
-                db.cursor.execute(SQL['orderRemark']%(orderID,food,new_sequence,j,remark_price))
+                db.cursor.execute(SQL['orderRemark']%(order,food,sequence,j,remark_price))
         db.cursor.execute('commit')
         return jsonify({'result':'Success'})
     else:
