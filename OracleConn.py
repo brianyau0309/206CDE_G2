@@ -333,5 +333,32 @@ SQL = {
   'orderComboFood':'''
   INSERT INTO order_food
     values('%s','%s',%d,'preparing',%f,'%s',%d)
-    '''
+    ''',
+
+  'getFoodOrdered':'''
+  Select a.food_%s_name, b.price
+  from food a, order_food b 
+  where b.orders = '%s'
+  and b.order_sequence = %d 
+  and  b.food = a.food_id
+  ''',
+  'getSequenceOrdered':'''
+  Select order_sequence
+  from order_food  
+  where orders = '%s'
+  ''',
+  'getRemarkOrdered':'''
+  Select a.remark_%s, a.option_%s, b.remark_price
+  from food_remark a, order_remark b ,food c
+  where c.food_%s_name = '%s'
+  and c.food_id = b.food
+  and b.orders = '%s'
+  and b.sequence = %d
+  and  b.remark = a.remark_id
+  ''',
+  'updateMember':'''
+  Update orders
+    SET member ='='%s'
+    where order_id = '%s'
+  '''
 }
