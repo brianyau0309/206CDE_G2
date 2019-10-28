@@ -202,20 +202,23 @@ def order_food():
         orderID = ordering.get('order')
         food = ordering.get('food')
         remark = ordering.get('remark')
-        price = db.exe_fetch(SQL['getPrice']%food).get('FOOD_PRICE')
-        print(ordering)
-        sequence = db.exe_fetch(SQL['getSequence']%(orderID,food)).get('ORDER_SEQUENCE')
-        print(sequence)
-        if sequence == None:
-            sequence = 0
-        new_sequence = int(sequence) + 1
-        db.cursor.execute(SQL['orderFood']%(orderID,food,new_sequence,price))
-        for i in remark:
-            remark_price = db.exe_fetch(SQL['getRemarkPrice']%i).get('PRICE')
-            print(remark_price)
-            db.cursor.execute(SQL['orderRemark']%(orderID,food,new_sequence,i,remark_price))
-        db.cursor.execute('commit')
-        return jsonify({'result':'Success'})
+        try:
+            price = db.exe_fetch(SQL['getPrice']%food).get('FOOD_PRICE')
+            print(ordering)
+            sequence = db.exe_fetch(SQL['getSequence']%(orderID,food)).get('ORDER_SEQUENCE')
+            print(sequence)
+            if sequence == None:
+                sequence = 0
+            new_sequence = int(sequence) + 1
+            db.cursor.execute(SQL['orderFood']%(orderID,food,new_sequence,price))
+            for i in remark:
+                remark_price = db.exe_fetch(SQL['getRemarkPrice']%i).get('PRICE')
+                print(remark_price)
+                db.cursor.execute(SQL['orderRemark']%(orderID,food,new_sequence,i,remark_price))
+            db.cursor.execute('commit')
+            return jsonify({'result':'Success'})
+        except:
+            return jsonify({'result':'error'})
     else:
         return jsonify({'result':'error'})
 
@@ -227,35 +230,58 @@ def combo_order_food():
         order = ordering.get('order')
         combo = ordering.get('combo')
         foods = ordering.get('food')
-        price = db.exe_fetch(SQL['getFoodPrice']%combo).get('FOOD_PRICE')
+        try:
+            price = db.exe_fetch(SQL['getFoodPrice']%combo).get('FOOD_PRICE')
 
-        combo_sequence = db.exe_fetch(SQL['getSequence']%(order,combo)).get('ORDER_SEQUENCE')
-        if combo_sequence == None:
-            combo_sequence = 0
-        new_combo_sequence = int(combo_sequence) + 1
+            combo_sequence = db.exe_fetch(SQL['getSequence']%(order,combo)).get('ORDER_SEQUENCE')
+            if combo_sequence == None:
+                combo_sequence = 0
+            new_combo_sequence = int(combo_sequence) + 1
 
-        db.cursor.execute(SQL['orderFood']%(order,combo,new_combo_sequence,price))
+            db.cursor.execute(SQL['orderFood']%(order,combo,new_combo_sequence,price))
 
-        for i in foods:
-            food = i.get('food')
-            remark = i.get('remark')
-            types = i.get('types')
-            price = db.exe_fetch(SQL['getComboFoodPrice']%(combo,food,types)).get('PRICE')
+            for i in foods:
+                food = i.get('food')
+                remark = i.get('remark')
+                types = i.get('types')
+                price = db.exe_fetch(SQL['getComboFoodPrice']%(combo,food,types)).get('PRICE')
 
-            sequence = db.exe_fetch(SQL['getSequence']%(order,food)).get('ORDER_SEQUENCE')
-            if sequence == None:
-                sequence = 0
-            sequence += 1
-            print(food, remark, types, price, sequence)
+                sequence = db.exe_fetch(SQL['getSequence']%(order,food)).get('ORDER_SEQUENCE')
+                if sequence == None:
+                    sequence = 0
+                sequence += 1
+                print(food, remark, types, price, sequence)
 
-            db.cursor.execute(SQL['orderComboFood']%(order,food,sequence,price,combo,new_combo_sequence))
-            for j in remark:
-                remark_price = db.exe_fetch(SQL['getRemarkPrice']%j).get('PRICE')
-                db.cursor.execute(SQL['orderRemark']%(order,food,sequence,j,remark_price))
-        db.cursor.execute('commit')
-        return jsonify({'result':'Success'})
+                db.cursor.execute(SQL['orderComboFood']%(order,food,sequence,price,combo,new_combo_sequence))
+                for j in remark:
+                    remark_price = db.exe_fetch(SQL['getRemarkPrice']%j).get('PRICE')
+                    db.cursor.execute(SQL['orderRemark']%(order,food,sequence,j,remark_price))
+            db.cursor.execute('commit')
+            return jsonify({'result':'Success'})
+        except:
+             return jsonify({'result':'error'})
     else:
         return jsonify({'result':'error'})
+
+@app.route('/api/bill', methods = ["post"]) #show the bill
+@cross_origin()
+def bill():
+    lang = 'eng'
+    if request.args.get('lang'):
+        lang = request.args.get('lang')
+
+    bill = request.json.get('bill')
+    orderID = bill.get('orderID')
+    table = bill.get('table')
+    staff = bill.get('staff')
+    sequence = db.exe_fetch(SQL['getSequenceOrdered']%(orderID)).get('ORDER_SEQUENCE')
+    for i in sequence:
+        food = db.exe_fetch(SQL['getFoodOrdered']%(lang,orderID,i)).get('FOOD_%s_NAME'%lang)
+        price = db.exe_fetch(SQL['getFoodOrdered']%(lang,orderID,i)).get('PRICE')
+        remark = db.exe_fetch(SQL['getRemarkOrdered']%(lang,lang,lang,food,orderID,i)).get('REMARK_%s'%lang)
+        options = db.exe_fetch(SQL['getRemarkOrdered']%(lang,lang,lang,food,orderID,i)).get('OPTIONS_%s'%lang)
+        remark_price = db.exe_fetch(SQL['getRemarkOrdered']%(lang,lang,lang,food,orderID,i)).get('REMARK_PRICE')
+    return jsonify({'bill': bill,sequence,food,price,remark,options,remark_price})
 
 @app.route('/pay', methods = ["post"]) #pay the bill
 @cross_origin()
@@ -264,11 +290,16 @@ def pay():
     orderID = payment.get('orderID')
     method = payment.get('method')
     table = payment.get('table')
-    db.execute(SQL['updatePayment']%(method,orderID))
-    db.execute(SQL['updateOrderState']%(method,orderID))
-    db.execute(SQL['tableAvailable']%table)
-    db.execute('commit')
-    return jsonify({'payment': payment})
+    member = payment.get('member')
+    try:
+        db.execute(SQL['updatePayment']%(method,orderID))
+        db.execute(SQL['updateOrderState']%(method,orderID))
+        db.execute(SQL['tableAvailable']%table)
+        db.execute(SQL['updateMember']%(member,orderID))
+        db.execute('commit')
+        return jsonify({'result':'success'})
+    except:
+        return jsonify({'result':'error'})
 
 @app.route('/cancel_food', methods = ["post"]) #cancel the ordered food
 @cross_origin()
