@@ -80,12 +80,12 @@ SQL = {
     a.member,
     b.staff_surname||' '||b.staff_lastname as staff_name,
     a.order_state,
-    a.order_date,
-    a.total_price
+    a.order_date
   FROM 
     orders a, staff b 
   WHERE
     a.staff = b.staff_id
+    {condition1}
   ''',
   
   'getPayment': '''
@@ -336,26 +336,89 @@ SQL = {
     ''',
 
   'getFoodOrdered':'''
-  Select a.food_%s_name, b.price
-  from food a, order_food b 
-  where b.orders = '%s'
-  and b.order_sequence = %d 
-  and  b.food = a.food_id
+  SELECT 
+  a.*,
+  b.food_{lang}_name,
+  c.category_name
+FROM 
+  order_food a,
+  food b,
+  category c
+WHERE
+  a.food = b.food_id 
+  and c.category_id = b.category
+  and b.category != 'C1'
+  and a.combo is NULL
+  {condition2}
   ''',
-  'getSequenceOrdered':'''
-  Select order_sequence
-  from order_food  
-  where orders = '%s'
+  
+  'getComboOrdered':'''
+  SELECT 
+  a.*,
+  b.food_{lang}_name,
+  c.category_name
+FROM 
+  order_food a,
+  food b,
+  category c
+WHERE
+  a.food = b.food_id 
+  and c.category_id = b.category
+  and b.category = 'C1'
+  and a.combo is NULL
+  {condition2}
   ''',
+
+  'getComboFoodOrdered':'''
+  SELECT 
+  a.*,
+  b.food_{lang}_name,
+  c.category_name
+FROM 
+  order_food a,
+  food b,
+  category c
+WHERE
+  a.food = b.food_id 
+  and c.category_id = b.category
+  and a.combo is not NULL
+  {condition2}
+  ''',
+
   'getRemarkOrdered':'''
-  Select a.remark_%s, a.option_%s, b.remark_price
-  from food_remark a, order_remark b ,food c
-  where c.food_%s_name = '%s'
-  and c.food_id = b.food
-  and b.orders = '%s'
-  and b.sequence = %d
-  and  b.remark = a.remark_id
-  ''',
+  SELECT
+  a.*,
+  b.remark_{lang}
+  FROM
+    order_remark a,
+    food_remark b,
+    order_food c
+  WHERE
+    a.remark = b.remark_id
+    and a.orders = c.orders
+    and a.order_sequence = c.order_sequence
+    and a.food = c.food
+    and c.combo is NULL
+    {condition2}
+    ''',
+
+  'getComboRemarkOrdered':'''
+  SELECT
+  a.*,
+  b.remark_{lang}
+  FROM
+    order_remark a,
+    food_remark b,
+    order_food c
+  WHERE
+    a.remark = b.remark_id
+    and a.orders = c.orders
+    and a.order_sequence = c.order_sequence
+    and a.food = c.food
+    and c.combo is not NULL
+    {condition2}
+    ''',
+
   'updateMember':'''
   Update orders
     SET member ='='%s'
