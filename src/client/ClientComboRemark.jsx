@@ -1,5 +1,4 @@
 import React from 'react'
-import { timingSafeEqual } from 'crypto';
 
 export default class ClientComboRemark extends React.Component {
   constructor(props) {
@@ -47,6 +46,14 @@ export default class ClientComboRemark extends React.Component {
     if (prevState.num_now != this.state.num_now) {
       console.log(prevState.num_now, this.state.num_now)
       this.setRemark()
+    }
+    if (this.state.lang != this.props.lang) {
+      if (this.state.lang === 'eng') {
+        this.setState({ 'lang': 'chi' })
+      } 
+      if (this.state.lang === 'chi') {
+        this.setState({ 'lang': 'eng' })
+      }
     }
   }
 
@@ -181,20 +188,20 @@ export default class ClientComboRemark extends React.Component {
     }
 
     while (all_remark.length != 0) {
-      let remark_name = all_remark[0].REMARK
-      remark_list.push(all_remark.filter(remark => remark.REMARK === remark_name))
-      all_remark = all_remark.filter(remark => remark.REMARK !== remark_name)
+      let remark_name = all_remark[0].REMARK_ENG
+      remark_list.push(all_remark.filter(remark => remark.REMARK_ENG === remark_name))
+      all_remark = all_remark.filter(remark => remark.REMARK_ENG !== remark_name)
     }
 
     const remark_component = remark_list.map(remark => (
       <li>
-        <h1>{remark[0].REMARK}</h1>
+        <h1>{this.state.lang === 'eng' ? remark[0].REMARK_ENG : remark[0].REMARK_CHI}</h1>
           {
             remark.map(remark => 
             (
               <label>
-                <input type="radio" name={remark.REMARK} value={remark.REMARK_ID} onChange={this.remarkOnChange} />
-                {remark.OPTION_ENG}
+                <input type="radio" name={remark.REMARK_ENG} value={remark.REMARK_ID} onChange={this.remarkOnChange} />
+                {this.state.lang === 'eng' ? remark.OPTION_ENG : remark.OPTION_CHI}
               </label>)
             )
           }
@@ -207,16 +214,16 @@ export default class ClientComboRemark extends React.Component {
           <h1 onClick={() => console.log(this.state)}>Your Order</h1>
         </div>
         <img onClick={this.setRemark} className="remark_img" src={this.state.food !== '' ? window.location.origin + '/static/image/food/' + this.state.food + '.png' : ''} alt="food image"/>
-        <div className="remark_food_name">{this.state.food_info.FOOD_ENG_NAME}</div>
+        <div className="remark_food_name">{this.state.lang === 'eng'? this.state.food_info.FOOD_ENG_NAME : this.state.food_info.FOOD_CHI_NAME}</div>
         
         <div className="remark_price_panel">
           <img className="left" src="https://img.icons8.com/carbon-copy/100/000000/back.png" onClick={() => this.changeQTY('minus')} />
           <span>{this.state.qty}</span>
           <img className="right" src="https://img.icons8.com/carbon-copy/100/000000/back.png" onClick={() => this.changeQTY('add')} />
         </div>
-        {remark_list.length === 0 ? null : <h3>Remark</h3>}
+        {remark_list.length === 0 ? null : <h3>{this.state.lang === 'eng' ? 'Remark' : '備註'}</h3>}
         {remark_list.length === 0 ? null : qty_list}
-        {remark_list.length === 0 ? null : <button className="reset_button" onClick={this.resetRemark}>Reset</button>}
+        {remark_list.length === 0 ? null : <button className="reset_button" onClick={this.resetRemark}>{this.state.lang === 'eng' ? 'Reset Remark' : '重設備註'}</button>}
         <ul className="remark_list">
           {remark_component}
         </ul>

@@ -128,7 +128,7 @@ SQL = {
 
   'getComboChoice': '''
   SELECT
-      a.combo, b.food_chi_name, a.food, c.category_name, a.types, a.price
+      a.combo, b.food_chi_name, b.food_eng_name, a.food, c.category_name, a.types, a.price
   FROM
       (SELECT
         a.food_id as combo, b.food_id as food, b.types, b.price 

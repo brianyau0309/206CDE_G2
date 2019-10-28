@@ -360,7 +360,7 @@
 }
 .remark_title > h1,
 .choice_title > h1 {
-  transform: translateX(-10%);
+  transform: translateX(-20%);
   font-size: 6vw;
 }
 .remark_img,

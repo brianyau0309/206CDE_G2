@@ -63,7 +63,7 @@ export default class ClientCombo extends React.Component {
     return(
       <div className="ClientCombo translateX-3" >
         {ComboList}
-        <ClientComboChoice open={this.state.choice} combo={this.state.combo_choosing} choiceToggle={this.choiceToggle}/>
+        <ClientComboChoice lang={this.state.lang} open={this.state.choice} combo={this.state.combo_choosing} choiceToggle={this.choiceToggle}/>
       </div>
     )
   }
