@@ -337,19 +337,35 @@ SQL = {
 
   'getFoodOrdered':'''
   SELECT 
-  a.*,
-  b.food_{lang}_name,
-  c.category_name
-FROM 
-  order_food a,
-  food b,
-  category c
-WHERE
-  a.food = b.food_id 
-  and c.category_id = b.category
-  and b.category != 'C1'
-  and a.combo is NULL
-  {condition2}
+    a.*,
+    b.food_{lang}_name,
+    c.category_name
+  FROM 
+    order_food a,
+    food b,
+    category c
+  WHERE
+    a.food = b.food_id 
+    and c.category_id = b.category
+    and b.category != 'C1'
+    and a.combo is NULL
+    {condition2}
+  ''',
+
+  'getFoodOrdered2':'''
+  SELECT 
+    a.*,
+    b.food_eng_name,
+    b.food_chi_name,
+    c.category_name
+  FROM 
+    order_food a,
+    food b,
+    category c
+  WHERE
+    a.food = b.food_id and 
+    c.category_id = b.category
+    {condition2}
   ''',
   
   'getComboOrdered':'''
@@ -384,6 +400,50 @@ WHERE
   and a.combo is not NULL
   {condition2}
   ''',
+
+  'getComboFoodOrdered2':'''
+  SELECT 
+    a.*,
+    b.food_eng_name,
+    b.food_chi_name,
+    c.category_name
+  FROM 
+    order_food a,
+    food b,
+    category c
+  WHERE
+    a.food = b.food_id 
+    and c.category_id = b.category
+    and a.combo is not NULL
+    {condition2}
+  ''',
+
+  'getComboFoodByPK':'''
+  SELECT
+    a.*,
+    b.food_eng_name,
+    b.food_chi_name,
+    c.category_name
+  FROM
+    order_food a,
+    food b,
+    category c
+  WHERE
+    a.food = b.food_id and
+    b.category = c.category_id and
+    a.orders = '{id}' and 
+    a.order_sequence = {seq}
+  ''',
+  'getRemarkByPK':'''
+  SELECT
+    *
+  FROM
+    order_remark
+  WHERE
+    orders = '{order}' and
+    food = '{food}' and
+    order_sequence = {seq}
+  '''
 
   'getRemarkOrdered':'''
   SELECT

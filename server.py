@@ -285,6 +285,25 @@ def bill():
     output4 =  db.exe_fetch(SQL['getComboFoodOrdered'].format(lang=lang,condition2=condition2),'all')
     output5 =  db.exe_fetch(SQL['getRemarkOrdered'].format(lang=lang,condition2=condition2),'all')
     output6 =  db.exe_fetch(SQL['getComboRemarkOrdered'].format(lang=lang,condition2=condition2),'all')
+
+    bill_food = db.exe_fetch(SQL['getFoodOrdered2'].format(condition2=condition2))
+    combo_food = db.exe_fetch(SQL['getComboFoodOrdered2']).format(condition2=condition2)
+
+    foods = []
+    for food in bill_food:
+        if food.get('category_name') == 'combo':
+            combo_food = db.exe_fetch(SQL['getComboFoodByPK']).format(id=food.get('FOOD'),seq=food.get('ORDER_SEQUENCE'))
+            for food in combo_food:
+                remark = db.exe_fetch(SQL['getRemarkByPK']).format(id=food.get('FOOD'))
+                food['REMARK'] = remark
+            foods.append(food)
+        else:
+            remark = db.exe_fetch(SQL['getRemarkByID']).format(id=food.get('FOOD'))
+            foods.append(food)
+
+    output = {'bill': output1, 'food': foods}
+    print(output)
+
     return jsonify({'Bills': output1,'Food':[{'Food': output2,'Remark':[{'Remark':output5}]}],'Combo':[{'Combo': output3,'ComboFood':[{'ComboFood':output4,'ComboRemark':[{'ComboRemark':output6}]}]}]})
 
 @app.route('/pay', methods = ["post"]) #pay the bill
