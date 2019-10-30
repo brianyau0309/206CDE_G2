@@ -2,7 +2,8 @@ import React from 'react'
 import { BrowserRouter as Router, Route, Switch, Redirect, withRouter } from 'react-router-dom'
 
 import StaffTop from './StaffTop.jsx'
-
+import StaffCombo from './StaffCombo.jsx'
+import StaffFood from './StaffFood.jsx'
 const FoodContainer = (props) => {
   return(
     <div>
@@ -167,11 +168,15 @@ export default class Staff extends React.Component {
         <Router>
           <div className="StaffMain translateX-3">
           <Switch>
-            
           <input id="searchthing" type="text" placeholder="Search table"></input>
           {FoodList}
           <label for="combo_id">Combo_id</label>
           <input id="combo_id" />
+          <Route path="/staff/food/combo">
+            <StaffCombo lang={this.state.lang} />
+              </Route>
+              <Route path="/staff/food/:category" render={(props) => <StaffFood {...props} lang={this.state.lang} />}/>
+              <Redirect from="/staff" to="/staff/food/combo" />  
           <label for="order_id">Order_id</label>
           <input id="order_id" />
           <label for="remark">remark</label>

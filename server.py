@@ -280,32 +280,28 @@ def bill():
         condition1 += " AND a.order_id = '00000003'"
         condition2 +=  " AND a.orders = '00000003'"
     output1 =  db.exe_fetch(SQL['getOrders'].format(condition1=condition1),'all')
-    output2 =  db.exe_fetch(SQL['getFoodOrdered'].format(lang=lang,condition2=condition2),'all')
-    output3 =  db.exe_fetch(SQL['getComboOrdered'].format(lang=lang,condition2=condition2),'all')
-    output4 =  db.exe_fetch(SQL['getComboFoodOrdered'].format(lang=lang,condition2=condition2),'all')
-    output5 =  db.exe_fetch(SQL['getRemarkOrdered'].format(lang=lang,condition2=condition2),'all')
-    output6 =  db.exe_fetch(SQL['getComboRemarkOrdered'].format(lang=lang,condition2=condition2),'all')
-
-    bill_food = db.exe_fetch(SQL['getFoodOrdered2'].format(condition2=condition2))
-    combo_food = db.exe_fetch(SQL['getComboFoodOrdered2']).format(condition2=condition2)
+    bill_food = db.exe_fetch(SQL['getFoodOrdered'].format(condition2=condition2), 'all')
 
     foods = []
     for food in bill_food:
-        if food.get('category_name') == 'combo':
-            combo_food = db.exe_fetch(SQL['getComboFoodByPK']).format(id=food.get('FOOD'),seq=food.get('ORDER_SEQUENCE'))
-            for food in combo_food:
-                remark = db.exe_fetch(SQL['getRemarkByPK']).format(id=food.get('FOOD'))
-                food['REMARK'] = remark
+        
+        if food.get('CATEGORY_NAME') == 'combo':
+            combo_food = db.exe_fetch(SQL['getComboFoodByPK'].format(combo=food.get('FOOD'),order=food.get('ORDERS'),seq=food.get('ORDER_SEQUENCE')), 'all')
+            food['COMBO_FOOD'] = []
+            for i in combo_food:
+                remark = db.exe_fetch(SQL['getRemarkByPK'].format(food=i.get('FOOD'),order=i.get('ORDERS'),seq=i.get('ORDER_SEQUENCE')), 'all')
+                i['REMARK'] = remark
+                food['COMBO_FOOD'].append(i)
             foods.append(food)
         else:
-            remark = db.exe_fetch(SQL['getRemarkByID']).format(id=food.get('FOOD'))
+            remark = db.exe_fetch(SQL['getRemarkByPK'].format(food=food.get('FOOD'),order=food.get('ORDERS'),seq=food.get('ORDER_SEQUENCE')),'all')
+            food['REMARK'] = remark
             foods.append(food)
 
     output = {'bill': output1, 'food': foods}
-    print(output)
 
-    return jsonify({'Bills': output1,'Food':[{'Food': output2,'Remark':[{'Remark':output5}]}],'Combo':[{'Combo': output3,'ComboFood':[{'ComboFood':output4,'ComboRemark':[{'ComboRemark':output6}]}]}]})
-
+    #return jsonify({'Bills': output1,'Food':[{'Food': output2,'Remark':[{'Remark':output5}]}],'Combo':[{'Combo': output3,'ComboFood':[{'ComboFood':output4,'ComboRemark':[{'ComboRemark':output6}]}]}]})
+    return jsonify(output)
 @app.route('/pay', methods = ["post"]) #pay the bill
 @cross_origin()
 def pay():
