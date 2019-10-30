@@ -21,6 +21,7 @@ export default class Client extends React.Component {
     this.getMemberInfo = this.getMemberInfo.bind(this)
     this.changeLang = this.changeLang.bind(this)
     this.changeBillBtn = this.changeBillBtn.bind(this)
+    this.logout = this.logout.bind(this)
   }
 
   componentDidMount() {
@@ -80,6 +81,10 @@ export default class Client extends React.Component {
     })
   }
 
+  logout() {
+    this.setState({'member':null})
+  }
+
   changeBillBtn() {
     let newPageHeight = document.querySelector('.ClientMain').scrollTop
     if (newPageHeight > this.state.PageHeight) {
@@ -112,7 +117,7 @@ export default class Client extends React.Component {
             </Switch>
           </div>
         </Router>
-        <ClientSide memberName={this.state.member ? this.state.member.MEMBER_SURNAME : null} loginFunc={this.login} lang={this.state.lang} changeLang={this.changeLang}/>
+        <ClientSide memberName={this.state.member ? this.state.member.MEMBER_SURNAME : null} loginFunc={this.login} logoutFunc={this.logout} lang={this.state.lang} changeLang={this.changeLang}/>
         <ClientBill lang={this.state.lang}/>
       </div>
     )

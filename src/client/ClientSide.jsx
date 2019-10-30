@@ -25,7 +25,7 @@ export default class ClientSide extends React.Component {
         <ul className="side_list">
           {this.props.memberName ? 
           <li className="side_li">
-              User Info
+              <button onClick={this.props.logoutFunc}>Logout</button>
           </li>
           :
           <li className="side_li">
@@ -37,7 +37,7 @@ export default class ClientSide extends React.Component {
               <table>
                 <tr>
                   <td className="ta-r">Member ID: </td>
-                  <td className="ta-l"><input id="login_id" type="text" /></td>
+                  <td className="ta-l"><input id="login_id"type="text"/></td>
                 </tr>
                 <tr>
                   <td className="ta-r">Password: </td>

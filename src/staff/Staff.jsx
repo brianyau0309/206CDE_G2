@@ -1,9 +1,7 @@
 import React from 'react'
 import { BrowserRouter as Router, Route, Switch, Redirect, withRouter } from 'react-router-dom'
 
-import StaffTop from './StaffTop.jsx'
-import StaffCombo from './StaffCombo.jsx'
-import StaffFood from './StaffFood.jsx'
+
 const FoodContainer = (props) => {
   return(
     <div>

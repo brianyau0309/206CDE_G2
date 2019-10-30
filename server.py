@@ -155,12 +155,28 @@ def loginpage():
 @app.route('/login', methods = ["POST"]) #Login process
 @cross_origin()
 def login():
+    loginInfo=request.json.get('login')
+    member_id = loginInfo.get('id')
+    password = loginInfo.get('password')
+    member_password = db.exe_fetch("SELECT member_password FROM members WHERE member_id = '%s'"%member_id, 'one').get('MEMBER_PASSWORD')
+    print(member_id)
+    print(password)
+    print(member_password)
+    if member_password != None:
+        if member_password == password:
+            session['member'] = member_id
+            return jsonify({ 'result': 'Success' })
+    return jsonify({'result':'Error'})
+
+@app.route('/QRlogin', methods = ["POST"]) #QRLogin process
+@cross_origin()
+def QRlogin():
     table = request.form['Table']
     order = request.form['Order']
     order_table = db.exe_fetch("SELECT order_id, table_id from order_table WHERE order_id = '%s' and table_id = '%s'"%(order,table))
     if order_table != None:
         if order == order_table.get('ORDER_ID') and table == order_table.get('TABLE_ID'):
-            if request.form['submit'] = 'member':
+            if request.form['submit'] == 'member':
                 member_id = request.form['Member']
                 password = request.form['MemberPassword']
                 member_password = db.exe_fetch("SELECT member_password FROM members WHERE member_id = '%s'"%member_id, 'one')
@@ -169,7 +185,7 @@ def login():
                         session['member'] = member_id
                         session['table'] = table_id
                         return redirect(url_for('client'))
-            elif request.form['submit'] = 'nonmember':
+            elif request.form['submit'] == 'nonmember':
                 session['member'] = 'guest'
                 session['table'] = table
                 return redirect(url_for('client'))
@@ -187,6 +203,13 @@ def myinfo():
         return jsonify({'result': userInfo})
     
     return jsonify({ 'result': 'Fail'})
+
+@app.route('/logout', methods = ["post"]) #Logout
+@cross_origin()
+def logout():
+    if session.get('table'):
+        session.clear()
+    return redirect(url_for('loginpage'))
 
 @app.route('/create_order', methods = ["post"]) #create invoice
 @cross_origin()
