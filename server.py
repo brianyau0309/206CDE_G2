@@ -155,16 +155,25 @@ def loginpage():
 @app.route('/login', methods = ["POST"]) #Login process
 @cross_origin()
 def login():
-    loginInfo = request.json.get('login')
-    db.cursor.execute("SELECT member_password FROM members WHERE member_id = '%s'"%loginInfo.get('id'))
-    member_password = db.cursor.fetchone()
-    
-    if member_password != None:
-        if member_password[0] == loginInfo.get('password'):
-            session['member'] = loginInfo.get('id')
-            return jsonify({ 'result': 'Success' })
-        
-    return jsonify({ 'result': 'Fail'})
+    table = request.form['Table']
+    order = request.form['Order']
+    order_table = db.exe_fetch("SELECT order_id, table_id from order_table WHERE order_id = '%s' and table_id = '%s'"%(order,table))
+    if order_table != None:
+        if order == order_table.get('ORDER_ID') and table == order_table.get('TABLE_ID'):
+            if request.form['submit'] = 'member':
+                member_id = request.form['Member']
+                password = request.form['MemberPassword']
+                member_password = db.exe_fetch("SELECT member_password FROM members WHERE member_id = '%s'"%member_id, 'one')
+                if member_password != None:
+                    if member_password[0] == password:
+                        session['member'] = member_id
+                        session['table'] = table_id
+                        return redirect(url_for('client'))
+            elif request.form['submit'] = 'nonmember':
+                session['member'] = 'guest'
+                session['table'] = table
+                return redirect(url_for('client'))
+    return jsonify({'result':'Error'})
 
 @app.route('/myinfo', methods = ["post"]) #Login process
 @cross_origin()
@@ -299,8 +308,6 @@ def bill():
             foods.append(food)
 
     output = {'bill': output1, 'food': foods}
-
-    #return jsonify({'Bills': output1,'Food':[{'Food': output2,'Remark':[{'Remark':output5}]}],'Combo':[{'Combo': output3,'ComboFood':[{'ComboFood':output4,'ComboRemark':[{'ComboRemark':output6}]}]}]})
     return jsonify(output)
 @app.route('/pay', methods = ["post"]) #pay the bill
 @cross_origin()
