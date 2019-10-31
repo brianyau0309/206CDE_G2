@@ -15,7 +15,8 @@ export default class Client extends React.Component {
                    'member': null, 
                    'lang': 'eng',
                    'bill_btn': 'active', 
-                   'PageHeight': 0
+                   'PageHeight': 0,
+                   'order_bill': {}
                   }
     this.login = this.login.bind(this)
     this.getMemberInfo = this.getMemberInfo.bind(this)
@@ -88,6 +89,32 @@ export default class Client extends React.Component {
       this.setState({ 'bill_btn': 'active'})
     }
     this.setState({'PageHeight': newPageHeight})
+  }
+
+  loadBill() {
+    const order = ''
+    fetch('/api/whoami', {
+      method: 'POST',
+      mode: 'cors',
+      credentials: 'include'
+    }).then(res => {
+      if (res.ok) {
+        res.json().then(result => {
+          order = result.order
+          fetch('/api/bill', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: { 'order': order },
+          }).then(res => {
+            if (res.ok) {
+              res.json().then(result => {
+                this.setState({'order_bill': result}, () => console.log(this.state.order_bill))
+              }
+            }
+          })
+        })
+      }
+    })
   }
 
   render() {

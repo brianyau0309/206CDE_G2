@@ -145,6 +145,22 @@ def order_table():
     output = db.exe_fetch(SQL['getOrderTable'].format(condition=condition))
     
     return jsonify({ 'order_table': output })
+
+@app.route('/api/whoami', methods=['POST'])
+def whoami():
+    user_type = session.get('type')
+    if user_type != None:
+        if user_type == 'table':
+            table = session.get('table')
+            member = session.get('member')
+            order = db.exe_fetch("SELECT a.order_id, a.order_state FROM orders a, order_table b WHERE a.order_id = b.orders and b.table = '%s'"%table)
+        elif user_type == 'member':
+            member = session.get('member')
+        elif user_type == 'staff':
+            staff = session.get('staff')
+    else:
+        return jsonify({'result': 'Error'})
+
 # API end
 
 @app.route('/loginpage')
@@ -154,7 +170,7 @@ def loginpage():
 
 @app.route('/login', methods = ["POST"]) #Login process
 @cross_origin()
-def login():
+def user_login():
     loginInfo = request.json.get('login')
     db.cursor.execute("SELECT member_password FROM members WHERE member_id = '%s'"%loginInfo.get('id'))
     member_password = db.cursor.fetchone()
@@ -166,7 +182,16 @@ def login():
         
     return jsonify({ 'result': 'Fail'})
 
-@app.route('/myinfo', methods = ["post"]) #Login process
+@app.route('/table_login', methods = ["POST"]) # Table Login process
+@cross_origin()
+def table_login():
+    loginInfo = request.json.get('login')
+    table_find = exe_fetch("SELECT * FROM table_list WHERE table_id = '%s'"%login.get('table'))
+    if len(table_find) > 0:
+        session["type"] = 'table'
+        session["table"] = login.get('table')
+
+@app.route('/myinfo', methods = ["post"])
 @cross_origin()
 def myinfo():
     user = session.get('member')
@@ -263,25 +288,29 @@ def combo_order_food():
     else:
         return jsonify({'result':'error'})
 
-@app.route('/api/bill', methods = ["post"]) #show the bill
+@app.route('/api/bill') #show the bill
 @cross_origin()
 def bill():
+    condition1 = ''
+    condition2 = ''
     lang = 'eng'
+    orderID = request.args.get('orderID')
     if request.args.get('lang'):
         lang = request.args.get('lang')
-
-    bill = request.json.get('bill')
-    orderID = bill.get('orderID')
-    table = bill.get('table')
-    staff = bill.get('staff')
-    sequence = db.exe_fetch(SQL['getSequenceOrdered']%(orderID)).get('ORDER_SEQUENCE')
-    for i in sequence:
-        food = db.exe_fetch(SQL['getFoodOrdered']%(lang,orderID,i)).get('FOOD_%s_NAME'%lang)
-        price = db.exe_fetch(SQL['getFoodOrdered']%(lang,orderID,i)).get('PRICE')
-        remark = db.exe_fetch(SQL['getRemarkOrdered']%(lang,lang,lang,food,orderID,i)).get('REMARK_%s'%lang)
-        options = db.exe_fetch(SQL['getRemarkOrdered']%(lang,lang,lang,food,orderID,i)).get('OPTIONS_%s'%lang)
-        remark_price = db.exe_fetch(SQL['getRemarkOrdered']%(lang,lang,lang,food,orderID,i)).get('REMARK_PRICE')
-    return jsonify({'bill': bill,sequence,food,price,remark,options,remark_price})
+    if orderID != None:
+        condition1 += " AND a.order_id = '%s'"%orderID
+        condition2 +=  " AND a.orders = '%s'"%orderID
+    else:
+        orderID = '00000003'
+        condition1 += " AND a.order_id = '00000003'"
+        condition2 +=  " AND a.orders = '00000003'"
+    output1 =  db.exe_fetch(SQL['getOrders'].format(condition1=condition1),'all')
+    output2 =  db.exe_fetch(SQL['getFoodOrdered'].format(lang=lang,condition2=condition2),'all')
+    output3 =  db.exe_fetch(SQL['getComboOrdered'].format(lang=lang,condition2=condition2),'all')
+    output4 =  db.exe_fetch(SQL['getComboFoodOrdered'].format(lang=lang,condition2=condition2),'all')
+    output5 =  db.exe_fetch(SQL['getRemarkOrdered'].format(lang=lang,condition2=condition2),'all')
+    output6 =  db.exe_fetch(SQL['getComboRemarkOrdered'].format(lang=lang,condition2=condition2),'all')
+    return jsonify({'Bills': output1,'Food':[{'Food': output2,'Remark':[{'Remark':output5}]}],'Combo':[{'Combo': output3,'ComboFood':[{'ComboFood':output4,'ComboRemark':[{'ComboRemark':output6}]}]}]})
 
 @app.route('/pay', methods = ["post"]) #pay the bill
 @cross_origin()
