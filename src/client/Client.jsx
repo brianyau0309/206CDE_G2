@@ -12,6 +12,7 @@ export default class Client extends React.Component {
   constructor() {
     super()
     this.state = {
+                   'table': null,
                    'member': null, 
                    'lang': 'eng',
                    'bill_btn': 'active', 
@@ -22,6 +23,7 @@ export default class Client extends React.Component {
     this.changeLang = this.changeLang.bind(this)
     this.changeBillBtn = this.changeBillBtn.bind(this)
     this.logout = this.logout.bind(this)
+    this.getSession = this.getSession.bind(this)
   }
 
   componentDidMount() {
@@ -81,8 +83,33 @@ export default class Client extends React.Component {
     })
   }
 
+  getSession(){
+    fetch(`/api/session`, {
+      method: 'POST',
+      mode: 'cors',
+      credentials: 'include'
+    }).then(res => {
+      if (res.ok) {
+        res.json().then(session => {
+          console.log(session.table)
+          this.setState({ 'table': session.table })
+        })
+      }
+    })
+  }
+  
   logout() {
-    this.setState({'member':null})
+    fetch(`/member_logout`, {method: 'POST'}).then(res => {
+      if (res.ok) {
+        res.json().then(result => {
+          if (result.result === 'success') {
+            this.setState({ 'member': null })
+          } else if (result.result === 'error') {
+            alert('Log out Error. Please contact the staff.')
+          }
+        })
+      }
+    })
   }
 
   changeBillBtn() {

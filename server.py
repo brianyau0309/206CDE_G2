@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-  
 import os   
 os.environ['NLS_LANG'] = 'SIMPLIFIED CHINESE_CHINA.UTF8'   
-from flask import Flask, session, request, render_template, jsonify
+from flask import Flask, session, request, render_template, jsonify, redirect, url_for
 from flask_cors import cross_origin
 from OracleConn import OracleConn, SQL
 from flask_socketio import SocketIO, send
@@ -23,7 +23,10 @@ def hello():
 @app.route('/client/', defaults={'path': ''})
 @app.route('/client/<path:path>')
 def client(path):
-    return render_template("client.html")
+    if session.get('table'):
+        return render_template("client.html")
+    else:
+        return redirect(url_for('tableloginpage'))
 
 @app.route('/staff/', defaults={'path': ''})
 @app.route('/staff/<path:path>')
@@ -168,6 +171,33 @@ def login():
             return jsonify({ 'result': 'Success' })
     return jsonify({'result':'Error'})
 
+@app.route('/tableloginpage') #Login process
+@cross_origin()
+def tableloginpage():
+    return render_template("tableloginpage.html")
+
+@app.route('/tablelogin', methods = ["POST"]) #Login process
+@cross_origin()
+def tablelogin():
+    table = request.form['Table']
+    table_id = db.exe_fetch("SELECT table_id FROM table_list WHERE table_id = '%s'"%table, 'one').get('TABLE_ID')
+    print(table)
+    print(table_id)
+    if table_id != None:
+        if table == table_id:
+            session['table'] = table_id
+            return redirect(url_for('client'))
+    return jsonify({'result':'Error'})
+
+@app.route('/member_logout', methods = ["post"]) #For Table member logout
+@cross_origin()
+def member_logout():
+    if session.get('member') != None:
+        session.pop('member')
+        return jsonify({ 'result': 'success' })
+
+    return jsonify({ 'result': 'error' })
+
 @app.route('/QRlogin', methods = ["POST"]) #QRLogin process
 @cross_origin()
 def QRlogin():
@@ -204,13 +234,31 @@ def myinfo():
     
     return jsonify({ 'result': 'Fail'})
 
-@app.route('/logout', methods = ["post"]) #Logout
+@app.route('/QRlogout', methods = ["post"]) #Logout
 @cross_origin()
-def logout():
+def QRlogout():
     if session.get('table'):
         session.clear()
     return redirect(url_for('loginpage'))
 
+@app.route('/api/session') #session
+@cross_origin()
+def SESsion():
+    table = None
+    member = None
+    staff = None
+    ses = []
+    if session.get('table'):
+        table = session.get('table')
+    if session.get('member'):
+        member = session.get('member')
+    if session.get('staff'):
+        staff = session.get('staff')
+    ses.append(table)
+    ses.append(member)
+    ses.append(staff)
+    return jsonify({'table': ses[0],'member':ses[1],'staff':ses[2]})
+        
 @app.route('/create_order', methods = ["post"]) #create invoice
 @cross_origin()
 def create_order():
@@ -332,6 +380,7 @@ def bill():
 
     output = {'bill': output1, 'food': foods}
     return jsonify(output)
+
 @app.route('/pay', methods = ["post"]) #pay the bill
 @cross_origin()
 def pay():
@@ -346,6 +395,8 @@ def pay():
         db.execute(SQL['tableAvailable']%table)
         db.execute(SQL['updateMember']%(member,orderID))
         db.execute('commit')
+        if session.get('member'):
+            session.pop('member')
         return jsonify({'result':'success'})
     except:
         return jsonify({'result':'error'})
