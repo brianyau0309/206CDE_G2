@@ -458,28 +458,18 @@ def cancel_food():
     orderID = cancel.get('order_id')
     sequence = cancel.get('sequence')
     food = cancel.get('food')
-    combo_food = db.exe_fetch(SQL['getComboFood']%(food,orderID,sequence))
-    if combo_food !=  None:
-        try:
-            for i in combo_food:
-                food = i.get('FOOD')
-                sequence = i.get('ORDER_SEQUENCE')
-                remark = db.exe_fetch(SQL['getOrderRemark']%(orderID,sequence,food)).get('REMARK')
-                db.cursor.execute(SQL['deleteRemark']%(sequence,orderID,remark,food))
-                db.cursor.execute(SQL['deleteOrderFood']%(sequence,orderID,food))
-            db.cursor.execute('commit')
-            return jsonify({'result':'success'})
-        except:
-            return jsonify({'result': 'error'})
-    else:
-        try:
-            remark = db.exe_fetch(SQL['getOrderRemark']%(orderID,sequence,food)).get(remark)
-            db.cursor.execute(SQL['deleteRemark']%(sequence,orderID,remark,food))
-            db.cursor.execute(SQL['deleteOrderFood']%(sequence,orderID,food))
-            db.cursor.execute('commit')
-            return {'result':'success'}
-        except:
-            return jsonify({'result': 'error'})
+    flag = True
+    print(orderID, food, sequence)
+    try:
+        db.cursor.execute(SQL['deleteOrderFood']%(sequence,orderID,food))
+    except:
+        flag = False
+
+    if flag:
+        db.cursor.execute('commit')
+        return jsonify({'result': 'success'})
+    
+    return jsonify({'result': 'error'})
 
 @app.route('/finish_cook', methods = ["post"]) #cooked the ordered food
 @cross_origin()
