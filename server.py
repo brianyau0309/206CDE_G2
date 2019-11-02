@@ -243,7 +243,7 @@ def QRlogout():
 
 @app.route('/api/session') #session
 @cross_origin()
-def SESsion():
+def SESSION():
     table = None
     member = None
     staff = None
@@ -258,7 +258,15 @@ def SESsion():
     ses.append(member)
     ses.append(staff)
     return jsonify({'table': ses[0],'member':ses[1],'staff':ses[2]})
-        
+
+@app.route('/api/orderid', method['POST']) #get orderid by session
+@cross_origin()
+def getorderid():
+    table = session.get('table')
+    orderid = db.exe_fetch("SELECT order_id from order_table where table_id = '%s'"%table)
+    return jsonify({'result': orderid})
+
+  
 @app.route('/create_order', methods = ["post"]) #create invoice
 @cross_origin()
 def create_order():
@@ -390,11 +398,11 @@ def pay():
     table = payment.get('table')
     member = payment.get('member')
     try:
-        db.execute(SQL['updatePayment']%(method,orderID))
-        db.execute(SQL['updateOrderState']%(method,orderID))
-        db.execute(SQL['tableAvailable']%table)
-        db.execute(SQL['updateMember']%(member,orderID))
-        db.execute('commit')
+        db.cursor.execute(SQL['updatePayment']%(method,orderID))
+        db.cursorexecute(SQL['updateOrderState']%(method,orderID))
+        db.cursor.execute(SQL['tableAvailable']%table)
+        db.cursor.execute(SQL['updateMember']%(member,orderID))
+        db.cursor.execute('commit')
         if session.get('member'):
             session.pop('member')
         return jsonify({'result':'success'})
@@ -407,17 +415,29 @@ def cancel_food():
     cancel = request.json.get('cancel')
     orderID = cancel.get('order_id')
     sequence = cancel.get('sequence')
-    try:
-        food = db.exe_fetch(SQL['getOrderRemark']%(orderID,sequence)).get(food)
-        remark = db.exe_fetch(SQL['getOrderRemark']%(orderID,sequence)).get(remark)
-        db.cursor.execute(SQL['deleteRemark']%(sequence,orderID,remark))
-        db.cursor.execute(SQL['deleteOrderFood']%(sequence,orderID,food))
-        db.cursor.execute('commit')
-        return {'result':'success'}
-    except:
-        pass
-
-    return jsonify({'cancel': cancel})
+    food = cancel.get('food')
+    combo_food = db.exe_fetch(SQL['getComboFood']%(food,orderID,sequence))
+    if combo_food !=  None:
+        try:
+            for i in combo_food:
+                food = i.get('FOOD')
+                sequence = i.get('ORDER_SEQUENCE')
+                remark = db.exe_fetch(SQL['getOrderRemark']%(orderID,sequence,food)).get('REMARK')
+                db.cursor.execute(SQL['deleteRemark']%(sequence,orderID,remark,food))
+                db.cursor.execute(SQL['deleteOrderFood']%(sequence,orderID,food))
+            db.cursor.execute('commit')
+            return {'result':'success'}
+        except:
+            return jsonify({'result': 'error'})
+    else:
+        try:
+            remark = db.exe_fetch(SQL['getOrderRemark']%(orderID,sequence,food)).get(remark)
+            db.cursor.execute(SQL['deleteRemark']%(sequence,orderID,remark,food))
+            db.cursor.execute(SQL['deleteOrderFood']%(sequence,orderID,food))
+            db.cursor.execute('commit')
+            return {'result':'success'}
+        except:
+            return jsonify({'result': 'error'})
 
 @app.route('/finish_cook', methods = ["post"]) #cooked the ordered food
 @cross_origin()
@@ -426,9 +446,9 @@ def finish_cook():
     orderID = cooked.get('orderID')
     food = cooked.get('food')
     sequence = cooked.get('sequence')
-    db.execute(SQL['foodCooked']%(orderID,food,sequence))
-    db.execute('commit')
-    return jsonify({'cooked': cooked})
+    db.cursor.execute(SQL['foodCooked']%(orderID,food,sequence))
+    db.cursor.execute('commit')
+    return jsonify({'result': 'success'})
 
 @app.route('/food_served', methods = ["post"]) #served the ordered food
 @cross_origin()
@@ -437,9 +457,9 @@ def food_served():
     orderID = served.get('orderID')
     food = served.get('food')
     sequence = served.get('sequence')
-    db.execute(SQL['foodServed']%(orderID,food,sequence))
-    db.execute('commit')
-    return jsonify({'served': served})
+    db.cursor.execute(SQL['foodServed']%(orderID,food,sequence))
+    db.cursor.execute('commit')
+    return jsonify({'result': 'success'})
 
 #socket
 @socketio.on('message')

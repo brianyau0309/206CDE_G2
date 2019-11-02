@@ -266,7 +266,7 @@ SQL = {
   from 
     order_remark
   WHERE
-    order_id = '%s' and order_sequence = %d
+    order_id = '%s' and order_sequence = %d and food = '%s'
   ''',
 
   'getRemarkPrice':'''
@@ -301,6 +301,7 @@ SQL = {
   where order_sequence = %d
   and orders = '%s'
   and remark = '%s'
+  and food = '%s'
   ''',
 
   'deleteOrderFood':'''
@@ -308,6 +309,14 @@ SQL = {
   where order_sequence = %d
   and orders ='%s'
   and food = '%s'
+  ''',
+
+  'getComboFood':'''
+  SELECT food , order_sequence 
+  from order_food 
+  where combo = '%s' 
+  and orders = '%s' 
+  and combo_sequence = %d
   ''',
 
   'foodCooked':'''
