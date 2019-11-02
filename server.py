@@ -465,7 +465,6 @@ def cancel_food():
                 food = i.get('FOOD')
                 sequence = i.get('ORDER_SEQUENCE')
                 remark = db.exe_fetch(SQL['getOrderRemark']%(orderID,sequence,food)).get('REMARK')
-                db.cursor.execute(SQL['deleteRemark']%(sequence,orderID,remark,food))
                 db.cursor.execute(SQL['deleteOrderFood']%(sequence,orderID,food))
             db.cursor.execute('commit')
             return jsonify({'result':'success'})
@@ -474,7 +473,6 @@ def cancel_food():
     else:
         try:
             remark = db.exe_fetch(SQL['getOrderRemark']%(orderID,sequence,food)).get(remark)
-            db.cursor.execute(SQL['deleteRemark']%(sequence,orderID,remark,food))
             db.cursor.execute(SQL['deleteOrderFood']%(sequence,orderID,food))
             db.cursor.execute('commit')
             return {'result':'success'}
