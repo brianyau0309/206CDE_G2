@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-  
 import os   
 os.environ['NLS_LANG'] = 'SIMPLIFIED CHINESE_CHINA.UTF8'   
-from flask import Flask, session, request, render_template, jsonify
+from flask import Flask, session, request, render_template, jsonify, redirect, url_for
 from flask_cors import cross_origin
 from OracleConn import OracleConn, SQL
 from flask_socketio import SocketIO, send
@@ -29,7 +29,10 @@ def hello():
 @app.route('/client/', defaults={'path': ''})
 @app.route('/client/<path:path>')
 def client(path):
-    return render_template("client.html")
+    if session.get('table'):
+        return render_template("client.html")
+    else:
+        return redirect(url_for('tableloginpage'))
 
 @app.route('/staff/', defaults={'path': ''})
 @app.route('/staff/<path:path>')
@@ -188,6 +191,33 @@ def user_login():
 
     return jsonify({'result':'Error'})
 
+@app.route('/tableloginpage') #Login process
+@cross_origin()
+def tableloginpage():
+    return render_template("tableloginpage.html")
+
+@app.route('/tablelogin', methods = ["POST"]) #Login process
+@cross_origin()
+def tablelogin():
+    table = request.form['Table']
+    table_id = db.exe_fetch("SELECT table_id FROM table_list WHERE table_id = '%s'"%table, 'one').get('TABLE_ID')
+    print(table)
+    print(table_id)
+    if table_id != None:
+        if table == table_id:
+            session['table'] = table_id
+            return redirect(url_for('client'))
+    return jsonify({'result':'Error'})
+
+@app.route('/member_logout', methods = ["post"]) #For Table member logout
+@cross_origin()
+def member_logout():
+    if session.get('member') != None:
+        session.pop('member')
+        return jsonify({ 'result': 'success' })
+
+    return jsonify({ 'result': 'error' })
+
 @app.route('/QRlogin', methods = ["POST"]) #QRLogin process
 @cross_origin()
 def QRlogin():
@@ -233,22 +263,39 @@ def myinfo():
     
     return jsonify({ 'result': 'Fail'})
 
-@app.route('/logout', methods = ["post"]) #Logout
+@app.route('/QRlogout', methods = ["post"]) #Logout
 @cross_origin()
-def logout():
+def QRlogout():
     if session.get('table'):
         session.clear()
     return redirect(url_for('loginpage'))
 
-@app.route('/table_logout', methods = ["post"]) #For Table member logout
+@app.route('/api/session') #session
 @cross_origin()
-def table_logout():
-    if session.get('member') != None:
-        session.pop('member')
-        return jsonify({ 'result': 'success' })
+def SESSION():
+    table = None
+    member = None
+    staff = None
+    ses = []
+    if session.get('table'):
+        table = session.get('table')
+    if session.get('member'):
+        member = session.get('member')
+    if session.get('staff'):
+        staff = session.get('staff')
+    ses.append(table)
+    ses.append(member)
+    ses.append(staff)
+    return jsonify({'table': ses[0],'member':ses[1],'staff':ses[2]})
 
-    return jsonify({ 'result': 'error' })
+@app.route('/api/orderid', methods=['POST']) #get orderid by session
+@cross_origin()
+def getorderid():
+    table = session.get('table')
+    orderid = db.exe_fetch("SELECT order_id from order_table where table_id = '%s'"%table)
+    return jsonify({'result': orderid})
 
+  
 @app.route('/create_order', methods = ["post"]) #create invoice
 @cross_origin()
 def create_order():
@@ -393,11 +440,13 @@ def pay():
     table = payment.get('table')
     member = payment.get('member')
     try:
-        db.execute(SQL['updatePayment']%(method,orderID))
-        db.execute(SQL['updateOrderState']%(method,orderID))
-        db.execute(SQL['tableAvailable']%table)
-        db.execute(SQL['updateMember']%(member,orderID))
-        db.execute('commit')
+        db.cursor.execute(SQL['updatePayment']%(method,orderID))
+        db.cursorexecute(SQL['updateOrderState']%(method,orderID))
+        db.cursor.execute(SQL['tableAvailable']%table)
+        db.cursor.execute(SQL['updateMember']%(member,orderID))
+        db.cursor.execute('commit')
+        if session.get('member'):
+            session.pop('member')
         return jsonify({'result':'success'})
     except:
         return jsonify({'result':'error'})
@@ -408,17 +457,29 @@ def cancel_food():
     cancel = request.json.get('cancel')
     orderID = cancel.get('order_id')
     sequence = cancel.get('sequence')
-    try:
-        food = db.exe_fetch(SQL['getOrderRemark']%(orderID,sequence)).get(food)
-        remark = db.exe_fetch(SQL['getOrderRemark']%(orderID,sequence)).get(remark)
-        db.cursor.execute(SQL['deleteRemark']%(sequence,orderID,remark))
-        db.cursor.execute(SQL['deleteOrderFood']%(sequence,orderID,food))
-        db.cursor.execute('commit')
-        return {'result':'success'}
-    except:
-        pass
-
-    return jsonify({'cancel': cancel})
+    food = cancel.get('food')
+    combo_food = db.exe_fetch(SQL['getComboFood']%(food,orderID,sequence))
+    if combo_food !=  None:
+        try:
+            for i in combo_food:
+                food = i.get('FOOD')
+                sequence = i.get('ORDER_SEQUENCE')
+                remark = db.exe_fetch(SQL['getOrderRemark']%(orderID,sequence,food)).get('REMARK')
+                db.cursor.execute(SQL['deleteRemark']%(sequence,orderID,remark,food))
+                db.cursor.execute(SQL['deleteOrderFood']%(sequence,orderID,food))
+            db.cursor.execute('commit')
+            return jsonify({'result':'success'})
+        except:
+            return jsonify({'result': 'error'})
+    else:
+        try:
+            remark = db.exe_fetch(SQL['getOrderRemark']%(orderID,sequence,food)).get(remark)
+            db.cursor.execute(SQL['deleteRemark']%(sequence,orderID,remark,food))
+            db.cursor.execute(SQL['deleteOrderFood']%(sequence,orderID,food))
+            db.cursor.execute('commit')
+            return {'result':'success'}
+        except:
+            return jsonify({'result': 'error'})
 
 @app.route('/finish_cook', methods = ["post"]) #cooked the ordered food
 @cross_origin()
@@ -427,9 +488,9 @@ def finish_cook():
     orderID = cooked.get('orderID')
     food = cooked.get('food')
     sequence = cooked.get('sequence')
-    db.execute(SQL['foodCooked']%(orderID,food,sequence))
-    db.execute('commit')
-    return jsonify({'cooked': cooked})
+    db.cursor.execute(SQL['foodCooked']%(orderID,food,sequence))
+    db.cursor.execute('commit')
+    return jsonify({'result': 'success'})
 
 @app.route('/food_served', methods = ["post"]) #served the ordered food
 @cross_origin()
@@ -438,9 +499,9 @@ def food_served():
     orderID = served.get('orderID')
     food = served.get('food')
     sequence = served.get('sequence')
-    db.execute(SQL['foodServed']%(orderID,food,sequence))
-    db.execute('commit')
-    return jsonify({'served': served})
+    db.cursor.execute(SQL['foodServed']%(orderID,food,sequence))
+    db.cursor.execute('commit')
+    return jsonify({'result': 'success'})
 
 #socket
 @socketio.on('message')
