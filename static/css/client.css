@@ -521,7 +521,9 @@
   font-size: 2vh;
   color: white;
   background: red;
-  position: sticky;
+  position: fixed;
+  width: 100vw;
+  margin-left: 1px;
   bottom: 0;
 }
 .checkout_button {
@@ -623,6 +625,6 @@
     padding: .1vw
   }
   .checkout_field {
-
+    width: 25vw;
   }
 }

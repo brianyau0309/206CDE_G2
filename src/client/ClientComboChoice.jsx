@@ -195,6 +195,7 @@ export default class ClientComboChoice extends React.Component {
   }
    selfCloseChoice() {
      this.setState({'pizza': [], 'rice_pasta': [], 'starter': [], 'drink': [], 'extra': [], 'price': this.state.combo_info.FOOD_PRICE})
+     this.props.loadBill()
      this.props.choiceToggle()
    }
 

@@ -68,7 +68,7 @@ export default class ClientFood extends React.Component {
         {FoodList}
         <div className="food_container placeholder"></div>
         <div className="food_container placeholder option"></div>
-        <ClientFoodRemark open={this.state.remark} food={this.state.food_remark} remarkToggle={this.remarkToggle} />
+        <ClientFoodRemark loadBill={this.props.loadBill} open={this.state.remark} food={this.state.food_remark} remarkToggle={this.remarkToggle} />
       </div>
     )
   }

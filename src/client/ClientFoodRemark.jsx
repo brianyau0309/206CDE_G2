@@ -92,6 +92,7 @@ export default class ClientFoodRemark extends React.Component {
 
   selfClose() {
     this.resetRemark()
+    this.props.loadBill()
     this.props.remarkToggle()
   }
 

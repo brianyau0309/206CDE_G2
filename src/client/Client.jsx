@@ -25,6 +25,7 @@ export default class Client extends React.Component {
     this.changeBillBtn = this.changeBillBtn.bind(this)
     this.logout = this.logout.bind(this)
     this.getSession = this.getSession.bind(this)
+    this.loadBill = this.loadBill.bind(this)
   }
 
   componentDidMount() {
@@ -127,6 +128,7 @@ export default class Client extends React.Component {
   }
 
   loadBill() {
+    console.log('loading bill')
     let order = ''
     fetch('/api/whoami', {
       method: 'POST',
@@ -143,6 +145,7 @@ export default class Client extends React.Component {
           }).then(res => {
             if (res.ok) {
               res.json().then(result => {
+                console.log(result)
                 this.setState({'order_bill': result}, () => console.log(this.state.order_bill))
               })
             }
@@ -167,15 +170,15 @@ export default class Client extends React.Component {
           <div className="ClientMain translateX-3" onScroll={this.changeBillBtn}>
             <Switch>
               <Route path="/client/food/combo">
-                <ClientCombo lang={this.state.lang} />
+                <ClientCombo lang={this.state.lang} loadBill={this.loadBill} />
               </Route>
-                <Route path="/client/food/:category" render={(props) => <ClientFood {...props} lang={this.state.lang} />}/>
+                <Route path="/client/food/:category" render={(props) => <ClientFood {...props} lang={this.state.lang} loadBill={this.loadBill} />}/>
               <Redirect from="/client" to="/client/food/combo" />
             </Switch>
           </div>
         </Router>
-        <ClientSide memberName={this.state.member ? this.state.member.MEMBER_SURNAME : null} loginFunc={this.login} logoutFunc={this.logout} lang={this.state.lang} changeLang={this.changeLang}/>
-        <ClientBill lang={this.state.lang} order_bill={this.state.order_bill.food ? this.state.order_bill : {'bill': [], 'food': []}} />
+        <ClientSide loadBill={this.loadBill} memberName={this.state.member ? this.state.member.MEMBER_SURNAME : null} loginFunc={this.login} logoutFunc={this.logout} lang={this.state.lang} changeLang={this.changeLang}/>
+        <ClientBill loadBill={this.loadBill} lang={this.state.lang} order_bill={this.state.order_bill.food ? this.state.order_bill : {'bill': [], 'food': []}} />
       </div>
     )
   }

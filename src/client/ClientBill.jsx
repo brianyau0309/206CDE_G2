@@ -11,7 +11,7 @@ const BillRow = (props) => {
         <td className="ta-l bill_detail_title">{props.lang === 'eng' ? props.food.FOOD_ENG_NAME : props.food.FOOD_CHI_NAME}</td>
         <td className="ta-l bill_detail_state">{props.food.DISH_STATE}</td>
         <td className="ta-r bill_detail_price">{props.food.PRICE}</td>
-        <td className="ta-r"><button className="cancel_button">X</button></td>
+        <td className="ta-r"><button className="cancel_button" onClick={() => props.cancel_food(props.order,props.food.FOOD,props.food.ORDER_SEQUENCE)}>X</button></td>
       </tr>
     </table>
       {
@@ -64,7 +64,8 @@ const BillRow = (props) => {
 export default class ClientBill extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {'order_bill': {}, 'vocabulary': vocabulary_eng, 'lang': 'eng' }
+    this.state = {'bill': {}, 'vocabulary': vocabulary_eng, 'lang': 'eng' }
+    this.cancel_food = this.cancel_food.bind(this)
   }
 
   static getDerivedStateFromProps(props, state) {
@@ -73,17 +74,31 @@ export default class ClientBill extends React.Component {
     } else if (props.lang !== state.lang && state.lang === "chi") {
       return { 'vocabulary': vocabulary_eng, 'lang': 'eng'}
     }
-    if (props.order_bill !== state.order_bill) {
-      console.log(props.order_bill)
-      console.log(state.order_bill)
-      return { 'order_bill': props.order_bill }
+    if (props.order_bill !== state.bill) {
+      return { 'bill': props.order_bill }
     }
+  }
+
+  cancel_food(order, food, seq) {
+    this.props.loadBill()
+    console.log(order,food,seq)
+    fetch(`/cancel_food`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({'cancel': {'order_id': order, 'food': food, 'sequence': seq}})
+    }).then(res => {
+      if (res.ok) {
+        res.json().then(result => {
+          console.log(result)
+        })
+      }
+    })
   }
 
   render() {
     let bill_detail = []
-    if (this.state.order_bill.food) {
-      bill_detail = this.state.order_bill.food.map(f => <BillRow lang={this.state.lang} food={f} />)
+    if (this.state.bill.food) {
+      bill_detail = this.state.bill.food.map(f => <BillRow order={this.state.bill.bill[0] ? this.state.bill.bill[0].ORDER_ID : ''} lang={this.state.lang} food={f} cancel_food={this.cancel_food} />)
     }
     return(
       <div className="ClientBill translateX-3">
@@ -95,15 +110,15 @@ export default class ClientBill extends React.Component {
         </div>
         <table className="bill_info">
           <tr rowspan="2">
-            <td onClick={() => console.log(this.state)}>{this.state.vocabulary.Order}: {this.state.order_bill.bill.length !== 0 ? this.state.order_bill.bill[0].ORDER_ID : ''}</td>
+            <td onClick={() => console.log(this.state)}>{this.state.vocabulary.Order}: {this.state.bill.bill.length !== 0 ? this.state.bill.bill[0].ORDER_ID : ''}</td>
           </tr>
           <tr>
-            <td>{this.state.vocabulary.Date}: {this.state.order_bill.bill.length !== 0 ? new Date(this.state.order_bill.bill[0].ORDER_DATE).toDateString() : ''}</td>
-            <td>{this.state.vocabulary.Time}: {this.state.order_bill.bill.length !== 0 ? new Date(this.state.order_bill.bill[0].ORDER_DATE).toLocaleTimeString() : ''}</td>
+            <td>{this.state.vocabulary.Date}: {this.state.bill.bill.length !== 0 ? new Date(this.state.bill.bill[0].ORDER_DATE).toDateString() : ''}</td>
+            <td>{this.state.vocabulary.Time}: {this.state.bill.bill.length !== 0 ? new Date(this.state.bill.bill[0].ORDER_DATE).toLocaleTimeString() : ''}</td>
           </tr>
           <tr>
-            <td>{this.state.vocabulary.Table}: {this.state.order_bill.bill.length !== 0 ? this.state.order_bill.bill[0].ORDER_STATE : ''}</td>
-            <td>{this.state.vocabulary.Staff}: {this.state.order_bill.bill.length !== 0 ? this.state.order_bill.bill[0].STAFF_NAME : ''}</td>
+            <td>{this.state.vocabulary.Table}: {this.state.bill.bill.length !== 0 ? this.state.bill.bill[0].ORDER_STATE : ''}</td>
+            <td>{this.state.vocabulary.Staff}: {this.state.bill.bill.length !== 0 ? this.state.bill.bill[0].STAFF_NAME : ''}</td>
           </tr>
         </table>
         <ul className="bill_detail_list">
@@ -119,8 +134,8 @@ export default class ClientBill extends React.Component {
         </ul>
         <div className="checkout_field">
           <div>Service Charge: +10%</div>
-          <div>Membership: {this.state.order_bill.bill[0] ? this.state.order_bill.bill[0].MEMBER ? this.state.order_bill.bill[0].MEMBER : 'None' : 'None'}</div>
-          <div>Total Price: {this.state.order_bill.bill[0] ? this.state.order_bill.bill[0].TOTAL_PRICE : 0}</div>
+          <div>Membership: {this.state.bill.bill[0] ? this.state.bill.bill[0].MEMBER ? this.state.bill.bill[0].MEMBER : 'None' : 'None'}</div>
+          <div>Total Price: {this.state.bill.bill[0] ? this.state.bill.bill[0].TOTAL_PRICE : 0}</div>
           <button className="checkout_button">Check Out</button>
         </div>
       </div>

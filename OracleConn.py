@@ -262,7 +262,7 @@ SQL = {
 
   'getOrderRemark':'''
   select 
-    *
+    remark
   from 
     order_remark
   WHERE
