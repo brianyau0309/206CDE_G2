@@ -1,5 +1,5 @@
 import React from 'react'
-export default class ClientFoodRemark extends React.Component {
+export default class StaffFoodRemark extends React.Component {
   constructor(props) {
     super(props);
     this.state = { 
@@ -17,7 +17,6 @@ export default class ClientFoodRemark extends React.Component {
     this.resetRemark = this.resetRemark.bind(this)
     this.calPrice = this.calPrice.bind(this)
     this.onSubmit = this.onSubmit.bind(this)
-    this.selfClose = this.selfClose.bind(this)
   }
 
   static getDerivedStateFromProps(props, state) {
@@ -87,12 +86,7 @@ export default class ClientFoodRemark extends React.Component {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({'new_order': {'order': order, 'food': food, 'remark': remark}})
-    }).then(res => res.json().then(() => this.selfClose()))
-  }
-
-  selfClose() {
-    this.resetRemark()
-    this.props.remarkToggle()
+    }).then(res => res.json().then(result => console.log(result.ordering)))
   }
 
   render() {
@@ -100,19 +94,19 @@ export default class ClientFoodRemark extends React.Component {
     const remark_list = []
 
     while (all_remark.length != 0) {
-      let remark_name = all_remark[0].REMARK_ENG
-      remark_list.push(all_remark.filter(remark => remark.REMARK_ENG === remark_name))
-      all_remark = all_remark.filter(remark => remark.REMARK_ENG !== remark_name)
+      let remark_name = all_remark[0].REMARK
+      remark_list.push(all_remark.filter(remark => remark.REMARK === remark_name))
+      all_remark = all_remark.filter(remark => remark.REMARK !== remark_name)
     }
 
     const remark_component = remark_list.map(remark => (
       <li>
-        <h1>{remark[0].REMARK_ENG}</h1>
+        <h1>{remark[0].REMARK}</h1>
           {
             remark.map(remark => 
             (
               <label>
-                <input type="radio" name={remark.REMARK_ENG} value={remark.REMARK_ID} onChange={this.remarkOnChange} />
+                <input type="radio" name={remark.REMARK} value={remark.REMARK_ID} onChange={this.remarkOnChange} />
                 {remark.OPTION_ENG}
               </label>)
             )
@@ -121,19 +115,19 @@ export default class ClientFoodRemark extends React.Component {
     ))
 
     return(
-      <div className={this.state.open ? "ClientFoodRemark ClientFoodRemarkActive" : "ClientFoodRemark"}>
+      <div className={this.state.open ? "StaffFoodRemark StaffFoodRemarkActive" : "StaffFoodRemark"}>
         <div className="remark_title">
-          <img src="https://img.icons8.com/carbon-copy/100/000000/back.png" onClick={this.selfClose} />
-          <h1>{this.state.lang === 'eng' ? 'Food' : '食物'}</h1>
+          <img src="https://img.icons8.com/carbon-copy/100/000000/back.png" onClick={this.props.remarkToggle} />
+          <h1>Your Order</h1>
         </div>
         <img className="remark_img" src={this.state.food != '' ? window.location.origin + '/static/image/food/' + this.state.food + '.png' : ''} alt="food image"/>
-        <div className="remark_food_name">{this.state.lang ? this.state.food_info.FOOD_ENG_NAME : this.state.food_info.FOOD_CHI_NAME}</div>
-        {remark_list.length === 0 ? null : <h3>{this.state.lang === 'eng' ? 'Remark' : '備註'}</h3>}
-        {remark_list.length === 0 ? null : <button className="reset_button" onClick={this.resetRemark}>{this.state.lang === 'eng' ? 'Reset Remark' : '重設備註'}</button>}
+        <div className="remark_food_name">{this.state.food_info.FOOD_ENG_NAME}</div>
+        <h3>Remark</h3>
+        <button onClick={this.resetRemark}>Reset</button>
         <ul className="remark_list">
           {remark_component}
         </ul>
-        <button className='bottom_btn' onClick={this.onSubmit}>{this.state.lang === 'eng' ? 'Add' : '加入'} ({this.state.price})</button>
+        <button onClick={this.onSubmit}>Submit ({this.state.price})</button>
       </div>
     )
   }

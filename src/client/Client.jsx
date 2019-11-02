@@ -22,6 +22,7 @@ export default class Client extends React.Component {
     this.getMemberInfo = this.getMemberInfo.bind(this)
     this.changeLang = this.changeLang.bind(this)
     this.changeBillBtn = this.changeBillBtn.bind(this)
+    this.logout = this.logout.bind(this)
   }
 
   componentDidMount() {
@@ -34,6 +35,9 @@ export default class Client extends React.Component {
     socket.on('message', function(msg) {
       console.log(msg);
     });
+
+    this.getMemberInfo()
+    this.loadBill()
   }
 
   login(e) {
@@ -81,6 +85,20 @@ export default class Client extends React.Component {
     })
   }
 
+  logout() {
+    fetch(`/table_logout`, {method: 'POST'}).then(res => {
+      if (res.ok) {
+        res.json().then(result => {
+          if (result.result === 'success') {
+            this.setState({ 'member': null })
+          } else if (result.result === 'error') {
+            alert('Log out Error. Please contact the staff.')
+          }
+        })
+      }
+    })
+  }
+
   changeBillBtn() {
     let newPageHeight = document.querySelector('.ClientMain').scrollTop
     if (newPageHeight > this.state.PageHeight) {
@@ -92,7 +110,7 @@ export default class Client extends React.Component {
   }
 
   loadBill() {
-    const order = ''
+    let order = ''
     fetch('/api/whoami', {
       method: 'POST',
       mode: 'cors',
@@ -101,15 +119,15 @@ export default class Client extends React.Component {
       if (res.ok) {
         res.json().then(result => {
           order = result.order
+          console.log(order)
           fetch('/api/bill', {
-            method: 'POST',
+            method: 'GET',
             headers: { 'Content-Type': 'application/json' },
-            body: { 'order': order },
           }).then(res => {
             if (res.ok) {
               res.json().then(result => {
                 this.setState({'order_bill': result}, () => console.log(this.state.order_bill))
-              }
+              })
             }
           })
         })
@@ -139,8 +157,8 @@ export default class Client extends React.Component {
             </Switch>
           </div>
         </Router>
-        <ClientSide memberName={this.state.member ? this.state.member.MEMBER_SURNAME : null} loginFunc={this.login} lang={this.state.lang} changeLang={this.changeLang}/>
-        <ClientBill lang={this.state.lang}/>
+        <ClientSide memberName={this.state.member ? this.state.member.MEMBER_SURNAME : null} loginFunc={this.login} logoutFunc={this.logout} lang={this.state.lang} changeLang={this.changeLang}/>
+        <ClientBill lang={this.state.lang} order_bill={this.state.order_bill.food ? this.state.order_bill : {'bill': [], 'food': []}} />
       </div>
     )
   }

@@ -15,6 +15,12 @@ app.config['SECRET_KEY'] = 'SecretKeyHERE!'
 app.config['JSON_AS_ASCII'] = False
 
 socketio = SocketIO(app)
+@app.route('/chi_test', methods=["POST"])
+def test_chi():
+    data = request.form['input']
+    print(data.encode('utf-8'))
+    db.exe_commit("insert into test_chi values (5, '%s')"%data)
+    return jsonify({ 'result': data })
 
 @app.route('/')
 def hello():
@@ -179,8 +185,31 @@ def user_login():
         if member_password[0] == loginInfo.get('password'):
             session['member'] = loginInfo.get('id')
             return jsonify({ 'result': 'Success' })
-        
-    return jsonify({ 'result': 'Fail'})
+
+    return jsonify({'result':'Error'})
+
+@app.route('/QRlogin', methods = ["POST"]) #QRLogin process
+@cross_origin()
+def QRlogin():
+    table = request.form['Table']
+    order = request.form['Order']
+    order_table = db.exe_fetch("SELECT order_id, table_id from order_table WHERE order_id = '%s' and table_id = '%s'"%(order,table))
+    if order_table != None:
+        if order == order_table.get('ORDER_ID') and table == order_table.get('TABLE_ID'):
+            if request.form['submit'] == 'member':
+                member_id = request.form['Member']
+                password = request.form['MemberPassword']
+                member_password = db.exe_fetch("SELECT member_password FROM members WHERE member_id = '%s'"%member_id, 'one')
+                if member_password != None:
+                    if member_password[0] == password:
+                        session['member'] = member_id
+                        session['table'] = table_id
+                        return redirect(url_for('client'))
+            elif request.form['submit'] == 'nonmember':
+                session['member'] = 'guest'
+                session['table'] = table
+                return redirect(url_for('client'))
+    return jsonify({'result':'Error'})
 
 @app.route('/table_login', methods = ["POST"]) # Table Login process
 @cross_origin()
@@ -203,6 +232,22 @@ def myinfo():
         return jsonify({'result': userInfo})
     
     return jsonify({ 'result': 'Fail'})
+
+@app.route('/logout', methods = ["post"]) #Logout
+@cross_origin()
+def logout():
+    if session.get('table'):
+        session.clear()
+    return redirect(url_for('loginpage'))
+
+@app.route('/table_logout', methods = ["post"]) #For Table member logout
+@cross_origin()
+def table_logout():
+    if session.get('member') != None:
+        session.pop('member')
+        return jsonify({ 'result': 'success' })
+
+    return jsonify({ 'result': 'error' })
 
 @app.route('/create_order', methods = ["post"]) #create invoice
 @cross_origin()
@@ -305,12 +350,39 @@ def bill():
         condition1 += " AND a.order_id = '00000003'"
         condition2 +=  " AND a.orders = '00000003'"
     output1 =  db.exe_fetch(SQL['getOrders'].format(condition1=condition1),'all')
-    output2 =  db.exe_fetch(SQL['getFoodOrdered'].format(lang=lang,condition2=condition2),'all')
-    output3 =  db.exe_fetch(SQL['getComboOrdered'].format(lang=lang,condition2=condition2),'all')
-    output4 =  db.exe_fetch(SQL['getComboFoodOrdered'].format(lang=lang,condition2=condition2),'all')
-    output5 =  db.exe_fetch(SQL['getRemarkOrdered'].format(lang=lang,condition2=condition2),'all')
-    output6 =  db.exe_fetch(SQL['getComboRemarkOrdered'].format(lang=lang,condition2=condition2),'all')
-    return jsonify({'Bills': output1,'Food':[{'Food': output2,'Remark':[{'Remark':output5}]}],'Combo':[{'Combo': output3,'ComboFood':[{'ComboFood':output4,'ComboRemark':[{'ComboRemark':output6}]}]}]})
+    bill_food = db.exe_fetch(SQL['getFoodOrdered'].format(condition2=condition2), 'all')
+
+    foods = []
+    for food in bill_food:
+        if food.get('CATEGORY_NAME') == 'combo':
+            combo_food = db.exe_fetch(SQL['getComboFoodByPK'].format(combo=food.get('FOOD'),order=food.get('ORDERS'),seq=food.get('ORDER_SEQUENCE')), 'all')
+            food['COMBO_FOOD'] = []
+            for i in combo_food:
+                remark = db.exe_fetch(SQL['getRemarkByPK'].format(food=i.get('FOOD'),order=i.get('ORDERS'),seq=i.get('ORDER_SEQUENCE')), 'all')
+                i['REMARK'] = remark
+                food['COMBO_FOOD'].append(i)
+            foods.append(food)
+        else:
+            remark = db.exe_fetch(SQL['getRemarkByPK'].format(food=food.get('FOOD'),order=food.get('ORDERS'),seq=food.get('ORDER_SEQUENCE')),'all')
+            food['REMARK'] = remark
+            foods.append(food)
+
+    total = 0
+    for i in foods:
+        total += i.get('PRICE')
+        if i.get('COMBO_FOOD'):
+            for j in i.get('COMBO_FOOD'):
+                total += j.get('PRICE')
+                for k in j.get('REMARK'):
+                    total += k.get('REMARK_PRICE')
+        if i.get('REMARK'):
+            for j in i.get('REMARK'):
+                total += j.get('REMARK_PRICE')
+    
+    output1[0]['TOTAL_PRICE'] = total
+    output = {'bill': output1, 'food': foods}
+
+    return jsonify(output)
 
 @app.route('/pay', methods = ["post"]) #pay the bill
 @cross_origin()
