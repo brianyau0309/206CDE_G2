@@ -64,7 +64,7 @@ const BillRow = (props) => {
 export default class ClientBill extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {'bill': {}, 'vocabulary': vocabulary_eng, 'lang': 'eng' }
+    this.state = {'bill': {}, 'vocabulary': vocabulary_eng, 'lang': 'eng' ,'payed': null}
     this.cancel_food = this.cancel_food.bind(this)
   }
 
@@ -76,6 +76,9 @@ export default class ClientBill extends React.Component {
     }
     if (props.order_bill !== state.bill) {
       return { 'bill': props.order_bill }
+    }
+    if (props.payed !== state.payed) {
+      return { 'payed' : 'waiting' }
     }
   }
 
@@ -102,6 +105,7 @@ export default class ClientBill extends React.Component {
     }
     return(
       <div className="ClientBill translateX-3">
+        {this.state.payed ? <div className="Payed"></div>: ''}
         <div className="bill_title">
           <label for="bill_toggle">
             <img src="https://img.icons8.com/carbon-copy/100/000000/back.png"/>
@@ -136,7 +140,7 @@ export default class ClientBill extends React.Component {
           <div>Service Charge: +10%</div>
           <div>Membership: {this.state.bill.bill[0] ? this.state.bill.bill[0].MEMBER ? this.state.bill.bill[0].MEMBER : 'None' : 'None'}</div>
           <div>Total Price: {this.state.bill.bill[0] ? this.state.bill.bill[0].TOTAL_PRICE : 0}</div>
-          <button className="checkout_button">Check Out</button>
+          <button className="checkout_button" onClick={this.props.pay}>Pay</button>
         </div>
       </div>
     )

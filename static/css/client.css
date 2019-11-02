@@ -539,6 +539,20 @@
   background: #000;
 }
 
+.Payed{
+  z-index: 99;
+  position:fixed;
+  padding:0;
+  margin:0;
+
+  top:0;
+  left:0;
+
+  width: 100%;
+  height: 100%;
+  background:rgb(255, 255, 255);
+}
+
 @media only screen and (min-width: 780px) {
   .Client {
     display: grid;
@@ -626,5 +640,18 @@
   }
   .checkout_field {
     width: 25vw;
+  }
+  .Payed{
+    z-index: 99;
+    position:fixed;
+    padding:0;
+    margin:0;
+  
+    top:0;
+    left:0;
+  
+    width: 100%;
+    height: 100%;
+    background:rgb(255, 255, 255);
   }
 }
