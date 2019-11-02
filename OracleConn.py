@@ -110,12 +110,25 @@ SQL = {
   ''',
   
   'getTable': '''
-  SELECT 
-    table_id,
-    table_available,
-    table_sit
-  FROM 
-    table_list
+    SELECT
+      b.table_id,
+      b.table_sit,
+      b.table_available,
+      a.order_id
+    FROM
+      (SELECT 
+        a.*, 
+        b.order_id 
+      FROM 
+        table_list a, 
+        order_table b, 
+        orders c 
+      WHERE 
+        a.table_id = b.table_id AND 
+        b.order_id = c.order_id AND 
+        c.order_state = 'in sit') a
+    RIGHT JOIN table_list b ON
+      a.table_id = b.table_id
   ''',
 
   'getFoodRemark': '''

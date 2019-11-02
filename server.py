@@ -73,7 +73,7 @@ def staffAPI():
 
 @app.route('/api/table')
 def tableAPI():
-    output = db.exe_fetch(SQL['getTable'])
+    output = db.exe_fetch(SQL['getTable'], 'all')
     
     return jsonify({'table': output})
 
@@ -307,9 +307,9 @@ def create_order():
         db.cursor.execute(SQL['createTable']%table)
         db.cursor.execute(SQL['tableNotAvailable']%table)
         db.cursor.execute('commit')
-        return { 'result': 'Success' } 
+        return { 'result': 'success' } 
     except:
-        return { 'result': 'Error' }
+        return { 'result': 'error' }
     
 @app.route('/api/order_food', methods = ["get","post"]) #ordering food from the menu
 @cross_origin()

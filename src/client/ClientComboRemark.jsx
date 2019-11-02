@@ -218,7 +218,7 @@ export default class ClientComboRemark extends React.Component {
         
         <div className="remark_price_panel">
           <img className="left" src="https://img.icons8.com/carbon-copy/100/000000/back.png" onClick={() => this.changeQTY('minus')} />
-          <span>{this.state.qty}</span>
+          <span>x {this.state.qty}</span>
           <img className="right" src="https://img.icons8.com/carbon-copy/100/000000/back.png" onClick={() => this.changeQTY('add')} />
         </div>
         {remark_list.length === 0 ? null : <h3>{this.state.lang === 'eng' ? 'Remark' : '備註'}</h3>}
