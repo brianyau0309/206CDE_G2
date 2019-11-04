@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+  <header>
+    <title>Staff Login</title>
+  </header>
+  <body>
+    <h1>Staff only</h1>
+    <form action="{{ url_for('stafflogin') }}" method="post">
+      <input type="text" name="Staff" placeholder="Staff No."/>
+      <input type="password" name="Password" placeholder="Password"/>
+    <input type="submit">staff login</input>
+  </form>
+  </body>
+</html>

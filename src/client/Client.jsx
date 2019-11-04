@@ -43,6 +43,7 @@ export default class Client extends React.Component {
 
     this.getMemberInfo()
     this.loadBill()
+    this.getSession()
   }
 
   login(e) {
@@ -97,9 +98,9 @@ export default class Client extends React.Component {
       credentials: 'include'
     }).then(res => {
       if (res.ok) {
-        res.json().then(session => {
-          console.log(session.table)
-          this.setState({ 'table': session.table })
+        res.json().then(result => {
+          console.log(result.table)
+          this.setState({ 'table': result.table })
         })
       }
     })
@@ -158,14 +159,22 @@ export default class Client extends React.Component {
   }
 
   pay(){
+    var table = this.state.order_bill
     var socket = io.connect(window.location.origin)
 
     socket.on('connect', function() {
-      socket.send('Please wait for the staff come');
+      socket.emit('topay','Please wait for the staff come');
+      socket.emit('callforpay', table + 'is waiting to pay');
     });
 
-    socket.on('message', function(msg) {
+    socket.on('topay', function(msg) {
       console.log(msg);
+      alert(msg);
+    });
+
+    socket.on('callforpay', function(msg) {
+      console.log(msg);
+      alert(msg);
     });
 
     this.setState({ 'payed': 'waiting' })
