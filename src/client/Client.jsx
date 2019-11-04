@@ -17,7 +17,8 @@ export default class Client extends React.Component {
                    'lang': 'eng',
                    'bill_btn': 'active', 
                    'PageHeight': 0,
-                   'order_bill': {}
+                   'order_bill': {},
+                   'payed': null
                   }
     this.login = this.login.bind(this)
     this.getMemberInfo = this.getMemberInfo.bind(this)
@@ -26,6 +27,7 @@ export default class Client extends React.Component {
     this.logout = this.logout.bind(this)
     this.getSession = this.getSession.bind(this)
     this.loadBill = this.loadBill.bind(this)
+    this.pay = this.pay.bind(this)
   }
 
   componentDidMount() {
@@ -155,11 +157,29 @@ export default class Client extends React.Component {
     })
   }
 
+  pay(){
+    var socket = io.connect(window.location.origin)
+
+    socket.on('connect', function() {
+      socket.send('Please wait for the staff come');
+    });
+
+    socket.on('message', function(msg) {
+      console.log(msg);
+    });
+
+    this.setState({ 'payed': 'waiting' })
+  }
+
   render() {
     return(
-      <div className="Client">
-        <input id="side_toggle" type="checkbox" />
-        <label for="side_toggle" className="cover"></label>
+      <div className="Client"> 
+      {this.state.payed ? 
+       <div className="Payed"></div>
+      : '' }
+        <input id="side_toggle" type="checkbox" /> 
+        <label for="side_toggle" className="cover"> 
+        </label> 
         <input id="bill_toggle" type="checkbox" />
         <label for="bill_toggle">
           <img id="bill_btn" className={(this.state.bill_btn === 'active') ? 'bill_btn_active' : 'bill_btn_deactive'} src="https://img.icons8.com/carbon-copy/100/000000/bill.png" alt="Bill Toggle Button" />
@@ -178,7 +198,7 @@ export default class Client extends React.Component {
           </div>
         </Router>
         <ClientSide loadBill={this.loadBill} memberName={this.state.member ? this.state.member.MEMBER_SURNAME : null} loginFunc={this.login} logoutFunc={this.logout} lang={this.state.lang} changeLang={this.changeLang}/>
-        <ClientBill loadBill={this.loadBill} lang={this.state.lang} order_bill={this.state.order_bill.food ? this.state.order_bill : {'bill': [], 'food': []}} />
+        <ClientBill loadBill={this.loadBill} lang={this.state.lang} order_bill={this.state.order_bill.food ? this.state.order_bill : {'bill': [], 'food': []}} pay={this.pay} payed={this.state.payed} />
       </div>
     )
   }
