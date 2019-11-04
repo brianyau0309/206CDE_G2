@@ -1,5 +1,7 @@
 import React from 'react'
 
+import StaffBill from './StaffBill.jsx'
+
 export default class StaffTable extends React.Component {
   constructor() {
     super()
@@ -57,6 +59,7 @@ export default class StaffTable extends React.Component {
                 </tr>
             ))}
           </table>
+          <StaffBill order_bill={this.state.bill} />
       </div>
     )
   }
