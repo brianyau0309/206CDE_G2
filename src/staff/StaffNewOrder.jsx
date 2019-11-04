@@ -28,7 +28,7 @@ export default class StaffNewOrder extends React.Component {
       <div className="StaffNewOrder">
         <div onClick={() =>console.log(this.state)}>New Order</div>
         {this.state.table.map(table => (
-          <label>
+          <label style={{display: 'block'}}>
             <input type="checkbox" disabled={table.TABLE_AVAILABLE === 'Y' ? false : true}></input>
             <span>Table ID: {table.TABLE_ID}</span>
             <span>Table Sit: {table.TABLE_SIT}</span>
