@@ -12,6 +12,7 @@ export default class StaffTable extends React.Component {
     }
     this.loadTable = this.loadTable.bind(this)
     this.openBill = this.openBill.bind(this)
+    this.closeBill = this.closeBill.bind(this)
   }
 
   componentDidMount() {
@@ -29,10 +30,11 @@ export default class StaffTable extends React.Component {
   }
 
   openBill(id) {
+    console.log(this.state)
     fetch(`/api/bill`).then(res => {
       if (res.ok) {
         res.json().then(result => {
-          this.setState({'bill_id': id, 'bill_toggle': true, 'bill_info': result})
+          this.setState({'bill': id, 'bill_toggle': true, 'bill_info': result})
         })
       }
     })
@@ -59,7 +61,7 @@ export default class StaffTable extends React.Component {
                 </tr>
             ))}
           </table>
-          <StaffBill order_bill={this.state.bill} />
+          <StaffBill openBill={this.openBill} order_bill={this.state.bill_info ? this.state.bill_info : ''} open={this.state.bill_toggle} close={this.closeBill}/>
       </div>
     )
   }

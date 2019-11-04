@@ -1,5 +1,8 @@
 import React from 'react'
 
+import StaffComboChoice from './StaffComboChoice.jsx'
+import StaffFoodRemark from './StaffFoodRemark.jsx'
+
 const BillRow = (props) => {
   return(
     <li>
@@ -61,18 +64,40 @@ const BillRow = (props) => {
 export default class StaffBill extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {'bill': {}}
+    this.state = {
+      'bill': {}, 'open': false,
+      'combo_toggle': false, 'combo_id': '', 'combo_info': '',
+      'food_toggle': false, 'food_id': '', 'food_info': ''
+    }
+    this.addFood = this.addFood.bind(this)
     this.cancel_food = this.cancel_food.bind(this)
+    this.closeCombo = this.closeCombo.bind(this)
+    this.closeFood = this.closeFood.bind(this)
   }
 
   static getDerivedStateFromProps(props, state) {
-    if (props.order_bill !== state.bill) {
-      return { 'bill': props.order_bill }
-    }
+    return { 'bill': props.order_bill, 'open': props.open}
+  }
+
+  addFood() {
+    let food_id = document.querySelector('#food_input').value
+    fetch(`/api/food?food=${food_id}`).then(res => {
+      if (res.ok) {
+        res.json().then(result => {
+          let food = (result.food.length > 0 ? result.food[0] : '')
+          if (food.CATEGORY === 'C1') {
+            this.setState({ 'combo_id': food_id, 'combo_info': food, 'combo_toggle': true })
+          } else if (food.CATEGORY) {
+            this.setState({ 'food_id': food_id, 'food_info': food, 'food_toggle': true })
+          } else {
+            console.log('No this food')
+          }
+        })
+      }
+    })
   }
 
   cancel_food(order, food, seq) {
-    this.props.loadBill()
     console.log(order,food,seq)
     fetch(`/cancel_food`, {
       method: 'POST',
@@ -82,35 +107,50 @@ export default class StaffBill extends React.Component {
       if (res.ok) {
         res.json().then(result => {
           console.log(result)
+          this.props.openBill()
         })
       }
     })
   }
 
+  closeCombo() {
+    document.querySelector('.StaffComboChoice').scrollTo(0,0)
+    this.setState({ 'combo_toggle': false })
+  }
+
+  closeFood() {
+    this.setState({ 'food_toggle': false })
+  }
+
   render() {
+    console.log(this.state)
     let bill_detail = []
     if (this.state.bill.food) {
       bill_detail = this.state.bill.food.map(f => <BillRow order={this.state.bill.bill[0] ? this.state.bill.bill[0].ORDER_ID : ''} lang={this.state.lang} food={f} cancel_food={this.cancel_food} />)
     }
     return(
-      <div className="StaffBill">
+      <div className={this.state.open === true ? 'StaffBill open' : 'StaffBill'}>
         <div className="bill_title">
-          <label for="bill_toggle">
+          <label onClick={this.props.close}>
             <img src="https://img.icons8.com/carbon-copy/100/000000/back.png"/>
           </label>
-          <span>{this.state.vocabulary.Bill}</span>
+          <span>Bill</span>
         </div>
         <table className="bill_info">
           <tr rowspan="2">
-            <td onClick={() => console.log(this.state)}>{this.state.vocabulary.Order}: {this.state.bill.bill.length !== 0 ? this.state.bill.bill[0].ORDER_ID : ''}</td>
+            <td onClick={() => console.log(this.state)}>Order: {this.state.bill.bill ? this.state.bill.bill[0].ORDER_ID : ''}</td>
           </tr>
           <tr>
-            <td>Date: {this.state.bill.bill.length !== 0 ? new Date(this.state.bill.bill[0].ORDER_DATE).toDateString() : ''}</td>
-            <td>Time: {this.state.bill.bill.length !== 0 ? new Date(this.state.bill.bill[0].ORDER_DATE).toLocaleTimeString() : ''}</td>
+            <td><input id="food_input" type="text"/></td>
+            <td><button onClick={this.addFood}>Add</button></td>
           </tr>
           <tr>
-            <td>Table: {this.state.bill.bill.length !== 0 ? this.state.bill.bill[0].ORDER_STATE : ''}</td>
-            <td>Staff: {this.state.bill.bill.length !== 0 ? this.state.bill.bill[0].STAFF_NAME : ''}</td>
+            <td>Date: {this.state.bill.bill ? new Date(this.state.bill.bill[0].ORDER_DATE).toDateString() : ''}</td>
+            <td>Time: {this.state.bill.bill ? new Date(this.state.bill.bill[0].ORDER_DATE).toLocaleTimeString() : ''}</td>
+          </tr>
+          <tr>
+            <td>Table: {this.state.bill.bill ? this.state.bill.bill[0].ORDER_STATE : ''}</td>
+            <td>Staff: {this.state.bill.bill ? this.state.bill.bill[0].STAFF_NAME : ''}</td>
           </tr>
         </table>
         <ul className="bill_detail_list">
@@ -126,10 +166,12 @@ export default class StaffBill extends React.Component {
         </ul>
         <div className="checkout_field">
           <div>Service Charge: +10%</div>
-          <div>Membership: {this.state.bill.bill[0] ? this.state.bill.bill[0].MEMBER ? this.state.bill.bill[0].MEMBER : 'None' : 'None'}</div>
-          <div>Total Price: {this.state.bill.bill[0] ? this.state.bill.bill[0].TOTAL_PRICE : 0}</div>
+          <div>Membership: {this.state.bill.bill ? this.state.bill.bill[0].MEMBER ? this.state.bill.bill[0].MEMBER : 'None' : 'None'}</div>
+          <div>Total Price: {this.state.bill.bill ? this.state.bill.bill[0].TOTAL_PRICE : 0}</div>
           <button className="checkout_button">Pay</button>
         </div>
+        <StaffComboChoice loadBill={this.props.openBill} open={this.state.combo_toggle} close={this.closeCombo} combo={this.state.combo_id} />
+        <StaffFoodRemark loadBill={this.props.openBill} open={this.state.food_toggle} close={this.closeFood} food={this.state.food_id} />
       </div>
     )
   }

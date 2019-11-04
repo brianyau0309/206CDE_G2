@@ -29,3 +29,259 @@
 .StaffMain {
   grid-area: main;
 }
+.StaffBill {
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 100vw;
+  background: white;
+  overflow-y: scroll;
+  transition: left .2s;
+}
+.StaffBill.open {
+  left: 0;
+}
+.bill_title {
+  background:#FFF;
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 8vw;
+  text-align: center;
+  border-bottom: 1px solid gray;
+}
+.bill_title > label {
+  float: left;
+  margin-left: 3px;
+}
+.bill_title > label > img {
+  margin-top: 1vw;
+  width: 7vw;
+  height: 7vw;
+}
+.bill_title > span {
+  display: inline-block;
+  font-size: 6vw;
+  margin: 0 auto;
+  transform: translateX(-35%);
+}
+.bill_info {
+  width: 100%;
+  height: 15vh;
+  font-size: 3vh;
+}
+.bill_detail {
+  display: table;
+  margin: 0 auto;
+  width: 98%;
+  font-size: 1.8vh;
+}
+.bill_detail.first {
+  font-size: 2.2vh;
+}
+.bill_detail_title {
+  width: 70%;
+}
+.bill_detail_state {
+  width: 12%;
+}
+.bill_detail_price {
+  width: 8%;
+}
+.cancel_button {
+  border-radius: 30px;
+  background: red;
+  color: white;
+  border: 0;
+  padding: 1vw
+}
+.lang {
+  font-size: 3vh;
+  width: 100%;
+  text-align: center;
+}
+.ta-l {
+  text-align: left;
+}
+.ta-r {
+  text-align: right;
+}
+.checkout_field {
+  margin-top: 2vh;
+  font-size: 2vh;
+  color: white;
+  background: red;
+  position: fixed;
+  width: 100vw;
+  margin-left: 1px;
+  bottom: 0;
+}
+.checkout_button {
+  width: 100%;
+  height: 5vh;
+  font-size: 3vh;
+  color: white;
+  border: 0;
+  border-top: 1px solid white;
+  background: red;
+}
+.checkout_button:hover {
+  background: #000;
+}
+.StaffFoodRemark,
+.StaffComboChoice {
+  width: 100%;
+  height: 100vh;
+  position: fixed;
+  top: 100%;
+  left: 0;
+  overflow-y: scroll;
+  background:whitesmoke;
+  transition: top .3s;
+  z-index: 5;
+}
+.StaffFoodRemarkActive, 
+.StaffComboChoiceActive {
+  top: 0;
+}
+.remark_title,
+.choice_title {
+  position: sticky;
+  position: sticky;
+  top: 0;
+  height: 7vh;
+  background: white;
+  text-align: center;
+  z-index: 1;
+}
+.remark_title > *,
+.choice_title > img {
+  display: inline-block;
+}
+.remark_title > img,
+.choice_title > img {
+  margin-top: 1vw;
+  margin-left: 1.5vw;
+  width: 7vw;
+  height: 7vw;
+  float: left;
+  transform: rotate(-90deg);
+}
+.remark_title > h1,
+.choice_title > h1 {
+  transform: translateX(-20%);
+  font-size: 6vw;
+}
+.remark_img,
+.choice_img {
+  display: block;
+  margin: 2vh auto;
+}
+.remark_food_name {
+  font-size: 4vw;
+  text-align: center;
+}
+.combo_food_li {
+  width: 98%;
+  margin: auto;
+}
+.combo_food_container {
+  display: inline-block;
+  border: 1px solid lightgray;
+  width: 31%;
+  height: 22vh;
+  margin: 1vh 1vw;
+}
+.combo_food_container.deactive {
+  opacity: .3;
+}
+.combo_food_container.active {
+  background: #EEE;
+  border-color: lightgray;
+}
+.combo_food_image {
+  width: 100%;
+  height: 75%;
+  border-bottom: 1px solid lightgray;
+}
+.combo_food_title {
+  width: 96%;
+  margin: 0 auto;
+  height: 10%;
+  font-size: 1.3vh;
+  font-weight: bold;
+  padding-bottom: 1px;
+  padding-left: 1px;
+  border-bottom: 1px solid lightgray;
+  overflow: scroll;
+}
+.combo_food_price {
+  width: 100%;
+  height: 5%;
+}
+.combo_food_price span {
+  padding-right: 5px;
+  float: right;
+  font-size: 1.5vh;
+}
+.bottom_btn {
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  height: 6vh;
+  border: 0;
+  background: red;
+  color: white;
+  font-size: 3vh;
+}
+.remark_price_panel {
+  font-size: 4vh;
+  text-align: center;
+}
+.remark_price_panel .left,
+.remark_price_panel .right {
+  vertical-align: middle;
+  margin: 0 5vw;
+  width: 5vh;
+  height: 5vh;
+}
+.remark_price_panel .right {
+  transform: rotate(180deg);
+}
+
+.qty_item {
+  display: inline-block;
+  background: white;
+  padding: 1vh 2vh;
+  margin: 1vh 1vh;
+  font-size: 2vh;
+  border: 1px solid gray;
+}
+.qty_item.active {
+  background: lightgray;
+}
+.remark_price_panel ~ h3 {
+  font-size: 5vh;
+  margin: 10px;
+}
+.reset_button {
+  display: block;
+  margin: 1vh 0;
+  padding: 0 1vh;
+  font-size: 2.5vh;
+  width: 20vh;
+  height: 5vh;
+  background: red;
+  border: 0;
+}
+.remark_list {
+  margin-bottom: 5vh;
+}
+.remark_list label {
+  margin: 0 10px;
+  font-size: 2vh;
+}
+.remark_food_name ~ h3 {
+  font-size: 3vh;
+}
