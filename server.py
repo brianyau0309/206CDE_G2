@@ -37,7 +37,10 @@ def client(path):
 @app.route('/staff/', defaults={'path': ''})
 @app.route('/staff/<path:path>')
 def staff(path):
-    return render_template("staff.html")
+    if session.get('staff'):
+        return render_template("staff.html")
+    else:
+        return redirect(url_for('staffloginpage'))
     
 #API
 @app.route('/api/food/<path:category>')
@@ -214,6 +217,31 @@ def tablelogin():
 def member_logout():
     if session.get('member') != None:
         session.pop('member')
+        return jsonify({ 'result': 'success' })
+
+    return jsonify({ 'result': 'error' })
+
+@app.route('/staffloginpage')
+@cross_origin()
+def staffloginpage():
+    return render_template("staffloginpage.html")
+
+@app.route('/stafflogin', methods = ["post"])
+@cross_origin()
+def stafflogin():
+    staff = request.form['Staff']
+    password = request.form['Password']
+    staffInfo = db.exe_fetch("SELECT * FROM staff WHERE staff_id ='%s' and staff_password = '%s'"%(staff,password))
+    if staffInfo != None:
+        session['staff'] = staffInfo.get('STAFF_ID')
+        return redirect(url_for('staff'))
+    return jsonify({'result':'Error'})
+
+@app.route('/stafflogout', methods = ["post"]) #For staff logout
+@cross_origin()
+def stafflogout():
+    if session.get('staff') != None:
+        session.pop('staff')
         return jsonify({ 'result': 'success' })
 
     return jsonify({ 'result': 'error' })
@@ -498,6 +526,17 @@ def food_served():
 def handleMessage(msg):
     print('Message: ', msg)
     send(msg, broadcast=True)
+
+@socketio.on('topay')
+def topaymessage(msg):
+    print('topaymessage: ', msg)
+    send(msg, broadcast=True)
+
+@socketio.on('callforpay')
+def callforpaymessage(msg):
+    print('callforpay: ', msg)
+    send(msg, broadcast=True)
+
 #socketio
 
 if __name__ == '__main__':
