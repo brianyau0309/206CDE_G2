@@ -50,8 +50,8 @@ export default class ClientSide extends React.Component {
         <h3>{this.state.vocabulary.Hello} {this.props.memberName ? this.props.memberName : this.state.vocabulary.Guest}!</h3>
         <ul className="side_list">
           {this.props.memberName ? 
-          <li className="side_li">
-              <button onClick={this.props.logoutFunc}>Logout</button>
+          <li className="side_li" onClick={this.props.logoutFunc}>
+            Logout
           </li>
           :
           <li className="side_li">

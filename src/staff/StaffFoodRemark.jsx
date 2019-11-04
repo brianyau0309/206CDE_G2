@@ -81,19 +81,19 @@ export default class StaffnFoodRemark extends React.Component {
   }
   
   onSubmit() {
-    let order = '00000003'
+    let order = this.props.order
     let food = this.state.food
     let remark = this.state.order_remark
     fetch(`/api/order_food`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({'new_order': {'order': order, 'food': food, 'remark': remark}})
+      body: JSON.stringify({ 'new_order': {'order': order, 'food': food, 'remark': remark }})
     }).then(res => res.json().then(() => this.selfClose()))
   }
 
   selfClose() {
     this.resetRemark()
-    this.props.loadBill()
+    this.props.loadBill(this.props.order)
     this.props.close()
   }
 

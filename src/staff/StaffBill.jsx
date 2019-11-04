@@ -65,14 +65,21 @@ export default class StaffBill extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      'bill': {}, 'open': false,
+      'bill': {}, 'open': false, 'payments': [], 'payment_rate': '',
       'combo_toggle': false, 'combo_id': '', 'combo_info': '',
       'food_toggle': false, 'food_id': '', 'food_info': ''
     }
     this.addFood = this.addFood.bind(this)
     this.cancel_food = this.cancel_food.bind(this)
+    this.closeOrder = this.closeOrder.bind(this)
     this.closeCombo = this.closeCombo.bind(this)
     this.closeFood = this.closeFood.bind(this)
+    this.loadPayment = this.loadPayment.bind(this)
+    this.handlePaymentChange = this.handlePaymentChange.bind(this)
+  }
+
+  componentDidMount() {
+    this.loadPayment()
   }
 
   static getDerivedStateFromProps(props, state) {
@@ -107,10 +114,26 @@ export default class StaffBill extends React.Component {
       if (res.ok) {
         res.json().then(result => {
           console.log(result)
-          this.props.openBill()
+          this.props.openBill(this.state.bill.bill ? this.state.bill.bill[0].ORDER_ID : '')
         })
       }
     })
+  }
+  
+  loadPayment() {
+    fetch(`/api/payment`).then(res => {
+      if (res.ok) {
+        res.json().then(result => {
+          console.log(result.payment)
+          this.setState({'payments': result.payment, 'payment_rate': '1 '})
+        })
+      }
+    })
+  }
+
+  handlePaymentChange() {
+    let temp = document.querySelector('#payment_select')
+    this.setState({'payment_rate':temp.value})
   }
 
   closeCombo() {
@@ -120,6 +143,27 @@ export default class StaffBill extends React.Component {
 
   closeFood() {
     this.setState({ 'food_toggle': false })
+  }
+
+  closeOrder() {
+    console.log("A", this.state)
+    let orderID = this.state.bill.bill[0].ORDER_ID
+    fetch(`/pay`, {
+      method: 'POST',
+      headers: {'Content-type': 'application/json'},
+      body: JSON.stringify({'payment': {
+        'orderID': orderID, 
+        'method': this.state.payment_rate,
+        'member': this.state.bill.bill[0].MEMBER
+      }})
+    }).then(res => {
+      if (res.ok) {
+        res.json().then(result => {
+          console.log(result)
+          this.props.close()
+        })
+      }
+    })
   }
 
   render() {
@@ -166,12 +210,17 @@ export default class StaffBill extends React.Component {
         </ul>
         <div className="checkout_field">
           <div>Service Charge: +10%</div>
+          <div>Payment Method:  
+            <select id="payment_select" onChange={this.handlePaymentChange}>
+              {this.state.payments.map(payment => <option value={payment.PAYMENT_METHOD_ID}>{payment.PAYMENT_METHOD_NAME}</option>)}
+            </select>
+          </div>
           <div>Membership: {this.state.bill.bill ? this.state.bill.bill[0].MEMBER ? this.state.bill.bill[0].MEMBER : 'None' : 'None'}</div>
-          <div>Total Price: {this.state.bill.bill ? this.state.bill.bill[0].TOTAL_PRICE : 0}</div>
-          <button className="checkout_button">Pay</button>
+          <div>Total Price: {this.state.bill.bill && this.state.payment_rate != '' ? (this.state.bill.bill[0].TOTAL_PRICE*1.1*this.state.payments.filter(p => p.PAYMENT_METHOD_ID === this.state.payment_rate)[0].PRICE_RATE / 100).toFixed(2) : 0}</div>
+          <button className="checkout_button" onClick={this.closeOrder}>Click to Close Order</button>
         </div>
-        <StaffComboChoice loadBill={this.props.openBill} open={this.state.combo_toggle} close={this.closeCombo} combo={this.state.combo_id} />
-        <StaffFoodRemark loadBill={this.props.openBill} open={this.state.food_toggle} close={this.closeFood} food={this.state.food_id} />
+        <StaffComboChoice order={this.state.bill.bill ? this.state.bill.bill[0].ORDER_ID : ''} loadBill={this.props.openBill} open={this.state.combo_toggle} close={this.closeCombo} combo={this.state.combo_id} />
+        <StaffFoodRemark order={this.state.bill.bill ? this.state.bill.bill[0].ORDER_ID : ''} loadBill={this.props.openBill} open={this.state.food_toggle} close={this.closeFood} food={this.state.food_id} />
       </div>
     )
   }

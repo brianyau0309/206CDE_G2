@@ -33,7 +33,7 @@ export default class StaffTable extends React.Component {
 
   openBill(id) {
     console.log(this.state)
-    fetch(`/api/bill`).then(res => {
+    fetch(`/api/bill?orderID=${id}`).then(res => {
       if (res.ok) {
         res.json().then(result => {
           this.setState({'bill': id, 'bill_toggle': true, 'bill_info': result})
@@ -43,6 +43,7 @@ export default class StaffTable extends React.Component {
   }
   closeBill() {
     this.setState({'bill_toggle': false})
+    this.loadTable()
   }
 
   callforpay(){
@@ -58,7 +59,7 @@ export default class StaffTable extends React.Component {
     return(
       <div className="StaffTable">
         <div onClick={() =>console.log(this.state)}>Table List</div>
-          <table>
+          <table className="table_table">
             <tr>
               <td>Table</td>
               <td>Sit</td>
@@ -68,7 +69,7 @@ export default class StaffTable extends React.Component {
                 <tr>
                   <td>{table.TABLE_ID}</td>
                   <td>{table.TABLE_SIT}</td>
-                  <td>{table.TABLE_AVAILABLE === "Y" ? 'Available' : <span onClick={() => this.openBill(table.ORDER_ID)}>{table.ORDER_ID}</span>}</td>
+                  <td>{table.ORDER_ID ? <span onClick={() => this.openBill(table.ORDER_ID)}>{table.ORDER_ID}</span> : 'Available'}</td>
                 </tr>
             ))}
           </table>

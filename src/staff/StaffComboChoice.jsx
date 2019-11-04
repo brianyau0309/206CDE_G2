@@ -172,7 +172,7 @@ export default class StaffComboChoice extends React.Component {
     })
 
     if (ready) {
-      const order = '00000003'
+      const order = this.props.order
       const combo = this.state.combo
       const temp = this.state.pizza.concat(this.state.rice_pasta,this.state.starter,this.state.drink,this.state.extra)
       const output = {'order_combo': {'order': order, 'combo': combo, 'food': temp}}
@@ -187,7 +187,7 @@ export default class StaffComboChoice extends React.Component {
   }
    selfCloseChoice() {
      this.setState({'pizza': [], 'rice_pasta': [], 'starter': [], 'drink': [], 'extra': [], 'price': this.state.combo_info.FOOD_PRICE})
-     this.props.loadBill()
+     this.props.loadBill(this.props.order)
      this.props.close()
    }
 

@@ -330,10 +330,14 @@ def create_order():
     order_date = datetime.now().strftime('%Y/%m/%d %H:%M:%S')
     print(SQL['createOrder']%order_date)
     table = request.json.get('table')
+    print(table)
     try:
         db.cursor.execute(SQL['createOrder']%order_date)
-        db.cursor.execute(SQL['createTable']%table)
-        db.cursor.execute(SQL['tableNotAvailable']%table)
+        for i in table:
+            print(SQL['createTable']%i)
+            print(SQL['tableNotAvailable']%i)
+            db.cursor.execute(SQL['createTable']%i)
+            db.cursor.execute(SQL['tableNotAvailable']%i)
         db.cursor.execute('commit')
         return { 'result': 'success' } 
     except:
@@ -421,9 +425,11 @@ def bill():
         condition1 += " AND a.order_id = '%s'"%orderID
         condition2 +=  " AND a.orders = '%s'"%orderID
     else:
-        orderID = '00000003'
-        condition1 += " AND a.order_id = '00000003'"
-        condition2 +=  " AND a.orders = '00000003'"
+        print(not orderID)
+        if not orderID:
+            orderID = '00000003'
+        condition1 += " AND a.order_id = '%s'"%orderID
+        condition2 +=  " AND a.orders = '%s'"%orderID
     output1 =  db.exe_fetch(SQL['getOrders'].format(condition1=condition1),'all')
     bill_food = db.exe_fetch(SQL['getFoodOrdered'].format(condition2=condition2), 'all')
 
@@ -465,13 +471,13 @@ def pay():
     payment = request.json.get('payment')
     orderID = payment.get('orderID')
     method = payment.get('method')
-    table = payment.get('table')
     member = payment.get('member')
+    print(payment)
     try:
+        print(SQL['updatePayment']%(method,orderID))
         db.cursor.execute(SQL['updatePayment']%(method,orderID))
-        db.cursorexecute(SQL['updateOrderState']%(method,orderID))
-        db.cursor.execute(SQL['tableAvailable']%table)
-        db.cursor.execute(SQL['updateMember']%(member,orderID))
+        print(SQL['updateOrderState']%(orderID))
+        db.cursor.execute(SQL['updateOrderState']%(orderID))
         db.cursor.execute('commit')
         if session.get('member'):
             session.pop('member')
