@@ -5,7 +5,7 @@ os.environ['NLS_LANG'] = 'SIMPLIFIED CHINESE_CHINA.UTF8'
 from flask import Flask, session, request, render_template, jsonify, redirect, url_for
 from flask_cors import cross_origin
 from OracleConn import OracleConn, SQL
-from flask_socketio import SocketIO, send
+from flask_socketio import SocketIO, send, emit, join_room
 from datetime import datetime
 
 db = OracleConn()
@@ -15,12 +15,25 @@ app.config['SECRET_KEY'] = 'SecretKeyHERE!'
 app.config['JSON_AS_ASCII'] = False
 
 socketio = SocketIO(app)
+
+#testing
+
 @app.route('/chi_test', methods=["POST"])
 def test_chi():
     data = request.form['input']
     print(data.encode('utf-8'))
     db.exe_commit("insert into test_chi values (5, '%s')"%data)
     return jsonify({ 'result': data })
+
+@app.route('/test_sk1')
+def test_sk1():
+    return render_template("test_socketio1.html")
+
+@app.route('/test_sk2')
+def test_sk2():
+    return render_template("test_socketio2.html")
+
+#testing end
 
 @app.route('/')
 def hello():
@@ -542,6 +555,26 @@ def topaymessage(msg):
 def callforpaymessage(msg):
     print('callforpay: ', msg)
     send(msg, broadcast=True)
+
+@socketio.on('joinRoom')
+def joinRoom(data):
+    print(data)
+    user = data['user']
+    room = data['room']
+    join_room(room)
+
+    print(user+' joined room '+room)
+    send(user+' joined room '+room, room=room)
+
+@socketio.on('my message')
+def joinRoom(data):
+    print("My message: "+data)
+    emit('my message', data, broadcast=True)
+
+@socketio.on('my message to room')
+def joinRoom(data):
+    print("My message: "+data['user']+': '+data['msg'])
+    emit('my message', data['user']+': '+data['msg'], room=data['room'])
 
 #socketio
 
