@@ -83,7 +83,6 @@ export default class ClientBill extends React.Component {
   }
 
   cancel_food(order, food, seq) {
-    this.props.loadBill()
     console.log(order,food,seq)
     fetch(`/cancel_food`, {
       method: 'POST',
@@ -93,6 +92,7 @@ export default class ClientBill extends React.Component {
       if (res.ok) {
         res.json().then(result => {
           console.log(result)
+          this.props.loadBill()
         })
       }
     })
