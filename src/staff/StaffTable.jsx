@@ -65,13 +65,16 @@ export default class StaffTable extends React.Component {
               <td>Sit</td>
               <td>Status</td>
             </tr>
-            {this.state.table.map(table => (
+            {
+              this.state.table.map(table => (
                 <tr>
+                  <td className="table_selector"><input type="checkbox" value={table.TABLE_ID} disabled={table.ORDER_ID ? true : false}></input></td>
                   <td>{table.TABLE_ID}</td>
                   <td>{table.TABLE_SIT}</td>
                   <td>{table.ORDER_ID ? <span onClick={() => this.openBill(table.ORDER_ID)}>{table.ORDER_ID}</span> : 'Available'}</td>
                 </tr>
-            ))}
+              ))
+            }
           </table>
           <StaffBill openBill={this.openBill} order_bill={this.state.bill_info ? this.state.bill_info : ''} open={this.state.bill_toggle} close={this.closeBill}/>
       </div>

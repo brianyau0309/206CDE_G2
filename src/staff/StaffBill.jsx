@@ -42,20 +42,20 @@ const BillRow = (props) => {
               {
                 cf.CATEGORY_NAME !== 'combo' && cf.DISH_STATE !== 'served' ?
                   <button className="served_button" onClick={() => props.served_food(props.order,cf.FOOD,cf.ORDER_SEQUENCE)}>OK</button>
-                  : null
+                : null
               }
               <td className="ta-r"></td>
             </tr>
             {
               cf.REMARK ? 
-              cf.REMARK.map(r => (
-                <tr>
-                  <td className="ta-l bill_detail_title" style={{paddingLeft: "4vw"}}>{props.lang === 'eng' ? r.REMARK_ENG : r.REMARK_CHI}</td>
-                  <td className="ta-l bill_detail_state"></td>
-                  <td className="ta-r bill_detail_price">+{r.REMARK_PRICE}</td>
-                  <td className="ta-r"></td>
-                </tr>
-              ))
+                cf.REMARK.map(r => (
+                  <tr>
+                    <td className="ta-l bill_detail_title" style={{paddingLeft: "4vw"}}>{props.lang === 'eng' ? r.REMARK_ENG : r.REMARK_CHI}</td>
+                    <td className="ta-l bill_detail_state"></td>
+                    <td className="ta-r bill_detail_price">+{r.REMARK_PRICE}</td>
+                    <td className="ta-r"></td>
+                  </tr>
+                ))
               : null
             }
           </table>  
@@ -64,16 +64,16 @@ const BillRow = (props) => {
       }
       {
         props.food.REMARK ?
-        props.food.REMARK.map(r => (
-          <table className="bill_detail">
-            <tr>
-              <td className="ta-l bill_detail_title" style={{paddingLeft: "2vw"}}>{props.lang === 'eng' ? r.REMARK_ENG : r.REMARK_CHI}</td>
-              <td className="ta-l bill_detail_state"></td>
-              <td className="ta-r bill_detail_price">+{r.REMARK_PRICE}</td>
-              <td className="ta-r"></td>
-            </tr>
-          </table>
-        ))
+          props.food.REMARK.map(r => (
+            <table className="bill_detail">
+              <tr>
+                <td className="ta-l bill_detail_title" style={{paddingLeft: "2vw"}}>{props.lang === 'eng' ? r.REMARK_ENG : r.REMARK_CHI}</td>
+                <td className="ta-l bill_detail_state"></td>
+                <td className="ta-r bill_detail_price">+{r.REMARK_PRICE}</td>
+                <td className="ta-r"></td>
+              </tr>
+            </table>
+          ))
         : null
       }
     </li>
