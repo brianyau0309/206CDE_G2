@@ -18,7 +18,8 @@ export default class Client extends React.Component {
                    'bill_btn': 'active', 
                    'PageHeight': 0,
                    'order_bill': {},
-                   'payed': null
+                   'payed': null,
+                   'socket': ''
                   }
     this.login = this.login.bind(this)
     this.getMemberInfo = this.getMemberInfo.bind(this)
@@ -32,18 +33,23 @@ export default class Client extends React.Component {
 
   componentDidMount() {
     var socket = io.connect(window.location.origin)
-      
-    socket.on('connect', function() {
-      socket.send('User has connected!');
+    this.setState({'socket': socket},() => console.log(this.state))
+    socket.on('addRoom', function(data) {
+      console.log(data);
     });
-    
+    socket.on('leaveRoom', function(data) {
+      console.log(data);
+    });
     socket.on('message', function(msg) {
       console.log(msg);
     });
-
+    socket.on('topay', function(msg) {
+      console.log(msg);
+      alert(msg);
+    });
+    this.getSession()
     this.getMemberInfo()
     this.loadBill()
-    this.getSession()
   }
 
   login(e) {
@@ -92,15 +98,17 @@ export default class Client extends React.Component {
   }
 
   getSession(){
-    fetch(`/api/session`, {
-      method: 'POST',
-      mode: 'cors',
-      credentials: 'include'
-    }).then(res => {
+    fetch(`/api/session`).then(res => {
       if (res.ok) {
         res.json().then(result => {
           console.log(result.table)
           this.setState({ 'table': result.table })
+          
+          this.state.socket.emit('addRoom',{'room':result.table});
+          this.state.socket.send('User has connected!')
+
+          
+          
         })
       }
     })
@@ -159,24 +167,10 @@ export default class Client extends React.Component {
   }
 
   pay(){
-    var table = this.state.order_bill
-    var socket = io.connect(window.location.origin)
+    var table = this.state.table
+    var socket = this.state.socket
 
-    socket.on('connect', function() {
-      socket.emit('topay','Please wait for the staff come');
-      socket.emit('callforpay', table + 'is waiting to pay');
-    });
-
-    socket.on('topay', function(msg) {
-      console.log(msg);
-      alert(msg);
-    });
-
-    socket.on('callforpay', function(msg) {
-      console.log(msg);
-      alert(msg);
-    });
-
+    socket.emit('topay',table);
     this.setState({ 'payed': 'waiting' })
   }
 
@@ -184,7 +178,7 @@ export default class Client extends React.Component {
     return(
       <div className="Client"> 
       {this.state.payed ? 
-       <div className="Payed"></div>
+       <div className="Payed"><p>Please wait for the staff come</p></div>
       : '' }
         <input id="side_toggle" type="checkbox" /> 
         <label for="side_toggle" className="cover"> 

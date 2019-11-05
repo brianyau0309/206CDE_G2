@@ -5,7 +5,7 @@ os.environ['NLS_LANG'] = 'SIMPLIFIED CHINESE_CHINA.UTF8'
 from flask import Flask, session, request, render_template, jsonify, redirect, url_for
 from flask_cors import cross_origin
 from OracleConn import OracleConn, SQL
-from flask_socketio import SocketIO, send, emit, join_room
+from flask_socketio import SocketIO, send, join_room, leave_room, emit
 from datetime import datetime
 
 db = OracleConn()
@@ -291,6 +291,13 @@ def table_login():
         session["type"] = 'table'
         session["table"] = login.get('table')
 
+@app.route('/table_logout', methods = ["POST"]) # Table Login process
+@cross_origin()
+def table_logout():
+    if session.get('table'):
+        session.clear()
+    return redirect(url_for('client'))
+
 @app.route('/myinfo', methods = ["post"])
 @cross_origin()
 def myinfo():
@@ -549,35 +556,25 @@ def handleMessage(msg):
     send(msg, broadcast=True)
 
 @socketio.on('topay')
-def topaymessage(msg):
-    print('topaymessage: ', msg)
-    send(msg, broadcast=True)
+def topaymessage(data):
+    print('topaymessage: ')
+    emit('topay','Please wait for the staff come', room=data)
+    emit('topay',data + ' is waiting to pay',room='staff')
 
-@socketio.on('callforpay')
-def callforpaymessage(msg):
-    print('callforpay: ', msg)
-    send(msg, broadcast=True)
 
-@socketio.on('joinRoom')
-def joinRoom(data):
-    print(data)
-    user = data['user']
+@socketio.on('addRoom')
+def on_join(data):
     room = data['room']
     join_room(room)
+    print('addRoom: ',room)
+    send('some one has join ' + room,room=room)
 
-    print(user+' joined room '+room)
-    send(user+' joined room '+room, room=room)
-
-@socketio.on('my message')
-def joinRoom(data):
-    print("My message: "+data)
-    emit('my message', data, broadcast=True)
-
-@socketio.on('my message to room')
-def joinRoom(data):
-    print("My message: "+data['user']+': '+data['msg'])
-    emit('my message', data['user']+': '+data['msg'], room=data['room'])
-
+@socketio.on('leaveRoom')
+def on_leave(data):
+    room = data['room']
+    leave_room(room)
+    print('leave: ',room)
+    send('some one has leave ' + room,room=room)
 #socketio
 
 if __name__ == '__main__':

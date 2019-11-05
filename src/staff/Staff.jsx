@@ -7,18 +7,27 @@ import StaffNewOrder from './StaffNewOrder.jsx'
 export default class Staff extends React.Component {
   constructor() {
     super()
+    this.state = {'socket':''}
   }
 
   componentDidMount() {
     var socket = io.connect(window.location.origin)
+    this.setState({'socket': socket},() => console.log(this.state))
       
     socket.on('connect', function() {
       socket.send('User has connected!');
+      socket.emit('addRoom',{'room':'staff'});
     });
     
     socket.on('message', function(msg) {
       console.log(msg);
     });
+
+    socket.on('topay', function(msg) {
+      console.log(msg);
+      alert(msg);
+    });
+    
   }
 
   render() {
