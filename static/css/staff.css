@@ -23,8 +23,9 @@
   display: flex;
   flex-flow: row nowrap;
 }
-.StaffMenu > li {
+.StaffMenu > a > li {
   list-style: none;
+  margin: 0 2vw;
 }
 .StaffMain {
   grid-area: main;
@@ -36,7 +37,13 @@
 }
 .table_table {
   width: 100%;
+  transform: translateX(-5%);
 }
+.table_table.show {
+  transition: transform .3s;
+  transform: translateX(5%);
+}
+
 .StaffBill {
   width: 100vw;
   height: 100vh;
@@ -236,6 +243,7 @@
   font-size: 1.5vh;
 }
 .bottom_btn {
+  display: none;
   position: sticky;
   bottom: 0;
   width: 100%;
@@ -244,6 +252,9 @@
   background: red;
   color: white;
   font-size: 3vh;
+}
+.bottom_btn.show {
+  display: inline-block;
 }
 .remark_price_panel {
   font-size: 4vh;
@@ -295,9 +306,17 @@
 .remark_food_name ~ h3 {
   font-size: 3vh;
 }
-.table_select_box {
-  font-size: 3vh;
+.popup {
+  background: black;
+  color: white;
+  font-size: 5vh;
+  opacity: 0.5;
+  position: fixed;
+  top: -12vh;
+  width: 100%;
+  height: 12vh;
+  transition: top .2s;
 }
-.table_select_box > input {
-  margin: 10px auto;
+.popup.open {
+  top: 0;
 }
