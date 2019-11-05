@@ -349,9 +349,12 @@ SQL = {
   ''',
 
   'foodServed':'''
-  update order_food
-  set dish_state = '='served'
-  where orders = '%s' and food = '%s' and order_sequence = %d
+  UPDATE order_food
+    SET dish_state = 'served'
+  WHERE 
+    orders = '%s' and 
+    food = '%s' and 
+    order_sequence = %d
   ''',
   
   'getComboFoodPrice':'''

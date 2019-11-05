@@ -11,7 +11,24 @@ const BillRow = (props) => {
         <td className="ta-l bill_detail_title">{props.lang === 'eng' ? props.food.FOOD_ENG_NAME : props.food.FOOD_CHI_NAME}</td>
         <td className="ta-l bill_detail_state">{props.food.DISH_STATE}</td>
         <td className="ta-r bill_detail_price">{props.food.PRICE}</td>
-        <td className="ta-r"><button className="cancel_button" onClick={() => props.cancel_food(props.order,props.food.FOOD,props.food.ORDER_SEQUENCE)}>X</button></td>
+        <td className="ta-r bill_detail_ok">
+        {
+          props.food.CATEGORY_NAME !== 'combo' && props.food.DISH_STATE !== 'served' ?
+            <button className="served_button" onClick={() => props.served_food(props.order,props.food.FOOD,props.food.ORDER_SEQUENCE)}>OK</button>
+            : null
+        }
+        </td>
+        <td className="ta-r">
+        {
+          props.food.COMBO_FOOD ?
+            props.food.COMBO_FOOD.filter(food => food.DISH_STATE === 'served').length > 0 ?
+              null
+              : <button className="cancel_button" onClick={() => props.cancel_food(props.order,props.food.FOOD,props.food.ORDER_SEQUENCE)}>X</button>
+          : props.food.DISH_STATE === 'preparing' ? 
+            <button className="cancel_button" onClick={() => props.cancel_food(props.order,props.food.FOOD,props.food.ORDER_SEQUENCE)}>X</button>
+            : null
+        }
+        </td>
       </tr>
     </table>
       {
@@ -22,6 +39,11 @@ const BillRow = (props) => {
               <td className="ta-l bill_detail_title" style={{paddingLeft: "2vw"}}>{props.lang === 'eng' ? cf.FOOD_ENG_NAME : cf.FOOD_CHI_NAME}</td>
               <td className="ta-l bill_detail_state">{cf.DISH_STATE}</td>
               <td className="ta-r bill_detail_price">+{cf.PRICE}</td>
+              {
+                cf.CATEGORY_NAME !== 'combo' && cf.DISH_STATE !== 'served' ?
+                  <button className="served_button" onClick={() => props.served_food(props.order,cf.FOOD,cf.ORDER_SEQUENCE)}>OK</button>
+                  : null
+              }
               <td className="ta-r"></td>
             </tr>
             {
@@ -34,13 +56,11 @@ const BillRow = (props) => {
                   <td className="ta-r"></td>
                 </tr>
               ))
-              : 
-              null
+              : null
             }
           </table>  
         ))
-        :
-        null
+        : null
       }
       {
         props.food.REMARK ?
@@ -54,8 +74,7 @@ const BillRow = (props) => {
             </tr>
           </table>
         ))
-        :
-        null
+        : null
       }
     </li>
   )
@@ -70,6 +89,7 @@ export default class StaffBill extends React.Component {
       'food_toggle': false, 'food_id': '', 'food_info': ''
     }
     this.addFood = this.addFood.bind(this)
+    this.served_food = this.served_food.bind(this)
     this.cancel_food = this.cancel_food.bind(this)
     this.closeOrder = this.closeOrder.bind(this)
     this.closeCombo = this.closeCombo.bind(this)
@@ -99,6 +119,22 @@ export default class StaffBill extends React.Component {
           } else {
             console.log('No this food')
           }
+        })
+      }
+    })
+  }
+
+  served_food(order, food, seq) {
+    console.log(order,food, seq)
+    fetch(`/food_served`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({'served': {'orderID': order, 'food': food, 'sequence': seq}})
+    }).then(res =>{ 
+      if (res.ok) {
+        res.json().then(result => {
+          console.log(result)
+          this.props.openBill(this.state.bill.bill ? this.state.bill.bill[0].ORDER_ID : '')
         })
       }
     })
@@ -170,7 +206,7 @@ export default class StaffBill extends React.Component {
     console.log(this.state)
     let bill_detail = []
     if (this.state.bill.food) {
-      bill_detail = this.state.bill.food.map(f => <BillRow order={this.state.bill.bill[0] ? this.state.bill.bill[0].ORDER_ID : ''} lang={this.state.lang} food={f} cancel_food={this.cancel_food} />)
+      bill_detail = this.state.bill.food.map(f => <BillRow order={this.state.bill.bill[0] ? this.state.bill.bill[0].ORDER_ID : ''} lang={this.state.lang} food={f} cancel_food={this.cancel_food} served_food={this.served_food} />)
     }
     return(
       <div className={this.state.open === true ? 'StaffBill open' : 'StaffBill'}>
@@ -185,8 +221,8 @@ export default class StaffBill extends React.Component {
             <td onClick={() => console.log(this.state)}>Order: {this.state.bill.bill ? this.state.bill.bill[0].ORDER_ID : ''}</td>
           </tr>
           <tr>
-            <td><input id="food_input" type="text"/></td>
-            <td><button onClick={this.addFood}>Add</button></td>
+            <td><input id="food_input" type="text"/><button onClick={this.addFood}>Add</button></td>
+            <td></td>
           </tr>
           <tr>
             <td>Date: {this.state.bill.bill ? new Date(this.state.bill.bill[0].ORDER_DATE).toDateString() : ''}</td>
@@ -203,6 +239,7 @@ export default class StaffBill extends React.Component {
               <td className="ta-l bill_detail_title">Product</td>
               <td className="ta-l bill_detail_state">State</td>
               <td className="ta-r">Price</td>
+              <td className="ta-r">Serve</td>
               <td className="ta-r">Cancel</td>
             </tr>
           </li>

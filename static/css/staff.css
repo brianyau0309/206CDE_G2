@@ -89,7 +89,7 @@
   font-size: 2.2vh;
 }
 .bill_detail_title {
-  width: 70%;
+  width: 60%;
 }
 .bill_detail_state {
   width: 12%;
@@ -97,8 +97,10 @@
 .bill_detail_price {
   width: 8%;
 }
+.bill_detail_ok {
+  width: 8%;
+}
 .cancel_button {
-  border-radius: 30px;
   background: red;
   color: white;
   border: 0;

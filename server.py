@@ -485,11 +485,8 @@ def pay():
     orderID = payment.get('orderID')
     method = payment.get('method')
     member = payment.get('member')
-    print(payment)
     try:
-        print(SQL['updatePayment']%(method,orderID))
         db.cursor.execute(SQL['updatePayment']%(method,orderID))
-        print(SQL['updateOrderState']%(orderID))
         db.cursor.execute(SQL['updateOrderState']%(orderID))
         db.cursor.execute('commit')
         if session.get('member'):
@@ -536,8 +533,13 @@ def food_served():
     orderID = served.get('orderID')
     food = served.get('food')
     sequence = served.get('sequence')
-    db.cursor.execute(SQL['foodServed']%(orderID,food,sequence))
-    db.cursor.execute('commit')
+
+    try:
+        db.cursor.execute(SQL['foodServed']%(orderID,food,sequence))
+        db.cursor.execute('commit')
+    except:
+        return jsonify({'result': 'erroe'})
+
     return jsonify({'result': 'success'})
 
 #socket
