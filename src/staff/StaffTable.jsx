@@ -12,13 +12,11 @@ export default class StaffTable extends React.Component {
     }
     this.loadTable = this.loadTable.bind(this)
     this.openBill = this.openBill.bind(this)
-    this.callforpay = this.callforpay.bind(this)
     this.closeBill = this.closeBill.bind(this)
   }
 
   componentDidMount() {
     this.loadTable()
-    this.callforpay()
   }
 
   loadTable() {
@@ -45,14 +43,6 @@ export default class StaffTable extends React.Component {
     this.setState({'bill_toggle': false})
   }
 
-  callforpay(){
-    var socket = io.connect(window.location.origin)
-
-    socket.on('callforpay', function(msg) {
-      console.log(msg);
-      alert(msg);
-    });
-  }
 
   render() {
     return(
