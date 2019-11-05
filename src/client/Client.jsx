@@ -103,12 +103,14 @@ export default class Client extends React.Component {
         res.json().then(result => {
           console.log(result.table)
           this.setState({ 'table': result.table })
-          
-          this.state.socket.emit('addRoom',{'room':result.table});
-          this.state.socket.send('User has connected!')
-
-          
-          
+          let socket = this.state.socket
+          socket.emit('addRoom',{'room':result.table});
+          socket.send('User has connected!')
+          socket.on('receivePayment',function(msg){
+            console.log(msg);
+            alert(msg);
+            socket.emit('leaveRoom',{'room':result.table});
+          });
         })
       }
     })

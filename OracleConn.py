@@ -206,7 +206,7 @@ SQL = {
 
   'getOrderTable': '''
   SELECT
-    *
+    table_id
   From
     order_table
   {condition}
