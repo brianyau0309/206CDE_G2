@@ -195,10 +195,20 @@ export default class StaffBill extends React.Component {
         res.json().then(result => {
           console.log(result)
           this.props.close()
+          fetch(`/api/order_table?order=${this.state.bill.bill[0].ORDER_ID}`).then(res => {
+            if (res.ok) {
+              res.json().then(result => {
+                const data = result.order_table
+                var socket = io.connect(window.location.origin)
+                for (let i = 0; i < data.length; i++) {
+                  socket.emit('receivePayment',data[i])
+                }
+              })
+            }
+          })
         })
-      }
-    })
-  }
+      }}
+    )}
 
   render() {
     let bill_detail = []

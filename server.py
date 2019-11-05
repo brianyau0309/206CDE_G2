@@ -167,7 +167,7 @@ def order_table():
         condition = "WHERE order_id = '%s'"%order
     
     print(SQL['getOrderTable'].format(condition=condition))
-    output = db.exe_fetch(SQL['getOrderTable'].format(condition=condition))
+    output = db.exe_fetch(SQL['getOrderTable'].format(condition=condition),'all')
     
     return jsonify({ 'order_table': output })
 
@@ -575,6 +575,12 @@ def on_leave(data):
     leave_room(room)
     print('leave: ',room)
     send('some one has leave ' + room,room=room)
+
+@socketio.on('receivePayment')
+def receivePayment(data):
+    print('receivePayment: ',data)
+    emit('receivePayment','Payment has received', room=data.get('TABLE_ID'))
+    emit('receivePayment',data.get('TABLE_ID') + '\'s Payment has received',room='staff')
 #socketio
 
 if __name__ == '__main__':
