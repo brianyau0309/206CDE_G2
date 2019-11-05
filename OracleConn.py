@@ -129,6 +129,7 @@ SQL = {
         c.order_state = 'in sit') a
     RIGHT JOIN table_list b ON
       a.table_id = b.table_id
+    Order by b.table_id
   ''',
 
   'getFoodRemark': '''
@@ -185,8 +186,8 @@ SQL = {
   ''',
 
   'createOrder':'''
-  INSERT INTO orders(order_id,staff,order_state,order_date,total_price) 
-    values(LPAD(orders_pk.NEXTVAL,8,'0'),'S001','in sit',TO_DATE('%s','yyyy/mm/dd hh24:mi:ss'),0)
+  INSERT INTO orders(order_id,staff,order_state,order_date) 
+    values(LPAD(orders_pk.NEXTVAL,8,'0'),'S001','in sit',TO_DATE('%s','yyyy/mm/dd hh24:mi:ss'))
   ''',
 
   'createTable':'''
@@ -248,9 +249,18 @@ SQL = {
 
   'updatePayment':'''
   UPDATE orders
-    SET payment_method = %d
+    SET payment_method = '%s'
     where order_id = '%s'
   ''',
+
+  'updateOrderState':'''
+  UPDATE orders
+    SET order_state = 'close'
+  WHERE
+    order_id = '%s' and 
+    order_state = 'in sit'
+  '''
+  ,
 
   'getTotalPrice':'''
   select 
@@ -339,9 +349,12 @@ SQL = {
   ''',
 
   'foodServed':'''
-  update order_food
-  set dish_state = '='served'
-  where orders = '%s' and food = '%s' and order_sequence = %d
+  UPDATE order_food
+    SET dish_state = 'served'
+  WHERE 
+    orders = '%s' and 
+    food = '%s' and 
+    order_sequence = %d
   ''',
   
   'getComboFoodPrice':'''
