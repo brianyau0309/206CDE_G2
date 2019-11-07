@@ -30,14 +30,11 @@ export default class Staff extends React.Component {
       console.log(msg);
     });
 
-    socket.on('topay', function(msg) {
+    socket.on('staffmessage', function(msg) {
       console.log(msg);
       loadMessage(msg)
     });
-    socket.on('created_order', function(msg){
-      console.log(msg);
-      alert(msg);
-    });
+    
   }
 
   loadMessage(msg) {

@@ -163,17 +163,16 @@ export default class Client extends React.Component {
 
   loadBill() {
     console.log('loading bill')
-    let order = ''
-    fetch('/api/whoami', {
+    fetch(`/api/whoami`, {
       method: 'POST',
       mode: 'cors',
       credentials: 'include'
     }).then(res => {
       if (res.ok) {
         res.json().then(result => {
-          order = result.order
+          let order = result.order
           console.log(order)
-          fetch('/api/bill', {
+          fetch(`/api/bill?orderID=${order}`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
           }).then(res => {

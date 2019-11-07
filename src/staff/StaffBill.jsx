@@ -199,7 +199,7 @@ export default class StaffBill extends React.Component {
             if (res.ok) {
               res.json().then(result => {
                 const data = result.order_table
-                var socket = io.connect(window.location.origin)
+                var socket = this.props.socket
                 for (let i = 0; i < data.length; i++) {
                   socket.emit('receivePayment',data[i])
                 }

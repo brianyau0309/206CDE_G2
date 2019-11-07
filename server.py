@@ -155,7 +155,7 @@ def order_table():
 def whoami():
     if session.get('table'):
         table = session.get('table')   
-        order = db.exe_fetch("SELECT a.order_id, a.order_state FROM orders a, order_table b WHERE a.order_id = b.orders and b.table = '%s'"%table)
+        order = db.exe_fetch("SELECT a.order_id, a.order_state FROM orders a, order_table b WHERE a.order_id = b.order_id and b.table_id = '%s'"%table,'one')
         return jsonify({ 'order': order })
     return jsonify({'result': 'Error'})
 
@@ -333,6 +333,7 @@ def create_order():
             print(SQL['tableNotAvailable']%i)
             db.cursor.execute(SQL['createTable']%i)
             db.cursor.execute(SQL['tableNotAvailable']%i)
+            socketio.emit('created_order',{'room':i})
         db.cursor.execute('commit')
         return { 'result': 'success' } 
     except:
@@ -530,7 +531,7 @@ def handleMessage(msg):
 def topaymessage(data):
     print('topaymessage: ')
     emit('topay','Please wait for the staff come', room=data)
-    emit('topay',data + ' is waiting to pay',room='staff')
+    emit('staffmessage',data + ' is waiting to pay',room='staff')
 
 
 @socketio.on('addRoom')
@@ -551,13 +552,13 @@ def on_leave(data):
 def receivePayment(data):
     print('receivePayment: ',data)
     emit('receivePayment','Payment has received', room=data.get('TABLE_ID'))
-    emit('receivePayment',data.get('TABLE_ID') + '\'s Payment has received',room='staff')
+    emit('staffmessage',data.get('TABLE_ID') + '\'s Payment has received',room='staff')
 
 @socketio.on('created_order')
 def created_order(data):
     print('Created Order: ',data)
     emit('created_order','welcome pizza-hat', room=data)
-    emit('created_order',data + ' orders is created',room='staff')
+    emit('staffmessage',data + ' orders is created',room='staff')
 #socketio
 
 if __name__ == '__main__':

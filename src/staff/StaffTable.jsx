@@ -52,10 +52,8 @@ export default class StaffTable extends React.Component {
   newOrder() {
     let temp = document.querySelectorAll('.table_selector > input')
     let list = []
-    var socket = this.props.socket
     for (let i = 0; i < temp.length; i++) {
       if (temp[i].checked) {
-        socket.emit('created_order',{'room':temp[i]})
         list.push(temp[i].value)
       }
     }
@@ -67,6 +65,7 @@ export default class StaffTable extends React.Component {
     }).then(res => {
       if (res.ok) {
         res.json().then(result => {
+          console.log(result)
           this.loadTable()
           setTimeout(() => this.resetCheckbox(), 200);
         })
@@ -106,7 +105,7 @@ export default class StaffTable extends React.Component {
             }
           </table>
           <button className={this.state.new_order ? "bottom_btn show" : "bottom_btn hide"} style={{position: 'fixed'}} onClick={this.newOrder}>New Order</button>
-          <StaffBill openBill={this.openBill} order_bill={this.state.bill_info ? this.state.bill_info : ''} open={this.state.bill_toggle} close={this.closeBill}/>
+          <StaffBill openBill={this.openBill} order_bill={this.state.bill_info ? this.state.bill_info : ''} open={this.state.bill_toggle} close={this.closeBill} socket={this.props.socket}/>
       </div>
     )
   }
