@@ -16,25 +16,6 @@ app.config['JSON_AS_ASCII'] = False
 
 socketio = SocketIO(app)
 
-#testing
-
-@app.route('/chi_test', methods=["POST"])
-def test_chi():
-    data = request.form['input']
-    print(data.encode('utf-8'))
-    db.exe_commit("insert into test_chi values (5, '%s')"%data)
-    return jsonify({ 'result': data })
-
-@app.route('/test_sk1')
-def test_sk1():
-    return render_template("test_socketio1.html")
-
-@app.route('/test_sk2')
-def test_sk2():
-    return render_template("test_socketio2.html")
-
-#testing end
-
 @app.route('/')
 def hello():
     return render_template("index.html")
@@ -42,7 +23,7 @@ def hello():
 @app.route('/client/', defaults={'path': ''})
 @app.route('/client/<path:path>')
 def client(path):
-    if session.get('table'):
+    if session.get('table') or session.get('QR'):
         return render_template("client.html")
     else:
         return redirect(url_for('tableloginpage'))
@@ -54,7 +35,10 @@ def staff(path):
         return render_template("staff.html")
     else:
         return redirect(url_for('staffloginpage'))
-    
+
+@app.route('/kitchen', methods=['GET'])
+def kitchen():
+    return render_template("kitchen.html")
 #API
 @app.route('/api/food/<path:category>')
 def foodAPI(category):
@@ -172,18 +156,11 @@ def order_table():
 
 @app.route('/api/whoami', methods=['POST'])
 def whoami():
-    user_type = session.get('type')
-    if user_type != None:
-        if user_type == 'table':
-            table = session.get('table')
-            member = session.get('member')
-            order = db.exe_fetch("SELECT a.order_id, a.order_state FROM orders a, order_table b WHERE a.order_id = b.orders and b.table = '%s'"%table)
-        elif user_type == 'member':
-            member = session.get('member')
-        elif user_type == 'staff':
-            staff = session.get('staff')
-    else:
-        return jsonify({'result': 'Error'})
+    if session.get('table'):
+        table = session.get('table')   
+        order = db.exe_fetch("SELECT a.order_id, a.order_state FROM orders a, order_table b WHERE a.order_id = b.orders and b.table = '%s'"%table)
+        return jsonify({ 'order': order })
+    return jsonify({'result': 'Error'})
 
 @app.route('/api/cook_list', methods=['GET'])
 def cook_list():
@@ -240,7 +217,7 @@ def member_logout():
         session.pop('member')
         return jsonify({ 'result': 'success' })
 
-    return jsonify({ 'result': 'error' })
+    return jsonify({ 'result': 'success' })
 
 @app.route('/staffloginpage')
 @cross_origin()
@@ -270,24 +247,15 @@ def stafflogout():
 @app.route('/QRlogin', methods = ["POST"]) #QRLogin process
 @cross_origin()
 def QRlogin():
-    table = request.form['Table']
     order = request.form['Order']
-    order_table = db.exe_fetch("SELECT order_id, table_id from order_table WHERE order_id = '%s' and table_id = '%s'"%(order,table))
+    order_table = db.exe_fetch(SQL['getTable'],'all')
     if order_table != None:
-        if order == order_table.get('ORDER_ID') and table == order_table.get('TABLE_ID'):
-            if request.form['submit'] == 'member':
-                member_id = request.form['Member']
-                password = request.form['MemberPassword']
-                member_password = db.exe_fetch("SELECT member_password FROM members WHERE member_id = '%s'"%member_id, 'one')
-                if member_password != None:
-                    if member_password[0] == password:
-                        session['member'] = member_id
-                        session['table'] = table_id
-                        return redirect(url_for('client'))
-            elif request.form['submit'] == 'nonmember':
-                session['member'] = 'guest'
-                session['table'] = table
+        for i in order_table:
+            if order == i.get('ORDER_ID'):
+                session['table'] = i.get('TABLE_ID')
+                session['QR'] = 'yes'
                 return redirect(url_for('client'))
+                break
     return jsonify({'result':'Error'})
 
 @app.route('/table_login', methods = ["POST"]) # Table Login process
@@ -322,7 +290,7 @@ def myinfo():
 @app.route('/QRlogout', methods = ["post"]) #Logout
 @cross_origin()
 def QRlogout():
-    if session.get('table'):
+    if session.get('QR'):
         session.clear()
     return redirect(url_for('loginpage'))
 
@@ -332,6 +300,7 @@ def SESSION():
     table = None
     member = None
     staff = None
+    QR = None
     ses = []
     if session.get('table'):
         table = session.get('table')
@@ -339,10 +308,13 @@ def SESSION():
         member = session.get('member')
     if session.get('staff'):
         staff = session.get('staff')
+    if session.get('QR'):
+        QR = session.get('QR')
     ses.append(table)
     ses.append(member)
     ses.append(staff)
-    return jsonify({'table': ses[0],'member':ses[1],'staff':ses[2]})
+    ses.append(QR) 
+    return jsonify({'table': ses[0],'member':ses[1],'staff':ses[2], 'QR':ses[3]})
 
 @app.route('/api/orderid', methods=['POST']) #get orderid by session
 @cross_origin()
@@ -367,6 +339,7 @@ def create_order():
             db.cursor.execute(SQL['createTable']%i)
             db.cursor.execute(SQL['tableNotAvailable']%i)
         db.cursor.execute('commit')
+        socketio.emit('created_order',{'room': i})
         return { 'result': 'success' } 
     except:
         return { 'result': 'error' }
@@ -453,12 +426,8 @@ def bill():
         condition1 += " AND a.order_id = '%s'"%orderID
         condition2 +=  " AND a.orders = '%s'"%orderID
     else:
-        print(not orderID)
-        if not orderID:
-            orderID = '00000003'
-        condition1 += " AND a.order_id = '%s'"%orderID
-        condition2 +=  " AND a.orders = '%s'"%orderID
-    output1 =  db.exe_fetch(SQL['getOrders'].format(condition1=condition1),'all')
+       return jsonify({'result':'error'})
+    output1 = db.exe_fetch(SQL['getOrders'].format(condition1=condition1),'all')
     bill_food = db.exe_fetch(SQL['getFoodOrdered'].format(condition2=condition2), 'all')
 
     foods = []
@@ -537,8 +506,10 @@ def finish_cook():
     orderID = cooked.get('orderID')
     food = cooked.get('food')
     sequence = cooked.get('sequence')
+    
     db.cursor.execute(SQL['foodCooked']%(orderID,food,sequence))
     db.cursor.execute('commit')
+
     return jsonify({'result': 'success'})
 
 @app.route('/food_served', methods = ["post"]) #served the ordered food
@@ -569,7 +540,6 @@ def topaymessage(data):
     emit('topay','Please wait for the staff come', room=data)
     emit('topay',data + ' is waiting to pay',room='staff')
 
-
 @socketio.on('addRoom')
 def on_join(data):
     room = data['room']
@@ -589,6 +559,12 @@ def receivePayment(data):
     print('receivePayment: ',data)
     emit('receivePayment','Payment has received', room=data.get('TABLE_ID'))
     emit('receivePayment',data.get('TABLE_ID') + '\'s Payment has received',room='staff')
+
+@socketio.on('created_order')
+def created_order(data):
+    print('Created Order: ',data)
+    emit('created_order','welcome pizza-hat', room=data)
+    emit('created_order',data + ' orders is created',room='staff')
 #socketio
 
 if __name__ == '__main__':

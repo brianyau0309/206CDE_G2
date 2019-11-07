@@ -34,7 +34,10 @@ export default class Staff extends React.Component {
       console.log(msg);
       loadMessage(msg)
     });
-    
+    socket.on('created_order', function(msg){
+      console.log(msg);
+      alert(msg);
+    });
   }
 
   loadMessage(msg) {
@@ -62,7 +65,7 @@ export default class Staff extends React.Component {
           <div className="StaffMain">
             <Switch>
               <Route path="/staff/table_list">
-                <StaffTable />
+                <StaffTable socket={this.state.socket} />
               </Route>
               <Route path="/staff/message">
                 <StaffMessage messages={this.state.messages} />

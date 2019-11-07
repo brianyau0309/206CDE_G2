@@ -52,6 +52,7 @@ export default class StaffTable extends React.Component {
   newOrder() {
     let temp = document.querySelectorAll('.table_selector > input')
     let list = []
+    var socket = this.props.socket
     for (let i = 0; i < temp.length; i++) {
       if (temp[i].checked) {
         list.push(temp[i].value)
@@ -65,7 +66,9 @@ export default class StaffTable extends React.Component {
     }).then(res => {
       if (res.ok) {
         res.json().then(result => {
+          console.log(result)
           this.loadTable()
+          this.newOrderToggle()
           setTimeout(() => this.resetCheckbox(), 200);
         })
       }

@@ -538,7 +538,7 @@
   background: #000;
 }
 
-.Payed{
+.Blocked{
   z-index: 99;
   position:fixed;
   padding:0;
@@ -640,7 +640,7 @@
   .checkout_field {
     width: 25vw;
   }
-  .Payed{
+  .Blocked{
     z-index: 99;
     position:fixed;
     padding:0;

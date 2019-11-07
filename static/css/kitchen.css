@@ -1,0 +1,22 @@
+.cook_list {
+  display: flex;
+  flex-flow: column wrap;
+  height: 85vh;
+}
+.kitchen_container {
+  display: inline-block;
+  min-width: 20vw;
+  min-height: 30vh;
+  padding: 3vw;
+  background: lightgray;
+  border-radius: 30px;
+  margin: 1vw 1vw;
+}
+.kitchen_container > div {
+  height: 90%;
+}
+.finish_btn {
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
+}

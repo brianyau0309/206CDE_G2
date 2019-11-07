@@ -4,14 +4,11 @@
     <title>Login</title>
   </header>
   <body>
-    <h1>Only Member need to fill in Member No. and password</h1>
-    <form action="{{ url_for('login') }}" method="post">
-      <input type="text" name="Table" placeholder="Table No."/>
+    <h1>QR login page</h1>
+    <form action="{{ url_for('QRlogin') }}" method="post">
       <input type="text" name="Order" placeholder="Order No."/>
-      <input type="text" name="Member" placeholder="Member No."/>
-      <input type="password" name="MemberPassword" placeholder="password"/>
-    <input type="submit" value="member" name="submit">member login</input>
-    <input type="submit" value="nonmember" name="submit">non-member login</input>
+    <input type="submit"  name="submit">QR login</input>
+    
   </form>
   </body>
 </html>
