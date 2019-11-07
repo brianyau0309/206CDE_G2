@@ -15,6 +15,14 @@ export default class Kitchen extends React.Component {
     let socket = io.connect(window.location.origin)
     this.setState({'socket': socket})
     this.loadCookList()
+    socket.on('connect', function() {
+      socket.send('User has connected!');
+      socket.emit('addRoom',{'room':'staff'});
+    });
+    
+    socket.on('message', function(msg) {
+      console.log(msg);
+    });
   }
 
   loadCookList() {

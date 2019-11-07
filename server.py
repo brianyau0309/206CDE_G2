@@ -38,8 +38,13 @@ def staff(path):
 
 @app.route('/kitchen', methods=['GET'])
 def kitchen():
-    return render_template("kitchen.html")
+    if session.get('type') == 'kitchen':
+        return render_template("kitchen.html")
+    
+    return redirect(url_for('kitchenloginpage'))
+
 #API
+
 @app.route('/api/food/<path:category>')
 def foodAPI(category):
     lang = 'eng'
@@ -158,7 +163,7 @@ def order_table():
 def whoami():
     if session.get('table'):
         table = session.get('table')   
-        order = db.exe_fetch("SELECT a.order_id, a.order_state FROM orders a, order_table b WHERE a.order_id = b.orders and b.table = '%s'"%table)
+        order = db.exe_fetch("SELECT a.order_id, a.order_state FROM orders a, order_table b WHERE a.order_id = b.order_id and b.table_id = '%s' and a.order_state = 'in sit'"%table)
         return jsonify({ 'order': order })
     return jsonify({'result': 'Error'})
 
@@ -273,6 +278,20 @@ def table_logout():
     if session.get('table'):
         session.clear()
     return redirect(url_for('client'))
+
+@app.route('/kitchenloginpage')
+@cross_origin()
+def kitchenloginpage():
+    return render_template("kitchenloginpage.html")
+
+@app.route('/kitchen_login', methods = ["POST"]) # Table Login process
+@cross_origin()
+def kitchen_login():
+    loginInfo = request.form.get('kitchen')
+    if loginInfo == 'kitchen':
+        session["type"] = 'kitchen'
+
+    return redirect(url_for('kitchen'))
 
 @app.route('/myinfo', methods = ["post"])
 @cross_origin()

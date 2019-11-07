@@ -17,7 +17,7 @@ export default class Client extends React.Component {
                    'bill_btn': 'active', 
                    'PageHeight': 0,
                    'order_bill': {},
-                   'block': 'yes',
+                   'block': null,
                    'socket': ''
                   }
     this.login = this.login.bind(this)
@@ -173,10 +173,7 @@ export default class Client extends React.Component {
         res.json().then(result => {
           order = result.order
           console.log(order)
-          fetch('/api/bill', {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-          }).then(res => {
+          fetch(`/api/bill?orderID=${order.ORDER_ID}`).then(res => {
             if (res.ok) {
               res.json().then(result => {
                 console.log(result)
@@ -220,7 +217,7 @@ export default class Client extends React.Component {
         <label for="side_toggle" className="cover"> 
         </label> 
         <input id="bill_toggle" type="checkbox" />
-        <label for="bill_toggle">
+        <label for="bill_toggle" onClick={()=>console.log(this.state)}>
           <img id="bill_btn" className={(this.state.bill_btn === 'active') ? 'bill_btn_active' : 'bill_btn_deactive'} src="https://img.icons8.com/carbon-copy/100/000000/bill.png" alt="Bill Toggle Button" />
         </label>
         <ClientTop />
