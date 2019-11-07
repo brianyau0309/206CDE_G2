@@ -29,8 +29,10 @@ export default class StaffNewOrder extends React.Component {
     let temp = document.querySelectorAll('.table_select_box > input')
     console.log(temp)
     let list = []
+    var socket = io.connect(window.location.origin)
     for (let i = 0; i < temp.length; i++) {
       if (temp[i].checked) {
+        socket.emit('created_order',{'room':temp[i]})
         list.push(temp[i].value)
       }
     }

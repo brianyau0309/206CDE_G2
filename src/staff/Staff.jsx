@@ -27,7 +27,10 @@ export default class Staff extends React.Component {
       console.log(msg);
       alert(msg);
     });
-    
+    socket.on('created_order', function(msg){
+      console.log(msg);
+      alert(msg);
+    });
   }
 
   render() {

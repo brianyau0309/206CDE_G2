@@ -64,7 +64,7 @@ const BillRow = (props) => {
 export default class ClientBill extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {'bill': {}, 'vocabulary': vocabulary_eng, 'lang': 'eng' ,'payed': null}
+    this.state = {'bill': {}, 'vocabulary': vocabulary_eng, 'lang': 'eng' ,'block': null}
     this.cancel_food = this.cancel_food.bind(this)
   }
 
@@ -77,8 +77,8 @@ export default class ClientBill extends React.Component {
     if (props.order_bill !== state.bill) {
       return { 'bill': props.order_bill }
     }
-    if (props.payed !== state.payed) {
-      return { 'payed' : 'waiting' }
+    if (props.block !== state.block) {
+      return { 'block' : 'yes' }
     }
   }
 
@@ -105,7 +105,7 @@ export default class ClientBill extends React.Component {
     }
     return(
       <div className="ClientBill translateX-3">
-        {this.state.payed ? <div className="Payed"></div>: ''}
+        {this.state.block ? <div className="Blocked"></div>: ''}
         <div className="bill_title">
           <label for="bill_toggle">
             <img src="https://img.icons8.com/carbon-copy/100/000000/back.png"/>

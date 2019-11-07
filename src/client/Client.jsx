@@ -11,14 +11,13 @@ import ClientSide from './ClientSide.jsx'
 export default class Client extends React.Component {
   constructor() {
     super()
-    this.state = {
-                   'table': null,
+    this.state = { 
                    'member': null, 
                    'lang': 'eng',
                    'bill_btn': 'active', 
                    'PageHeight': 0,
                    'order_bill': {},
-                   'payed': null,
+                   'block': null,
                    'socket': ''
                   }
     this.login = this.login.bind(this)
@@ -29,11 +28,15 @@ export default class Client extends React.Component {
     this.getSession = this.getSession.bind(this)
     this.loadBill = this.loadBill.bind(this)
     this.pay = this.pay.bind(this)
+    this.QRlogout = this.QRlogout.bind(this)
+    this.setunBlocked = this.setunBlocked.bind(this)
+    this.setBlocked = this.setBlocked.bind(this)
   }
 
   componentDidMount() {
     var socket = io.connect(window.location.origin)
     this.setState({'socket': socket},() => console.log(this.state))
+    let setunBlocked = this.setunBlocked
     socket.on('addRoom', function(data) {
       console.log(data);
     });
@@ -46,6 +49,11 @@ export default class Client extends React.Component {
     socket.on('topay', function(msg) {
       console.log(msg);
       alert(msg);
+    });
+    socket.on('created_order', function(msg){
+      console.log(msg);
+      alert(msg);
+      setunBlocked()
     });
     this.getSession()
     this.getMemberInfo()
@@ -102,14 +110,18 @@ export default class Client extends React.Component {
       if (res.ok) {
         res.json().then(result => {
           console.log(result.table)
-          this.setState({ 'table': result.table })
           let socket = this.state.socket
+          let logout = this.logout
+          let QRlogout = this.QRlogout
+          let setBlocked = this.setBlocked
           socket.emit('addRoom',{'room':result.table});
           socket.send('User has connected!')
           socket.on('receivePayment',function(msg){
             console.log(msg);
-            alert(msg);
-            socket.emit('leaveRoom',{'room':result.table});
+            logout()
+            QRlogout()
+            location.reload(true);
+            setBlocked()
           });
         })
       }
@@ -130,6 +142,15 @@ export default class Client extends React.Component {
     })
   }
 
+ QRlogout(){
+    fetch(`/QRlogout`).then(res => {
+      if (res.ok) {
+        res.json().then(result => 
+          {console.log(result)}
+          )
+      }
+    })
+ }
   changeBillBtn() {
     let newPageHeight = document.querySelector('.ClientMain').scrollTop
     if (newPageHeight > this.state.PageHeight) {
@@ -169,18 +190,31 @@ export default class Client extends React.Component {
   }
 
   pay(){
-    var table = this.state.table
-    var socket = this.state.socket
+    fetch(`/api/session`).then(res => {
+      if (res.ok) {
+        res.json().then(result => {
+        var table = result.table
+        var socket = this.state.socket
+        socket.emit('topay',table);
+        this.setBlocked()
+      })
+    }
+  })
+  }
 
-    socket.emit('topay',table);
-    this.setState({ 'payed': 'waiting' })
+  setunBlocked(){
+    this.setState({ 'block' : null })
+  }
+
+  setBlocked(){
+    this.setState({ 'block' : 'yes' })
   }
 
   render() {
     return(
       <div className="Client"> 
-      {this.state.payed ? 
-       <div className="Payed"><p>Please wait for the staff come</p></div>
+      {this.state.block ? 
+       <div className="Blocked"><p>Please wait for the staff come</p></div>
       : '' }
         <input id="side_toggle" type="checkbox" /> 
         <label for="side_toggle" className="cover"> 
@@ -203,7 +237,7 @@ export default class Client extends React.Component {
           </div>
         </Router>
         <ClientSide loadBill={this.loadBill} memberName={this.state.member ? this.state.member.MEMBER_SURNAME : null} loginFunc={this.login} logoutFunc={this.logout} lang={this.state.lang} changeLang={this.changeLang}/>
-        <ClientBill loadBill={this.loadBill} lang={this.state.lang} order_bill={this.state.order_bill.food ? this.state.order_bill : {'bill': [], 'food': []}} pay={this.pay} payed={this.state.payed} />
+        <ClientBill loadBill={this.loadBill} lang={this.state.lang} order_bill={this.state.order_bill.food ? this.state.order_bill : {'bill': [], 'food': []}} pay={this.pay} block={this.state.block} />
       </div>
     )
   }
