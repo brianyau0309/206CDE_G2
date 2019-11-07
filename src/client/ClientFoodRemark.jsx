@@ -80,7 +80,7 @@ export default class ClientFoodRemark extends React.Component {
   }
   
   onSubmit() {
-    let order = '00000003'
+    let order = this.props.orderID
     let food = this.state.food
     let remark = this.state.order_remark
     fetch(`/api/order_food`, {

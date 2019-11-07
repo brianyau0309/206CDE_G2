@@ -12,6 +12,7 @@ export default class Client extends React.Component {
   constructor() {
     super()
     this.state = { 
+                   'orderID':null,
                    'member': null, 
                    'lang': 'eng',
                    'bill_btn': 'active', 
@@ -37,6 +38,7 @@ export default class Client extends React.Component {
     var socket = io.connect(window.location.origin)
     this.setState({'socket': socket},() => console.log(this.state))
     let setunBlocked = this.setunBlocked
+    let loadBill = this.loadBill
     socket.on('addRoom', function(data) {
       console.log(data);
     });
@@ -54,6 +56,10 @@ export default class Client extends React.Component {
       console.log(msg);
       alert(msg);
       setunBlocked()
+    });
+    socket.on('reloadbill', function(msg){
+      console.log(msg);
+      loadBill()
     });
     this.getSession()
     this.getMemberInfo()
@@ -171,6 +177,7 @@ export default class Client extends React.Component {
       if (res.ok) {
         res.json().then(result => {
           let order = result.order
+          this.setState({'orderID':order.ORDER_ID}, () => console.log(this.state.orderID))
           console.log(order)
           fetch(`/api/bill?orderID=${order.ORDER_ID}`).then(res => {
             if (res.ok) {
@@ -225,9 +232,9 @@ export default class Client extends React.Component {
           <div className="ClientMain translateX-3" onScroll={this.changeBillBtn}>
             <Switch>
               <Route path="/client/food/combo">
-                <ClientCombo lang={this.state.lang} loadBill={this.loadBill} />
+                <ClientCombo lang={this.state.lang} loadBill={this.loadBill} orderID={this.state.orderID}/>
               </Route>
-                <Route path="/client/food/:category" render={(props) => <ClientFood {...props} lang={this.state.lang} loadBill={this.loadBill} />}/>
+                <Route path="/client/food/:category" render={(props) => <ClientFood {...props} lang={this.state.lang} loadBill={this.loadBill} orderID={this.state.orderID}/>}/>
               <Redirect from="/client" to="/client/food/combo" />
             </Switch>
           </div>

@@ -180,7 +180,7 @@ export default class ClientComboChoice extends React.Component {
     })
 
     if (ready) {
-      const order = '00000003'
+      const order = this.props.orderID
       const combo = this.state.combo
       const temp = this.state.pizza.concat(this.state.rice_pasta,this.state.starter,this.state.drink,this.state.extra)
       const output = {'order_combo': {'order': order, 'combo': combo, 'food': temp}}

@@ -359,7 +359,6 @@ def create_order():
             db.cursor.execute(SQL['tableNotAvailable']%i)
             socketio.emit('created_order',{'room':i})
         db.cursor.execute('commit')
-        socketio.emit('created_order',{'room': i})
         return { 'result': 'success' } 
     except:
         return { 'result': 'error' }
@@ -427,6 +426,10 @@ def combo_order_food():
                     remark_price = db.exe_fetch(SQL['getRemarkPrice']%j).get('PRICE')
                     db.cursor.execute(SQL['orderRemark']%(order,food,sequence,j,remark_price))
             db.cursor.execute('commit')
+            condition = "WHERE order_id = '%s'"%order
+            table = db.exe_fetch(SQL['getOrderTable'].format(condition=condition),'all')
+            for i in table:
+                socketio.emit('reloadbill',{'room':i.get('TABLE_ID')})
             return jsonify({'result':'Success'})
         except:
              return jsonify({'result':'error'})
@@ -585,6 +588,12 @@ def created_order(data):
     print('Created Order: ',data)
     emit('created_order','welcome pizza-hat', room=data)
     emit('staffmessage',data + ' orders is created',room='staff')
+
+@socketio.on('reloadbill')
+def reloadbill(data):
+    print('reloadbill: ',data)
+    emit('reloadbill','reloadbill', room=data)
+
 #socketio
 
 if __name__ == '__main__':
