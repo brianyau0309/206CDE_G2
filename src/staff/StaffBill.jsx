@@ -39,11 +39,13 @@ const BillRow = (props) => {
               <td className="ta-l bill_detail_title" style={{paddingLeft: "2vw"}}>{props.lang === 'eng' ? cf.FOOD_ENG_NAME : cf.FOOD_CHI_NAME}</td>
               <td className="ta-l bill_detail_state">{cf.DISH_STATE}</td>
               <td className="ta-r bill_detail_price">+{cf.PRICE}</td>
+              <td className="ta-r bill_detail_ok">
               {
                 cf.CATEGORY_NAME !== 'combo' && cf.DISH_STATE !== 'served' ?
                   <button className="served_button" onClick={() => props.served_food(props.order,cf.FOOD,cf.ORDER_SEQUENCE)}>OK</button>
                 : null
               }
+              </td>
               <td className="ta-r"></td>
             </tr>
             {

@@ -35,8 +35,16 @@ def staff(path):
         return render_template("staff.html")
     else:
         return redirect(url_for('staffloginpage'))
+
+@app.route('/kitchen', methods=['GET'])
+def kitchen():
+    if session.get('type') == 'kitchen':
+        return render_template("kitchen.html")
     
+    return redirect(url_for('kitchenloginpage'))
+
 #API
+
 @app.route('/api/food/<path:category>')
 def foodAPI(category):
     lang = 'eng'
@@ -155,14 +163,16 @@ def order_table():
 def whoami():
     if session.get('table'):
         table = session.get('table')   
-        order = db.exe_fetch("SELECT a.order_id, a.order_state FROM orders a, order_table b WHERE a.order_id = b.order_id and b.table_id = '%s'"%table,'one')
+        order = db.exe_fetch("SELECT a.order_id, a.order_state FROM orders a, order_table b WHERE a.order_id = b.order_id and b.table_id = '%s' and a.order_state = 'in sit'"%table)
         return jsonify({ 'order': order })
     return jsonify({'result': 'Error'})
 
 @app.route('/api/cook_list', methods=['GET'])
 def cook_list():
-
     cook_list = db.exe_fetch(SQL['getCookList'], 'all')
+    for food in cook_list:
+        remark = db.exe_fetch(SQL['getRemarkByPK'].format(food=food.get('FOOD'),order=food.get('ORDERS'),seq=food.get('ORDER_SEQUENCE')), 'all')
+        food['REMARK'] = remark
 
     return jsonify({'cook_list': cook_list})
 
@@ -269,6 +279,20 @@ def table_logout():
         session.clear()
     return redirect(url_for('client'))
 
+@app.route('/kitchenloginpage')
+@cross_origin()
+def kitchenloginpage():
+    return render_template("kitchenloginpage.html")
+
+@app.route('/kitchen_login', methods = ["POST"]) # Table Login process
+@cross_origin()
+def kitchen_login():
+    loginInfo = request.form.get('kitchen')
+    if loginInfo == 'kitchen':
+        session["type"] = 'kitchen'
+
+    return redirect(url_for('kitchen'))
+
 @app.route('/myinfo', methods = ["post"])
 @cross_origin()
 def myinfo():
@@ -335,6 +359,7 @@ def create_order():
             db.cursor.execute(SQL['tableNotAvailable']%i)
             socketio.emit('created_order',{'room':i})
         db.cursor.execute('commit')
+        socketio.emit('created_order',{'room': i})
         return { 'result': 'success' } 
     except:
         return { 'result': 'error' }
@@ -422,7 +447,7 @@ def bill():
         condition2 +=  " AND a.orders = '%s'"%orderID
     else:
        return jsonify({'result':'error'})
-    output1 =  db.exe_fetch(SQL['getOrders'].format(condition1=condition1),'all')
+    output1 = db.exe_fetch(SQL['getOrders'].format(condition1=condition1),'all')
     bill_food = db.exe_fetch(SQL['getFoodOrdered'].format(condition2=condition2), 'all')
 
     foods = []
@@ -501,8 +526,10 @@ def finish_cook():
     orderID = cooked.get('orderID')
     food = cooked.get('food')
     sequence = cooked.get('sequence')
+    
     db.cursor.execute(SQL['foodCooked']%(orderID,food,sequence))
     db.cursor.execute('commit')
+
     return jsonify({'result': 'success'})
 
 @app.route('/food_served', methods = ["post"]) #served the ordered food
@@ -532,7 +559,6 @@ def topaymessage(data):
     print('topaymessage: ')
     emit('topay','Please wait for the staff come', room=data)
     emit('staffmessage',data + ' is waiting to pay',room='staff')
-
 
 @socketio.on('addRoom')
 def on_join(data):

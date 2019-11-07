@@ -344,7 +344,7 @@ SQL = {
 
   'foodCooked':'''
   update order_food
-  set dish_state = '='cooked'
+  set dish_state = 'cooked'
   where orders = '%s' and food = '%s' and order_sequence = %d
   ''',
 

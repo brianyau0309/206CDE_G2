@@ -67,6 +67,7 @@ export default class StaffTable extends React.Component {
         res.json().then(result => {
           console.log(result)
           this.loadTable()
+          this.newOrderToggle()
           setTimeout(() => this.resetCheckbox(), 200);
         })
       }
