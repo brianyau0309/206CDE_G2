@@ -33,7 +33,7 @@ export default class Client extends React.Component {
 
   componentDidMount() {
     var socket = io.connect(window.location.origin)
-    this.setState({'socket': socket},() => console.log(this.state))
+    this.setState({'socket': socket})
     socket.on('addRoom', function(data) {
       console.log(data);
     });

@@ -419,5 +419,17 @@ SQL = {
     a.orders = '{order}' and
     a.food = '{food}' and
     a.order_sequence = {seq}
+  ''',
+
+  'getCookList':'''
+  SELECT 
+    a.*, b.food_chi_name
+  FROM 
+    order_food a, food b, orders c
+  WHERE 
+    a.food = b.food_id and
+    a.orders = c.order_id and 
+    a.dish_state = 'preparing' and
+    c.order_state = 'in sit'
   '''
 }

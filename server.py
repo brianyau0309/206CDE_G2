@@ -166,7 +166,6 @@ def order_table():
     if (order != None): 
         condition = "WHERE order_id = '%s'"%order
     
-    print(SQL['getOrderTable'].format(condition=condition))
     output = db.exe_fetch(SQL['getOrderTable'].format(condition=condition),'all')
     
     return jsonify({ 'order_table': output })
@@ -185,6 +184,13 @@ def whoami():
             staff = session.get('staff')
     else:
         return jsonify({'result': 'Error'})
+
+@app.route('/api/cook_list', methods=['GET'])
+def cook_list():
+
+    cook_list = db.exe_fetch(SQL['getCookList'], 'all')
+
+    return jsonify({'cook_list': cook_list})
 
 # API end
 

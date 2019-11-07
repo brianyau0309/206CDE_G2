@@ -103,7 +103,7 @@ export default class StaffTable extends React.Component {
               ))
             }
           </table>
-          <button className={this.state.new_order ? "bottom_btn show" : "bottom_btn"} style={{position: 'fixed'}} onClick={this.newOrder}>New Order</button>
+          <button className={this.state.new_order ? "bottom_btn show" : "bottom_btn hide"} style={{position: 'fixed'}} onClick={this.newOrder}>New Order</button>
           <StaffBill openBill={this.openBill} order_bill={this.state.bill_info ? this.state.bill_info : ''} open={this.state.bill_toggle} close={this.closeBill}/>
       </div>
     )
