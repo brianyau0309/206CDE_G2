@@ -42,20 +42,20 @@ const BillRow = (props) => {
               {
                 cf.CATEGORY_NAME !== 'combo' && cf.DISH_STATE !== 'served' ?
                   <button className="served_button" onClick={() => props.served_food(props.order,cf.FOOD,cf.ORDER_SEQUENCE)}>OK</button>
-                  : null
+                : null
               }
               <td className="ta-r"></td>
             </tr>
             {
               cf.REMARK ? 
-              cf.REMARK.map(r => (
-                <tr>
-                  <td className="ta-l bill_detail_title" style={{paddingLeft: "4vw"}}>{props.lang === 'eng' ? r.REMARK_ENG : r.REMARK_CHI}</td>
-                  <td className="ta-l bill_detail_state"></td>
-                  <td className="ta-r bill_detail_price">+{r.REMARK_PRICE}</td>
-                  <td className="ta-r"></td>
-                </tr>
-              ))
+                cf.REMARK.map(r => (
+                  <tr>
+                    <td className="ta-l bill_detail_title" style={{paddingLeft: "4vw"}}>{props.lang === 'eng' ? r.REMARK_ENG : r.REMARK_CHI}</td>
+                    <td className="ta-l bill_detail_state"></td>
+                    <td className="ta-r bill_detail_price">+{r.REMARK_PRICE}</td>
+                    <td className="ta-r"></td>
+                  </tr>
+                ))
               : null
             }
           </table>  
@@ -64,16 +64,16 @@ const BillRow = (props) => {
       }
       {
         props.food.REMARK ?
-        props.food.REMARK.map(r => (
-          <table className="bill_detail">
-            <tr>
-              <td className="ta-l bill_detail_title" style={{paddingLeft: "2vw"}}>{props.lang === 'eng' ? r.REMARK_ENG : r.REMARK_CHI}</td>
-              <td className="ta-l bill_detail_state"></td>
-              <td className="ta-r bill_detail_price">+{r.REMARK_PRICE}</td>
-              <td className="ta-r"></td>
-            </tr>
-          </table>
-        ))
+          props.food.REMARK.map(r => (
+            <table className="bill_detail">
+              <tr>
+                <td className="ta-l bill_detail_title" style={{paddingLeft: "2vw"}}>{props.lang === 'eng' ? r.REMARK_ENG : r.REMARK_CHI}</td>
+                <td className="ta-l bill_detail_state"></td>
+                <td className="ta-r bill_detail_price">+{r.REMARK_PRICE}</td>
+                <td className="ta-r"></td>
+              </tr>
+            </table>
+          ))
         : null
       }
     </li>
@@ -125,7 +125,6 @@ export default class StaffBill extends React.Component {
   }
 
   served_food(order, food, seq) {
-    console.log(order,food, seq)
     fetch(`/food_served`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -141,7 +140,6 @@ export default class StaffBill extends React.Component {
   }
 
   cancel_food(order, food, seq) {
-    console.log(order,food,seq)
     fetch(`/cancel_food`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -205,14 +203,14 @@ export default class StaffBill extends React.Component {
                 for (let i = 0; i < data.length; i++) {
                   socket.emit('receivePayment',data[i])
                 }
+              })
+            }
+          })
         })
-      }
-    })
-  })
-}})}
+      }}
+    )}
 
   render() {
-    console.log(this.state)
     let bill_detail = []
     if (this.state.bill.food) {
       bill_detail = this.state.bill.food.map(f => <BillRow order={this.state.bill.bill[0] ? this.state.bill.bill[0].ORDER_ID : ''} lang={this.state.lang} food={f} cancel_food={this.cancel_food} served_food={this.served_food} />)
@@ -263,7 +261,7 @@ export default class StaffBill extends React.Component {
           </div>
           <div>Membership: {this.state.bill.bill ? this.state.bill.bill[0].MEMBER ? this.state.bill.bill[0].MEMBER : 'None' : 'None'}</div>
           <div>Total Price: {this.state.bill.bill && this.state.payment_rate != '' ? (this.state.bill.bill[0].TOTAL_PRICE*1.1*this.state.payments.filter(p => p.PAYMENT_METHOD_ID === this.state.payment_rate)[0].PRICE_RATE / 100).toFixed(2) : 0}</div>
-          <button className="checkout_button" onClick={this.closeOrder}>Click to Close Order</button>
+          <button className="checkout_button" onClick={this.closeOrder}>Receive Payment</button>
         </div>
         <StaffComboChoice order={this.state.bill.bill ? this.state.bill.bill[0].ORDER_ID : ''} loadBill={this.props.openBill} open={this.state.combo_toggle} close={this.closeCombo} combo={this.state.combo_id} />
         <StaffFoodRemark order={this.state.bill.bill ? this.state.bill.bill[0].ORDER_ID : ''} loadBill={this.props.openBill} open={this.state.food_toggle} close={this.closeFood} food={this.state.food_id} />

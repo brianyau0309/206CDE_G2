@@ -147,7 +147,6 @@ def order_table():
     if (order != None): 
         condition = "WHERE order_id = '%s'"%order
     
-    print(SQL['getOrderTable'].format(condition=condition))
     output = db.exe_fetch(SQL['getOrderTable'].format(condition=condition),'all')
     
     return jsonify({ 'order_table': output })
@@ -159,6 +158,13 @@ def whoami():
         order = db.exe_fetch("SELECT a.order_id, a.order_state FROM orders a, order_table b WHERE a.order_id = b.orders and b.table = '%s'"%table)
         return jsonify({ 'order': order })
     return jsonify({'result': 'Error'})
+
+@app.route('/api/cook_list', methods=['GET'])
+def cook_list():
+
+    cook_list = db.exe_fetch(SQL['getCookList'], 'all')
+
+    return jsonify({'cook_list': cook_list})
 
 # API end
 
