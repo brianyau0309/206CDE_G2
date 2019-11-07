@@ -17,12 +17,19 @@ export default class Kitchen extends React.Component {
   }
 
   loadCookList() {
-    fetch()
+    fetch(`/api/cook_list`).then(res => {
+      if (res.ok) {
+        res.json().then(result => {
+          this.setState({'cook_list': result.cook_list})
+        })
+      }
+    })
   }
 
   render() {
     return(
       <div className="Kitchen">
+        <h1>Kitchen</h1>
       </div>
     )
   }

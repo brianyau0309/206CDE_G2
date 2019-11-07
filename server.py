@@ -187,8 +187,10 @@ def whoami():
 
 @app.route('/api/cook_list', methods=['GET'])
 def cook_list():
-
     cook_list = db.exe_fetch(SQL['getCookList'], 'all')
+    for food in cook_list:
+        remark = db.exe_fetch(SQL['getRemarkByPK'].format(food=food.get('FOOD'),order=food.get('ORDERS'),seq=food.get('ORDER_SEQUENCE')), 'all')
+        food['REMARK'] = remark
 
     return jsonify({'cook_list': cook_list})
 
