@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-  
 import os   
 os.environ['NLS_LANG'] = 'SIMPLIFIED CHINESE_CHINA.UTF8'   
-from flask import Flask, session, request, render_template, jsonify, redirect, url_for
+from flask import Flask, session, request, render_template, jsonify, redirect, url_for, send_file
 from flask_cors import cross_origin
 from OracleConn import OracleConn, SQL
 from flask_socketio import SocketIO, send, join_room, leave_room, emit
@@ -15,7 +15,9 @@ app.config['SECRET_KEY'] = 'SecretKeyHERE!'
 app.config['JSON_AS_ASCII'] = False
 
 socketio = SocketIO(app)
-
+@app.route('/sw.js')
+def sw():
+    return send_file("C:\\Users\\user\\remoteUser\\206CDE_G2\\static\\sw.js")
 @app.route('/')
 def hello():
     return render_template("index.html")
@@ -619,4 +621,7 @@ if __name__ == '__main__':
     ip = input('IP: ')
     if ip == '':
         ip = '127.0.0.1'
-    socketio.run(app, debug = True, host=ip, port=5000)
+    cer = os.path.dirname(os.path.realpath(__file__))+"\ssl\certificate.crt"
+    key = os.path.dirname(os.path.realpath(__file__))+"\ssl\private.key"
+    print(cer, key)
+    socketio.run(app, debug = True, host=ip, port=5000, keyfile=key, certfile=cer)
