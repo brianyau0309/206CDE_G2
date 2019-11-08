@@ -18,7 +18,7 @@ export default class Client extends React.Component {
                    'bill_btn': 'active', 
                    'PageHeight': 0,
                    'order_bill': {},
-                   'block': null,
+                   'block': 'yes',
                    'socket': ''
                   }
     this.login = this.login.bind(this)
@@ -38,6 +38,7 @@ export default class Client extends React.Component {
     var socket = io.connect(window.location.origin)
     this.setState({'socket': socket},() => console.log(this.state))
     let setunBlocked = this.setunBlocked
+    let setBlocked = this.setBlocked
     let loadBill = this.loadBill
     socket.on('addRoom', function(data) {
       console.log(data);
@@ -51,8 +52,10 @@ export default class Client extends React.Component {
     socket.on('topay', function(msg) {
       console.log(msg);
       alert(msg);
+      setBlocked()
     });
     socket.on('created_order', function(msg){
+      loadBill()
       console.log(msg);
       alert(msg);
       setunBlocked()
@@ -177,8 +180,9 @@ export default class Client extends React.Component {
       if (res.ok) {
         res.json().then(result => {
           let order = result.order
-          this.setState({'orderID':order.ORDER_ID}, () => console.log(this.state.orderID))
           console.log(order)
+          if (order.ORDER_ID !== undefined) {this.setunBlocked()}
+          this.setState({'orderID':order.ORDER_ID}, () => console.log(this.state.orderID))
           fetch(`/api/bill?orderID=${order.ORDER_ID}`).then(res => {
             if (res.ok) {
               res.json().then(result => {

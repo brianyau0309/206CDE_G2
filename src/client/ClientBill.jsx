@@ -11,7 +11,17 @@ const BillRow = (props) => {
         <td className="ta-l bill_detail_title">{props.lang === 'eng' ? props.food.FOOD_ENG_NAME : props.food.FOOD_CHI_NAME}</td>
         <td className="ta-l bill_detail_state">{props.food.DISH_STATE}</td>
         <td className="ta-r bill_detail_price">{props.food.PRICE}</td>
-        <td className="ta-r"><button className="cancel_button" onClick={() => props.cancel_food(props.order,props.food.FOOD,props.food.ORDER_SEQUENCE)}>X</button></td>
+        <td className="ta-r">
+        {
+          props.food.COMBO_FOOD ?
+            props.food.COMBO_FOOD.filter(food => food.DISH_STATE === 'served').length > 0 ?
+              null
+              : <button className="cancel_button" onClick={() => props.cancel_food(props.order,props.food.FOOD,props.food.ORDER_SEQUENCE)}>X</button>
+          : props.food.DISH_STATE === 'preparing' ? 
+            <button className="cancel_button" onClick={() => props.cancel_food(props.order,props.food.FOOD,props.food.ORDER_SEQUENCE)}>X</button>
+            : null
+        }
+        </td>
       </tr>
     </table>
       {

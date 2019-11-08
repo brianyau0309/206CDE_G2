@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="theme-color" content="#FF0000">
+    <link rel="manifest" href="{{url_for('static', filename='manifest/manifest.json')}}">
+    <link rel="icon" sizes="192x192" href="{{url_for('static', filename='image/client_icons/icon-192x192.png')}}">
+    <link rel="apple-touch-icon" href="{{url_for('static', filename='image/client_icons/icon-192x192.png')}}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{url_for('static', filename='image/client_icons/icon-192x192.png')}}" />
     <title>Staff -- PizzaHut</title>
     
     <link rel="stylesheet" href="{{url_for('static', filename='css/staff.css')}}">
@@ -13,5 +18,13 @@
 
     <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
     <script src="{{url_for('static', filename='js/staff.js')}}"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+        navigator.serviceWorker
+            .register("{{url_for('sw')}}")
+            .then(function(registration) {console.log('service worker install complete')}
+        );
+      }
+    </script>
 </body>
 </html>
