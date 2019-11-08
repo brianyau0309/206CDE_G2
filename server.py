@@ -245,9 +245,8 @@ def stafflogin():
 def stafflogout():
     if session.get('staff') != None:
         session.pop('staff')
-        return jsonify({ 'result': 'success' })
-
-    return jsonify({ 'result': 'error' })
+        return redirect(url_for('staff'))
+    return jsonify({'result':'Error'})
 
 @app.route('/QRlogin', methods = ["POST"]) #QRLogin process
 @cross_origin()
