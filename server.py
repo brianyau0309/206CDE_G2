@@ -389,8 +389,8 @@ def order_food():
             db.cursor.execute('commit')
             condition = "WHERE order_id = '%s'"%orderID
             table = db.exe_fetch(SQL['getOrderTable'].format(condition=condition),'all')
-            for i in table:
-                socketio.emit('reloadbill',{'room':i.get('TABLE_ID')})
+            for j in table:
+                socketio.emit('reloadbill',{'room':j.get('TABLE_ID')})
             return jsonify({'result':'Success'})
         except:
             return jsonify({'result':'error'})
@@ -434,8 +434,8 @@ def combo_order_food():
             db.cursor.execute('commit')
             condition = "WHERE order_id = '%s'"%order
             table = db.exe_fetch(SQL['getOrderTable'].format(condition=condition),'all')
-            for i in table:
-                socketio.emit('reloadbill',{'room':i.get('TABLE_ID')})
+            for k in table:
+                socketio.emit('reloadbill',{'room':k.get('TABLE_ID')})
             return jsonify({'result':'Success'})
         except:
              return jsonify({'result':'error'})
@@ -524,6 +524,10 @@ def cancel_food():
 
     if flag:
         db.cursor.execute('commit')
+        condition = "WHERE order_id = '%s'"%orderID
+        table = db.exe_fetch(SQL['getOrderTable'].format(condition=condition),'all')
+        for i in table:
+            socketio.emit('reloadbill',{'room':i.get('TABLE_ID')})
         return jsonify({'result': 'success'})
     
     return jsonify({'result': 'error'})
@@ -538,7 +542,7 @@ def finish_cook():
     
     db.cursor.execute(SQL['foodCooked']%(orderID,food,sequence))
     db.cursor.execute('commit')
-
+    socketio.emit('staffmessage',orderID + '\'s'+ food +' cooked', room='staff')
     return jsonify({'result': 'success'})
 
 @app.route('/food_served', methods = ["post"]) #served the ordered food
@@ -552,8 +556,12 @@ def food_served():
     try:
         db.cursor.execute(SQL['foodServed']%(orderID,food,sequence))
         db.cursor.execute('commit')
+        condition = "WHERE order_id = '%s'"%orderID
+        table = db.exe_fetch(SQL['getOrderTable'].format(condition=condition),'all')
+        for i in table:
+            socketio.emit('reloadbill',{'room':i.get('TABLE_ID')})
     except:
-        return jsonify({'result': 'erroe'})
+        return jsonify({'result': 'error'})
 
     return jsonify({'result': 'success'})
 
@@ -599,7 +607,15 @@ def created_order(data):
 def reloadbill(data):
     print('reloadbill: ',data)
     emit('reloadbill','reloadbill', room=data)
+    emit('reloadbill','reloadbill', room='kitchen')
 
+@socketio.on('cooked')
+def cooked(data):
+    order = data['order']
+    food = data['food']
+    room = data['room']
+    print('cooked: ' + order + food + room)
+    emit('staffmessage',order + '\'s'+ food +' cooked', room=room)
 #socketio
 
 if __name__ == '__main__':
