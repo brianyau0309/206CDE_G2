@@ -91,6 +91,10 @@ export default class ClientSide extends React.Component {
               </table>
             </form>
           </li>
+          <li style={{paddingTop: '8vh'}}>
+            <div>Order by Phone!</div>
+            <img className="qr" src={window.location.origin+'/static/image/qr.png'}></img>
+          </li>
         </ul>
         <div className="lang" onClick={this.props.changeLang}>{this.state.vocabulary.ToLang}</div>
       </div>
