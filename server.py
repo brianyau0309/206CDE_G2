@@ -15,15 +15,16 @@ app.config['SECRET_KEY'] = 'SecretKeyHERE!'
 app.config['JSON_AS_ASCII'] = False
 
 socketio = SocketIO(app)
-@app.route('/sw.js')
+
+@app.route('/sw.js') # path to service worker
 def sw():
-    return send_file("C:\\Users\\user\\remoteUser\\206CDE_G2\\static\\sw.js")
+    return send_file(os.path.join(os.path.dirname(__file__),"\\static\\sw.js"))
 
 @app.route('/')
 def hello():
     return render_template("index.html")
 
-@app.route('/client/', defaults={'path': ''})
+@app.route('/client/', defaults={'path': ''}) # client page
 @app.route('/client/<path:path>')
 def client(path):
     if session.get('table') or session.get('QR'):
@@ -31,7 +32,7 @@ def client(path):
     else:
         return redirect(url_for('tableloginpage'))
 
-@app.route('/staff/', defaults={'path': ''})
+@app.route('/staff/', defaults={'path': ''}) # staff page
 @app.route('/staff/<path:path>')
 def staff(path):
     if session.get('staff'):
@@ -39,7 +40,7 @@ def staff(path):
     else:
         return redirect(url_for('staffloginpage'))
 
-@app.route('/kitchen', methods=['GET'])
+@app.route('/kitchen', methods=['GET']) # kitchen page
 def kitchen():
     if session.get('type') == 'kitchen':
         return render_template("kitchen.html")
@@ -48,7 +49,7 @@ def kitchen():
 
 #API
 
-@app.route('/api/food/<path:category>')
+@app.route('/api/food/<path:category>') # get food by category
 def foodAPI(category):
     lang = 'eng'
     if request.args.get('lang'):
@@ -61,31 +62,31 @@ def foodAPI(category):
 
     return jsonify({ 'food': output })
 
-@app.route('/api/orders')
+@app.route('/api/orders') 
 def ordersAPI():
     output = db.exe_fetch(SQL['getOrders'], 'all')
     
     return jsonify({ 'order': output })
 
-@app.route('/api/payment')
+@app.route('/api/payment') # get all payment methods
 def paymentAPI():
     output = db.exe_fetch(SQL['getPayment'], 'all')
 
     return jsonify({'payment': output})
 
-@app.route('/api/staff')
+@app.route('/api/staff') # get staff list
 def staffAPI():
     output = db.exe_fetch(SQL['getStaff'], 'all')
 
     return jsonify({'staff': output})
 
-@app.route('/api/table')
+@app.route('/api/table') # get table list and status
 def tableAPI():
     output = db.exe_fetch(SQL['getTable'], 'all')
     
     return jsonify({'table': output})
 
-@app.route('/api/food')
+@app.route('/api/food') # get food by id
 def allFoodAPI():
     condition = ''
     food = request.args.get('food')
@@ -96,7 +97,7 @@ def allFoodAPI():
     
     return jsonify({ 'food': output })
 
-@app.route('/api/food_remark')
+@app.route('/api/food_remark') # get the remark of food
 def food_remarkAPI():
     condition = ''
     food = request.args.get('food')
@@ -110,7 +111,7 @@ def food_remarkAPI():
 
     return jsonify({ 'food_remark': output})
 
-@app.route('/api/combo_choice')
+@app.route('/api/combo_choice') # get foods can choice in a combo
 def combo_choiceAPI():
     condition = ''
     combo = request.args.get('combo')
@@ -121,7 +122,7 @@ def combo_choiceAPI():
 
     return jsonify({ 'combo_choice': output })
 
-@app.route('/api/combo_choice_info')
+@app.route('/api/combo_choice_info') # get detail info of the combo choice
 def combo_choice_infoAPI():
     condition = ''
     food = request.args.get('food')
@@ -139,7 +140,7 @@ def combo_choice_infoAPI():
 
     return jsonify({ 'combo_choice_info': output })
 
-@app.route('/api/combo_person')
+@app.route('/api/combo_person') # get food max. qty in a combo
 def combo_personAPI():
     condition = ''
     combo = request.args.get('combo')
@@ -181,12 +182,14 @@ def cook_list():
 
 # API end
 
+
+
 @app.route('/loginpage')
 @cross_origin()
 def loginpage():
     return render_template("loginpage.html")
 
-@app.route('/login', methods = ["POST"]) #Login process
+@app.route('/login', methods = ["POST"]) #Login process for members
 @cross_origin()
 def user_login():
     loginInfo = request.json.get('login')
@@ -200,12 +203,12 @@ def user_login():
 
     return jsonify({'result':'Error'})
 
-@app.route('/tableloginpage') #Login process
+@app.route('/tableloginpage') #Login page for table
 @cross_origin()
 def tableloginpage():
     return render_template("tableloginpage.html")
 
-@app.route('/tablelogin', methods = ["POST"]) #Login process
+@app.route('/tablelogin', methods = ["POST"]) #Login process for table
 @cross_origin()
 def tablelogin():
     table = request.form['Table']
@@ -227,12 +230,12 @@ def member_logout():
 
     return jsonify({ 'result': 'success' })
 
-@app.route('/staffloginpage')
+@app.route('/staffloginpage') #Login page for staff
 @cross_origin()
 def staffloginpage():
     return render_template("staffloginpage.html")
 
-@app.route('/stafflogin', methods = ["post"])
+@app.route('/stafflogin', methods = ["post"]) # Login process of staff
 @cross_origin()
 def stafflogin():
     staff = request.form['Staff']
@@ -337,7 +340,7 @@ def SESSION():
     ses.append(QR) 
     return jsonify({'table': ses[0],'member':ses[1],'staff':ses[2], 'QR':ses[3]})
 
-@app.route('/api/orderid', methods=['POST']) #get orderid by session
+@app.route('/api/orderid', methods=['POST']) #get order id by session
 @cross_origin()
 def getorderid():
     table = session.get('table')
@@ -565,8 +568,11 @@ def food_served():
 
     return jsonify({'result': 'success'})
 
-#socket
-@socketio.on('message')
+
+
+# Socket
+
+@socketio.on('message') # for testing
 def handleMessage(msg):
     print('Message: ', msg)
     send(msg, broadcast=True)
@@ -616,13 +622,19 @@ def cooked(data):
     room = data['room']
     print('cooked: ' + order + food + room)
     emit('staffmessage',order + '\'s'+ food +' cooked', room=room)
-#socketio
+
+# Socket Edn
+
 
 if __name__ == '__main__':
     ip = input('IP: ')
     if ip == '':
+    # Start server.py in localhost:5000
         ip = '127.0.0.1'
-    cer = os.path.dirname(os.path.realpath(__file__))+"\ssl\certificate.crt"
-    key = os.path.dirname(os.path.realpath(__file__))+"\ssl\private.key"
-    print(cer, key)
-    socketio.run(app, debug = True, host=ip, port=5000, keyfile=key, certfile=cer)
+        socketio.run(app, debug = True, host=ip, port=5000)
+    else:
+    # Start server.py with https cert
+        cer = os.path.dirname(os.path.realpath(__file__))+"\ssl\certificate.crt"
+        key = os.path.dirname(os.path.realpath(__file__))+"\ssl\private.key"
+
+        socketio.run(app, debug = True, host=ip, port=5000, keyfile=key, certfile=cer)

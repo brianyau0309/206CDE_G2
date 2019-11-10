@@ -113,7 +113,6 @@ SQL = {
     SELECT
       b.table_id,
       b.table_sit,
-      b.table_available,
       a.order_id
     FROM
       (SELECT 
