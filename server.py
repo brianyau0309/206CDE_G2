@@ -18,6 +18,7 @@ socketio = SocketIO(app)
 @app.route('/sw.js')
 def sw():
     return send_file("C:\\Users\\user\\remoteUser\\206CDE_G2\\static\\sw.js")
+
 @app.route('/')
 def hello():
     return render_template("index.html")

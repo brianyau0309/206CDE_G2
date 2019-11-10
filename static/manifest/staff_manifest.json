@@ -4,7 +4,7 @@
   "theme_color": "#ff0000",
   "background_color": "#ffffff",
   "display": "standalone",
-  "Scope": "/",
+  "Scope": "/staff/",
   "start_url": "/staff/",
   "icons": [
     {
@@ -47,6 +47,5 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ],
-  "splash_pages": null
+  ]
 }
