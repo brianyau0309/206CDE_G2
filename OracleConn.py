@@ -113,7 +113,6 @@ SQL = {
     SELECT
       b.table_id,
       b.table_sit,
-      b.table_available,
       a.order_id
     FROM
       (SELECT 
@@ -430,6 +429,7 @@ SQL = {
     a.food = b.food_id and
     a.orders = c.order_id and 
     a.dish_state = 'preparing' and
-    c.order_state = 'in sit'
+    c.order_state = 'in sit' and 
+    b.category != 'C1'
   '''
 }

@@ -55,7 +55,7 @@ export default class Staff extends React.Component {
         <div className="StaffTop">Staff Page</div>
         <Router>
           <ul className="StaffMenu">
-            <NavLink to="/staff"><li>Home</li></NavLink>
+            <NavLink to="/staff/"><li>Home</li></NavLink>
             <NavLink to="/staff/table_list"><li>Table State</li></NavLink>
             <NavLink to="/staff/message"><li>Message</li></NavLink>
           </ul>
@@ -69,7 +69,7 @@ export default class Staff extends React.Component {
               </Route>
             </Switch>
           </div>
-        <NavLink to="/staff/message"><div className={this.state.popup ? "popup open" : "popup"}>{this.state.messages[0] ? this.state.messages[0] : null}</div></NavLink>
+          <NavLink to="/staff/message"><div className={this.state.popup ? "popup open" : "popup"}>{this.state.messages[0] ? this.state.messages[0] : null}</div></NavLink>
         </Router>
       </div>
     )

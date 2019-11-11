@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-  
 import os   
 os.environ['NLS_LANG'] = 'SIMPLIFIED CHINESE_CHINA.UTF8'   
-from flask import Flask, session, request, render_template, jsonify, redirect, url_for
+from flask import Flask, session, request, render_template, jsonify, redirect, url_for, send_file
 from flask_cors import cross_origin
 from OracleConn import OracleConn, SQL
 from flask_socketio import SocketIO, send, join_room, leave_room, emit
@@ -16,11 +16,15 @@ app.config['JSON_AS_ASCII'] = False
 
 socketio = SocketIO(app)
 
+@app.route('/sw.js') # path to service worker
+def sw():
+    return send_file(os.path.dirname(os.path.realpath(__file__))+"\static\sw.js")
+
 @app.route('/')
 def hello():
     return render_template("index.html")
 
-@app.route('/client/', defaults={'path': ''})
+@app.route('/client/', defaults={'path': ''}) # client page
 @app.route('/client/<path:path>')
 def client(path):
     if session.get('table') or session.get('QR'):
@@ -28,7 +32,7 @@ def client(path):
     else:
         return redirect(url_for('tableloginpage'))
 
-@app.route('/staff/', defaults={'path': ''})
+@app.route('/staff/', defaults={'path': ''}) # staff page
 @app.route('/staff/<path:path>')
 def staff(path):
     if session.get('staff'):
@@ -36,7 +40,7 @@ def staff(path):
     else:
         return redirect(url_for('staffloginpage'))
 
-@app.route('/kitchen', methods=['GET'])
+@app.route('/kitchen', methods=['GET']) # kitchen page
 def kitchen():
     if session.get('type') == 'kitchen':
         return render_template("kitchen.html")
@@ -45,7 +49,7 @@ def kitchen():
 
 #API
 
-@app.route('/api/food/<path:category>')
+@app.route('/api/food/<path:category>') # get food by category
 def foodAPI(category):
     lang = 'eng'
     if request.args.get('lang'):
@@ -58,31 +62,31 @@ def foodAPI(category):
 
     return jsonify({ 'food': output })
 
-@app.route('/api/orders')
+@app.route('/api/orders') 
 def ordersAPI():
     output = db.exe_fetch(SQL['getOrders'], 'all')
     
     return jsonify({ 'order': output })
 
-@app.route('/api/payment')
+@app.route('/api/payment') # get all payment methods
 def paymentAPI():
     output = db.exe_fetch(SQL['getPayment'], 'all')
 
     return jsonify({'payment': output})
 
-@app.route('/api/staff')
+@app.route('/api/staff') # get staff list
 def staffAPI():
     output = db.exe_fetch(SQL['getStaff'], 'all')
 
     return jsonify({'staff': output})
 
-@app.route('/api/table')
+@app.route('/api/table') # get table list and status
 def tableAPI():
     output = db.exe_fetch(SQL['getTable'], 'all')
     
     return jsonify({'table': output})
 
-@app.route('/api/food')
+@app.route('/api/food') # get food by id
 def allFoodAPI():
     condition = ''
     food = request.args.get('food')
@@ -93,7 +97,7 @@ def allFoodAPI():
     
     return jsonify({ 'food': output })
 
-@app.route('/api/food_remark')
+@app.route('/api/food_remark') # get the remark of food
 def food_remarkAPI():
     condition = ''
     food = request.args.get('food')
@@ -107,7 +111,7 @@ def food_remarkAPI():
 
     return jsonify({ 'food_remark': output})
 
-@app.route('/api/combo_choice')
+@app.route('/api/combo_choice') # get foods can choice in a combo
 def combo_choiceAPI():
     condition = ''
     combo = request.args.get('combo')
@@ -118,7 +122,7 @@ def combo_choiceAPI():
 
     return jsonify({ 'combo_choice': output })
 
-@app.route('/api/combo_choice_info')
+@app.route('/api/combo_choice_info') # get detail info of the combo choice
 def combo_choice_infoAPI():
     condition = ''
     food = request.args.get('food')
@@ -136,7 +140,7 @@ def combo_choice_infoAPI():
 
     return jsonify({ 'combo_choice_info': output })
 
-@app.route('/api/combo_person')
+@app.route('/api/combo_person') # get food max. qty in a combo
 def combo_personAPI():
     condition = ''
     combo = request.args.get('combo')
@@ -176,14 +180,32 @@ def cook_list():
 
     return jsonify({'cook_list': cook_list})
 
+@app.route('/api/member_membership', methods=['POST'])
+def member_member():
+    print('MEMBER: ----------------------------')
+    print(request.json)
+    if (request.json.get('member')):
+        membership = db.exe_fetch('SELECT a.membership_name from membership a, members b WHERE a.membership_id = b.membership and member_id = \'%s\''%request.json.get('member'))
+        print(membership)
+        return jsonify({'membership': membership})
+
+    return jsonify({'result': 'error'})
+
+@app.route('/api/membership', methods=['GET'])
+def membership():
+    membership = db.exe_fetch('Select * from membership', 'all')
+    return jsonify({'membership': membership})
+
 # API end
+
+
 
 @app.route('/loginpage')
 @cross_origin()
 def loginpage():
     return render_template("loginpage.html")
 
-@app.route('/login', methods = ["POST"]) #Login process
+@app.route('/login', methods = ["POST"]) #Login process for members
 @cross_origin()
 def user_login():
     loginInfo = request.json.get('login')
@@ -193,16 +215,23 @@ def user_login():
     if member_password != None:
         if member_password[0] == loginInfo.get('password'):
             session['member'] = loginInfo.get('id')
+            table = session.get('table')
+            order_id = db.exe_fetch("SELECT a.order_id from order_table a, orders b WHERE a.order_id = b.order_id and b.order_state = 'in sit' and a.table_id = '%s'"%table)
+            print(order_id)
+            db.cursor.execute("Update orders set member = '%s' where order_id = '%s'"%(loginInfo.get('id'), order_id.get('ORDER_ID')))
+            db.cursor.execute("commit")
+            socketio.emit('reloadbill', room=session.get(table))
+
             return jsonify({ 'result': 'Success' })
 
     return jsonify({'result':'Error'})
 
-@app.route('/tableloginpage') #Login process
+@app.route('/tableloginpage') #Login page for table
 @cross_origin()
 def tableloginpage():
     return render_template("tableloginpage.html")
 
-@app.route('/tablelogin', methods = ["POST"]) #Login process
+@app.route('/tablelogin', methods = ["POST"]) #Login process for table
 @cross_origin()
 def tablelogin():
     table = request.form['Table']
@@ -224,12 +253,12 @@ def member_logout():
 
     return jsonify({ 'result': 'success' })
 
-@app.route('/staffloginpage')
+@app.route('/staffloginpage') #Login page for staff
 @cross_origin()
 def staffloginpage():
     return render_template("staffloginpage.html")
 
-@app.route('/stafflogin', methods = ["post"])
+@app.route('/stafflogin', methods = ["post"]) # Login process of staff
 @cross_origin()
 def stafflogin():
     staff = request.form['Staff']
@@ -245,9 +274,8 @@ def stafflogin():
 def stafflogout():
     if session.get('staff') != None:
         session.pop('staff')
-        return jsonify({ 'result': 'success' })
-
-    return jsonify({ 'result': 'error' })
+        return redirect(url_for('staff'))
+    return jsonify({'result':'Error'})
 
 @app.route('/QRlogin', methods = ["POST"]) #QRLogin process
 @cross_origin()
@@ -335,7 +363,7 @@ def SESSION():
     ses.append(QR) 
     return jsonify({'table': ses[0],'member':ses[1],'staff':ses[2], 'QR':ses[3]})
 
-@app.route('/api/orderid', methods=['POST']) #get orderid by session
+@app.route('/api/orderid', methods=['POST']) #get order id by session
 @cross_origin()
 def getorderid():
     table = session.get('table')
@@ -385,6 +413,10 @@ def order_food():
                 print(remark_price)
                 db.cursor.execute(SQL['orderRemark']%(orderID,food,new_sequence,i,remark_price))
             db.cursor.execute('commit')
+            condition = "WHERE order_id = '%s'"%orderID
+            table = db.exe_fetch(SQL['getOrderTable'].format(condition=condition),'all')
+            for j in table:
+                socketio.emit('reloadbill',{'room':j.get('TABLE_ID')})
             return jsonify({'result':'Success'})
         except:
             return jsonify({'result':'error'})
@@ -428,8 +460,8 @@ def combo_order_food():
             db.cursor.execute('commit')
             condition = "WHERE order_id = '%s'"%order
             table = db.exe_fetch(SQL['getOrderTable'].format(condition=condition),'all')
-            for i in table:
-                socketio.emit('reloadbill',{'room':i.get('TABLE_ID')})
+            for k in table:
+                socketio.emit('reloadbill',{'room':k.get('TABLE_ID')})
             return jsonify({'result':'Success'})
         except:
              return jsonify({'result':'error'})
@@ -518,6 +550,10 @@ def cancel_food():
 
     if flag:
         db.cursor.execute('commit')
+        condition = "WHERE order_id = '%s'"%orderID
+        table = db.exe_fetch(SQL['getOrderTable'].format(condition=condition),'all')
+        for i in table:
+            socketio.emit('reloadbill',{'room':i.get('TABLE_ID')})
         return jsonify({'result': 'success'})
     
     return jsonify({'result': 'error'})
@@ -532,7 +568,7 @@ def finish_cook():
     
     db.cursor.execute(SQL['foodCooked']%(orderID,food,sequence))
     db.cursor.execute('commit')
-
+    socketio.emit('staffmessage',orderID + '\'s'+ food +' cooked', room='staff')
     return jsonify({'result': 'success'})
 
 @app.route('/food_served', methods = ["post"]) #served the ordered food
@@ -546,13 +582,20 @@ def food_served():
     try:
         db.cursor.execute(SQL['foodServed']%(orderID,food,sequence))
         db.cursor.execute('commit')
+        condition = "WHERE order_id = '%s'"%orderID
+        table = db.exe_fetch(SQL['getOrderTable'].format(condition=condition),'all')
+        for i in table:
+            socketio.emit('reloadbill',{'room':i.get('TABLE_ID')})
     except:
-        return jsonify({'result': 'erroe'})
+        return jsonify({'result': 'error'})
 
     return jsonify({'result': 'success'})
 
-#socket
-@socketio.on('message')
+
+
+# Socket
+
+@socketio.on('message') # for testing
 def handleMessage(msg):
     print('Message: ', msg)
     send(msg, broadcast=True)
@@ -593,11 +636,28 @@ def created_order(data):
 def reloadbill(data):
     print('reloadbill: ',data)
     emit('reloadbill','reloadbill', room=data)
+    emit('reloadbill','reloadbill', room='kitchen')
 
-#socketio
+@socketio.on('cooked')
+def cooked(data):
+    order = data['order']
+    food = data['food']
+    room = data['room']
+    print('cooked: ' + order + food + room)
+    emit('staffmessage',order + '\'s'+ food +' cooked', room=room)
+
+# Socket Edn
+
 
 if __name__ == '__main__':
     ip = input('IP: ')
     if ip == '':
+    # Start server.py in localhost:5000
         ip = '127.0.0.1'
-    socketio.run(app, debug = True, host=ip, port=5000)
+        socketio.run(app, debug = True, host=ip, port=5000)
+    else:
+    # Start server.py with https cert
+        cer = os.path.dirname(os.path.realpath(__file__))+"\ssl\certificate.crt"
+        key = os.path.dirname(os.path.realpath(__file__))+"\ssl\private.key"
+
+        socketio.run(app, debug = True, host=ip, port=5000, keyfile=key, certfile=cer)
