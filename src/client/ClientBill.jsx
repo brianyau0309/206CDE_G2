@@ -1,4 +1,5 @@
 import React from 'react'
+import { generateKeyPair } from 'crypto'
 
 const vocabulary_eng = {'Bill': 'Bill', 'Order': 'Order', 'Date': 'Date', 'Time': 'Time', 'Table': 'Table', 'Staff': 'Staff', 'Product': 'Product', 'State': 'State', 'Price': 'Price', 'Cancel': 'Cancel'}
 const vocabulary_chi = {'Bill': '單據', 'Order': '單號', 'Date': '日期', 'Time': '時間', 'Table': '桌號', 'Staff': '員工', 'Product': '產品', 'State': '狀態', 'Price': '價錢', 'Cancel': '取消'}
@@ -74,8 +75,19 @@ const BillRow = (props) => {
 export default class ClientBill extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {'bill': {}, 'vocabulary': vocabulary_eng, 'lang': 'eng'}
+    this.state = {
+      'bill': {}, 
+      'vocabulary': vocabulary_eng, 
+      'lang': 'eng',
+      'membership': 'None',
+      'membership_list': []
+    }
     this.cancel_food = this.cancel_food.bind(this)
+    this.getMemberShipList = this.getMemberShipList.bind(this)
+  }
+
+  componentDidMount() {
+    this.getMemberShipList()
   }
 
   static getDerivedStateFromProps(props, state) {
@@ -90,6 +102,10 @@ export default class ClientBill extends React.Component {
     if (props.block !== state.block) {
       return { 'block' : 'yes' }
     }
+    if (props.membership !== 'None') {
+      console.log(props.membership)
+      return { 'membership': props.membership }
+    }
   }
 
   cancel_food(order, food, seq) {
@@ -103,6 +119,16 @@ export default class ClientBill extends React.Component {
         res.json().then(result => {
           console.log(result)
           this.props.loadBill()
+        })
+      }
+    })
+  }
+
+  getMemberShipList() {
+    fetch('/api/membership').then(res => {
+      if (res.ok) {
+        res.json().then(result => {
+          this.setState({'membership_list': result.membership})
         })
       }
     })
@@ -147,8 +173,16 @@ export default class ClientBill extends React.Component {
         </ul>
         <div className="checkout_field">
           <div>{this.state.lang === 'eng' ? 'Service Charge' : '服務費'}: +10%</div>
-          <div>{this.state.lang === 'eng' ? 'Membership' : '會員'}: {this.state.bill.bill[0] ? this.state.bill.bill[0].MEMBER ? this.state.bill.bill[0].MEMBER : 'None' : 'None'}</div>
-          <div>{this.state.lang === 'eng' ? 'Total Price' : '總費用'}: {this.state.bill.bill[0] ? this.state.bill.bill[0].TOTAL_PRICE : 0}</div>
+          <div>{this.state.lang === 'eng' ? 'Membership' : '會員'}: {this.props.membership}</div>
+          <div>{this.state.lang === 'eng' ? 'Total Price' : '總費用'}: {
+          this.state.bill.bill[0] ? 
+          (this.state.bill.bill[0].TOTAL_PRICE*1.1*(
+            this.props.membership !== 'None' && this.state.membership_list.length > 0 ? 
+            this.state.membership_list.filter(membership => membership.MEMBERSHIP_NAME === this.props.membership)[0].DISCOUNT 
+            : 1)).toFixed(1)
+          : 0
+          }
+          </div>
           <button className="checkout_button" onClick={this.props.pay}>{this.state.lang === 'eng' ? 'Call Waiter' : '呼叫服務員'}</button>
         </div>
       </div>

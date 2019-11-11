@@ -21,7 +21,8 @@ export default class Client extends React.Component {
                    'PageHeight': 0,
                    'order_bill': {},
                    'block': 'yes',
-                   'socket': ''
+                   'socket': '',
+                   'membership': 'None'
                   }
     this.login = this.login.bind(this)
     this.getMemberInfo = this.getMemberInfo.bind(this)
@@ -34,6 +35,7 @@ export default class Client extends React.Component {
     this.QRlogout = this.QRlogout.bind(this)
     this.setunBlocked = this.setunBlocked.bind(this)
     this.setBlocked = this.setBlocked.bind(this)
+    this.getMemberShip = this.getMemberShip.bind(this)
   }
 
   componentDidMount() {
@@ -42,6 +44,7 @@ export default class Client extends React.Component {
     let setunBlocked = this.setunBlocked
     let setBlocked = this.setBlocked
     let loadBill = this.loadBill
+    let getMemberShip = this.getMemberShip
     socket.on('addRoom', function(data) {
       console.log(data);
     });
@@ -64,6 +67,7 @@ export default class Client extends React.Component {
     });
     socket.on('reloadbill', function(msg){
       console.log(msg);
+      getMemberShip()
       loadBill()
     });
     this.getSession()
@@ -84,13 +88,31 @@ export default class Client extends React.Component {
         res.json().then(loginResult => {
           if (loginResult.result === 'Success') {
             console.log('Success')
+            this.loadBill()
             this.getMemberInfo()
+            this.getMemberShip()
           } else {
             console.log('Fail')
           }
         })
       }
     })
+  }
+
+  getMemberShip() {
+    if (this.state.order_bill.bill[0].MEMBER) {
+      fetch('/api/member_membership', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({'member': this.state.order_bill.bill[0].MEMBER})
+      }).then(res => {
+        if (res.ok) {
+          res.json().then(result => {
+            this.setState({'membership': result.membership.MEMBERSHIP_NAME})
+          })
+        }
+      })
+    }
   }
 
   changeLang() {
@@ -146,7 +168,7 @@ export default class Client extends React.Component {
       if (res.ok) {
         res.json().then(result => {
           if (result.result === 'success') {
-            this.setState({ 'member': null })
+            this.setState({ 'member': null, 'membership': 'None' })
           } else if (result.result === 'error') {
             alert('Log out Error. Please contact the staff.')
           }
@@ -234,7 +256,7 @@ export default class Client extends React.Component {
         <label for="side_toggle" className="cover"> 
         </label> 
         <input id="bill_toggle" type="checkbox" />
-        <label for="bill_toggle" onClick={()=>console.log(this.state)}>
+        <label for="bill_toggle" onClick={this.getMemberShip}>
           <img id="bill_btn" className={(this.state.bill_btn === 'active') ? 'bill_btn_active' : 'bill_btn_deactive'} src="https://img.icons8.com/carbon-copy/100/000000/bill.png" alt="Bill Toggle Button" />
         </label>
         <ClientTop />
@@ -250,8 +272,8 @@ export default class Client extends React.Component {
             </Switch>
           </div>
         </Router>
-        <ClientSide order={this.state.order_bill.bill ? this.state.order_bill.bill[0].ORDER_ID : null} loadBill={this.loadBill} memberName={this.state.member ? this.state.member.MEMBER_SURNAME : null} loginFunc={this.login} logoutFunc={this.logout} lang={this.state.lang} changeLang={this.changeLang}/>
-        <ClientBill table={this.state.table} loadBill={this.loadBill} lang={this.state.lang} order_bill={this.state.order_bill.food ? this.state.order_bill : {'bill': [], 'food': []}} pay={this.pay} block={this.state.block} />
+        <ClientSide QR={this.state.QR} order={this.state.order_bill.bill ? this.state.order_bill.bill[0].ORDER_ID : null} loadBill={this.loadBill} memberName={this.state.member ? this.state.member.MEMBER_SURNAME : null} loginFunc={this.login} logoutFunc={this.logout} lang={this.state.lang} changeLang={this.changeLang}/>
+        <ClientBill membership={this.state.membership} table={this.state.table} loadBill={this.loadBill} lang={this.state.lang} order_bill={this.state.order_bill.food ? this.state.order_bill : {'bill': [], 'food': []}} pay={this.pay} block={this.state.block} />
       </div>
     )
   }

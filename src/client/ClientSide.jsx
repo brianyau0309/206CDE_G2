@@ -53,24 +53,26 @@ export default class ClientSide extends React.Component {
           <li className="side_li" onClick={this.props.logoutFunc}>
             {this.state.lang === 'eng' ? 'Member Logout' : '會員登出'}
           </li>
-          :
+          : this.props.QR ?
+            ''
+          : 
           <li className="side_li">
             <input type="checkbox" id="login_toggle"/>
             <label for="login_toggle">
               {this.state.vocabulary.Login}
             </label>
             <form className="login_panel">
-              <table>
+              <table style={{margin: "0 auto"}}>
                 <tr>
-                  <td className="ta-r">Member ID: </td>
+                  <td className="ta-r">{this.state.lang === 'eng' ? 'Member ID' : '會員ID' }: </td>
                   <td className="ta-l"><input id="login_id"type="text"/></td>
                 </tr>
                 <tr>
-                  <td className="ta-r">Password: </td>
+                  <td className="ta-r">{this.state.lang === 'eng' ? 'Password' : '會員密碼' }: </td>
                   <td className="ta-l"><input id="login_password" type="password"/></td>
                 </tr>
                 <tr>
-                  <td colspan='2'><button onClick={this.props.loginFunc}>Login</button></td>
+                  <td colspan='2'><button style={{background: 'red', border: '0', color: 'white', padding: '3px', fontSize: '3vh'}} onClick={this.props.loginFunc}>{this.state.lang ? 'Login' : '登入'}</button></td>
                 </tr>
               </table>
             </form>

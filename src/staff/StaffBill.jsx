@@ -262,7 +262,7 @@ export default class StaffBill extends React.Component {
             </select>
           </div>
           <div>Membership: {this.state.bill.bill ? this.state.bill.bill[0].MEMBER ? this.state.bill.bill[0].MEMBER : 'None' : 'None'}</div>
-          <div>Total Price: {this.state.bill.bill && this.state.payment_rate != '' ? (this.state.bill.bill[0].TOTAL_PRICE*1.1*this.state.payments.filter(p => p.PAYMENT_METHOD_ID === this.state.payment_rate)[0].PRICE_RATE / 100).toFixed(2) : 0}</div>
+          <div>Total Price: {this.state.bill.bill && this.state.payment_rate != '' ? (this.state.bill.bill[0].TOTAL_PRICE*1.1*this.state.payments.filter(p => p.PAYMENT_METHOD_ID === this.state.payment_rate)[0].PRICE_RATE / 100).toFixed(1) : 0}</div>
           <button className="checkout_button" onClick={this.closeOrder}>Receive Payment</button>
         </div>
         <StaffComboChoice order={this.state.bill.bill ? this.state.bill.bill[0].ORDER_ID : ''} loadBill={this.props.openBill} open={this.state.combo_toggle} close={this.closeCombo} combo={this.state.combo_id} />
