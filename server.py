@@ -7,12 +7,16 @@ from flask_cors import cross_origin
 from OracleConn import OracleConn, SQL
 from flask_socketio import SocketIO, send, join_room, leave_room, emit
 from datetime import datetime
+from werkzeug.utils import secure_filename
 
+UPLOAD_FOLDER = os.getcwd() + '/static' + '/image' + '/food'
+ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 db = OracleConn()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'SecretKeyHERE!'
 app.config['JSON_AS_ASCII'] = False
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 socketio = SocketIO(app)
 
@@ -194,7 +198,7 @@ def loginpage():
 def user_login():
     loginInfo = request.json.get('login')
     db.cursor.execute("SELECT member_password FROM members WHERE member_id = '%s'"%loginInfo.get('id'))
-    member_password = db.cursor.fetchone()
+    member_password = db.fetchone()
     
     if member_password != None:
         if member_password[0] == loginInfo.get('password'):
@@ -625,6 +629,137 @@ def cooked(data):
 
 # Socket Edn
 
+# Admin
+
+@app.route("/admin_index")
+def admin_index():
+    if session.get('admin'):
+        return render_template("admin_index.html")
+    else:
+        return render_template("admin_login.html")
+
+@app.route("/admin_food")
+def admin_food():
+    sql = "select food_id, food_eng_name, food_chi_name,food_price,available from food"
+    result = db.exe_fetch(sql,'all')
+    return render_template("food.html", result = result)
+
+@app.route("/admin_combo")
+def admin_combo():
+    sql = "select COMBO_ID, FOOD_ID, TYPES, PRICE from combo_price"
+    result = db.exe_fetch(sql,'all')
+    print(type(result))
+    sql2 = "select COMBO, PERSON, CATEGORY, QUANTITY from combo_person"
+    result2 = db.exe_fetch(sql2,'all')
+    return render_template("combo.html", result = result, result2 = result2)
+
+@app.route("/admin_order")
+def admin_order():
+    sql = "select ORDER_ID, MEMBER, STAFF, PAYMENT_METHOD, ORDER_STATE, ORDER_DATE from orders"
+    result = db.exe_fetch(sql,'all')
+    return render_template("order.html", result = result)
+    
+
+@app.route("/admin_update", methods=['GET', 'POST'])
+def admin_update():
+    if 'fid' in request.args:
+        foodid = request.args['fid']
+        sql1 = "select food_id, food_eng_name, food_chi_name,food_price,available from food"
+        result = db.exe_fetch(sql,'all')
+
+    if request.method == "POST":
+        food_id = request.form['id']
+        engname = request.form['name']
+        cname = request.form['cname']
+        price = request.form['price']
+        print(food_id)
+        print(engname)
+        print(cname)
+        sql = "update food SET food_eng_name = '{0}', food_chi_name = '{1}',food_price = {2} where food_id ='{3}'"
+        execute(sql.format(engname, cname, price, food_id))
+        execute('commit')
+        return redirect(url_for("admin_food"))
+
+    return render_template("update.html",foodid = foodid,result=result)
+    
+
+@app.route("/admin_delete", methods=['GET','POST'])
+def admin_delete():
+    if 'fid' in request.args:
+        foodid = request.args['fid']
+        db.exe_fetch("SELECT available from food where food_id ='%s'"%foodid,'one')
+        available = db.exe_fetch("SELECT available from food where food_id ='%s'"%foodid,'one')
+        if available[0] == 'Y':
+            sql = "update food set available = 'N' where food_id = '{0}'".format(foodid)
+            execute(sql)
+            execute('commit')
+        if available[0] == 'N':
+            sql = "update food set available = 'Y' where food_id = '{0}'".format(foodid)
+            execute(sql)
+            execute('commit')
+
+@app.route("/admin_add", methods=['POST'])
+def admin_add():
+    food_id = request.form['ID']
+    food_Catecory = request.form['Catecory']
+    food_Eng_name = request.form['Eng_name']
+    food_Chi_name = request.form['Chi_name']
+    food_Disscription_Eng = request.form['Disscription_Eng']
+    food_Disscription_Chi = request.form['Disscription_Chi']
+    food_Price = request.form['Price']
+    print(food_Chi_name)
+    food_Vegetarian = request.form['Vegetarian']
+    sql = "insert into food values('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', {6}, '{7}', 'Y')"
+    execute(sql.format(food_id, food_Catecory, food_Eng_name, '一', food_Disscription_Eng, '一', food_Price, food_Vegetarian))
+    execute('commit')
+    return redirect(url_for("food"))
+
+@app.route("/admin_loginpage")
+def admin_loginpage():
+    return render_template("admin_login.html")
+
+@app.route("/admin_login", methods=['POST'])
+def admin_login():
+    staff_id = request.form['staff_id']
+    password = request.form['password']
+    sql = "select staff_id ,staff_password from staff where staff_id = '{0}' and staff_password = '{1}'"
+    adminInfo = db.exe_fetch(sql.format(staff_id, password),'all')
+    print(adminInfo)
+    if adminInfo != []:
+        session['admin'] = 'admin'
+        return redirect(url_for('admin_index'))
+    else:
+        return redirect(url_for('admin_loginpage'))
+
+@app.route("/admin_logout", methods=['POST'])
+def admin_logout():
+     session.pop('admin', None)
+     return redirect(url_for('admin_loginpage'))
+
+@app.route('/admin_upload', methods=['GET', 'POST'])
+def admin_upload():
+    if request.method == 'POST':
+        file = request.files['image']
+        name = request.form['newname']
+        if Path(os.getcwd() + '/static/image/food' + str(name) + '.png').exists():
+            return render_template("admin_index.html")
+        elif Path(os.getcwd() + '/static/image/food' + str(name) + '.jpg').exists():
+            return render_template("admin_index.html")
+        elif Path(os.getcwd() + '/static/image/food' + str(name) + '.jpeg').exists():
+            return render_template("admin_index.html")
+        else:
+            if 'image' not in request.files:
+                return render_template("admin_index.html")
+            file = request.files['image']
+            if file.filename == "":
+                return render_template("admin_index.html")
+            if name == "":
+                return render_template("admin_index.html")
+                filename = str(name) + '.' + silename(file.filename).split('.')[-1]
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                return render_template("admin_index.html")
+
+#Admin End
 
 if __name__ == '__main__':
     ip = input('IP: ')

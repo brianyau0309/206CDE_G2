@@ -1,0 +1,72 @@
+<html>
+<HEAD>
+<TITLE>admin page</TITLE>	
+<link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='index.css') }}" >
+</HEAD>
+<body>
+<div id="header">
+<center><a href="{{url_for('admin_index')}}"><img src="{{ url_for('static',filename='admin_icon.png') }}" alt="logo" id="adminlogo"></a><br>hello, this is a admin page
+</center>
+
+
+
+
+</div>
+
+<div id="sidebar">
+<ul>
+	<li>
+	   <a href="{{ url_for('admin_food') }}">food</a>
+	</li>
+	<li>
+        <a href="{{ url_for('admin_combo') }}">combo</a>   
+    </li>
+	<li>
+        <a href="#">staff</a>   
+    </li>
+
+</ul>
+
+
+
+</div>
+
+    {% if result %}
+  <table id="combo_price">
+    {% for i in result %}
+    <tr>
+    <td style="width: 10%">{{ i.get('COMBO_ID') }}</td>
+    <td style="width: 10%">{{ i.get('FOOD_ID') }}</td>
+    <td style="width: 10%">{{ i.get('TYPES') }}</td>
+    <td style="width: 10%">{{ i.get('PRICE') }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+
+  {% if result2 %}
+  <table id="combo_person">
+    {% for i in result2 %}
+    <tr>
+    <td style="width: 10%">{{ i.get('COMBO') }}</td>
+    <td style="width: 10%">{{ i.get('PERSON') }}</td>
+    <td style="width: 10%">{{ i.get('CATEGORY') }}</td>
+    <td style="width: 10%">{{ i.get('QUANTITY') }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+
+
+    
+
+
+
+
+
+
+
+
+</div>
+</body>
+</html>

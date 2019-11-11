@@ -1,0 +1,45 @@
+<html>
+<HEAD>
+<TITLE>admin page</TITLE>	
+<link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='index.css') }}" >
+</HEAD>
+<BODY>
+<div id="header">
+<center><img src="{{ url_for('static',filename='admin_icon.png') }}"" alt="logo" id="adminlogo"><br>hello, this is a admin page
+</center>
+
+
+
+
+</div>
+
+<div id="sidebar">
+<ul>
+	<li>
+	<a href="{{ url_for('admin_food') }}">food</a>
+	</li>
+	<li>combo</li>
+	<li>staff</li>
+
+</ul>
+
+
+
+</div>
+
+<div id="data"><br>
+<center><h3> hello </h3><form action="/admin_logout" method="POST">
+	<button type="submit">Logout</button>
+</form>
+<p></p>
+</center>
+
+
+
+
+
+
+
+</div>
+</BODY>
+</html>

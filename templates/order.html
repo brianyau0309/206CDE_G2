@@ -1,0 +1,64 @@
+<html>
+<HEAD>
+<TITLE>admin page</TITLE>	
+<link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='index.css') }}" >
+</HEAD>
+<body>
+<div id="header">
+<center><a href="{{url_for('index')}}"><img src="{{ url_for('static',filename='admin_icon.png') }}" alt="logo" id="adminlogo"></a><br>hello, this is a admin page
+</center>
+
+
+
+
+</div>
+
+<div id="sidebar">
+<ul>
+	<li>
+	   <a href="{{ url_for('admin_food') }}">food</a>
+	</li>
+	<li>
+        <a href="{{ url_for('admin_combo') }}">combo</a>   
+    </li>
+  <li>
+        <a href="{{ url_for('admin_order') }}">order data</a>   
+    </li>
+	<li>
+        <a href="{{ url_for('staff') }}">staff</a>   
+    </li>
+
+</ul>
+
+
+
+</div>
+
+    {% if result %}
+  <table id="order">
+    {% for i in result %}
+    <tr>
+    <td style="width: 10%">{{ i.ORDER_ID }}</td>
+    <td style="width: 10%">{{ i.MEMBER }}</td>
+    <td style="width: 10%">{{ i.STAFF }}</td>
+    <td style="width: 10%">{{ i.PAYMENT_METHOD }}</td>
+    <td style="width: 10%">{{ i.ORDER_STATE }}</td>
+    <td style="width: 10%">{{ i.ORDER_DATE }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+
+
+    
+
+
+
+
+
+
+
+
+</div>
+</body>
+</html>

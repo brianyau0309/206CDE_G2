@@ -1,0 +1,104 @@
+<html>
+<HEAD>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<TITLE>admin page</TITLE>	
+<link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='index.css') }}" >
+</HEAD>
+<body>
+<div id="header">
+<center><a href="{{url_for('admin_index')}}"><img src="{{ url_for('static',filename='admin_icon.png') }}" alt="logo" id="adminlogo"></a><br>hello, this is a admin page
+</center>
+
+
+
+
+</div>
+
+<div id="sidebar">
+<ul>
+	<li>
+	<a href="{{ url_for('admin_food') }}">food</a>
+	</li>
+	<li>
+    <a href="{{ url_for('admin_combo') }}">combo</a>
+    </li>
+	<li>staff</li>
+
+</ul>
+
+
+
+</div>
+
+<div id="data"><br>
+    
+    <h1>Food List</h1>
+    <p>Table</p><button onclick="showaddfood()">Add food</button>
+    <script>
+    function showaddfood() {
+    var x = document.getElementById("add_food");
+    if (x.style.display === "none") {
+    x.style.display = "block";
+    } else {
+        x.style.display = "none";
+        }
+    }
+    </script>
+    <div id="add_food" style="display:none">
+    <form action="/add" method="post">
+        Food_id: <input type="text" name="ID"><br>
+        Catecory: <input type="text" name="Catecory"><br>
+        Eng_name: <input type="text" name="Eng_name"><br>
+        Chi_name: <input type="text" name="Chi_name"><br>
+        Disscription_Eng: <input type="text" name="Disscription_Eng"><br>
+        Disscription_Chi: <input type="text" name="Disscription_Chi"><br>
+        Price: <input type="number" name="Price"><br>
+        Vegetarian: <input type="text" name="Vegetarian"><br>
+        <button type="submit">Add Food</button>
+      </form>
+    </div>
+    <table class="table">
+        <thead>
+            <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Eng_name</th>
+            <th scope="col">Chi_name</th>
+            <th scope="col">price</th>
+            <th scope="col">available</th>
+            <th scope="col">update</th>
+            <th scope="col">delete(disable)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in result %}
+            <tr>
+            <th scope="row">{{ i[0] }}</th>
+            <td>{{ i[1] }}</td>
+            <td>{{ i[2] }}</td>
+            <td>{{ i[3] }}</td>
+            <td>{{ i[4] }}</td>
+            <td><a href="/update?fid={{ i[0] }}"><h3>update now</h3></a></td>
+            {% if i[4] == 'Y' %}
+            <td><a href="/delete?fid={{ i[0] }}"><h3>disable food</h3></a></td>
+            {% endif %}
+            {% if i[4] == 'N' %}
+            <td><a href="/delete?fid={{ i[0] }}"><h3>able food</h3></a></td>
+            {% endif %}
+
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
+
+
+
+
+
+
+</div>
+</body>
+</html>
