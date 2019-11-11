@@ -551,6 +551,20 @@
   height: 100%;
   background:rgb(255, 255, 255);
 }
+.Blocked > * {
+  z-index: 99;
+  margin: 0 auto;
+  display: block;
+}
+.Blocked > img {
+  margin-top: 10vh;
+  width: 90vw;
+  height: 42vh;
+}
+.Blocked > p {
+  font-size:5vh;
+  text-align: center;
+}
 
 @media only screen and (min-width: 780px) {
   .Client {
@@ -599,6 +613,12 @@
   #bill_btn {
     display: none;
   }
+  #bill_toggle:checked ~ .ClientBill {
+    transform: translateX(0%);
+  }
+  #side_toggle:checked ~ .ClientBill {
+    transform: translateX(30vw);  
+  }
   .translateX-3 {
     transition: transform .35s;
   }
@@ -640,17 +660,26 @@
   .checkout_field {
     width: 25vw;
   }
-  .Blocked{
-    z-index: 99;
-    position:fixed;
-    padding:0;
-    margin:0;
-  
-    top:0;
-    left:0;
-  
-    width: 100%;
-    height: 100%;
-    background:rgb(255, 255, 255);
+  .remark_title > img,
+  .choice_title > img {
+    margin-top: 1vw;
+    margin-left: 1.5vw;
+    width: 4vw;
+    height: 4vw;
+    float: left;
+    transform: rotate(-90deg);
+  }
+  .remark_title > h1,
+  .choice_title > h1 {
+    transform: translateX(-20%);
+    font-size: 4vw;
+  }
+  .combo_food_container {
+    width: 22%;
+    height: 28vh;
+  }
+  .Blocked > img {
+    widows: 90vw;
+    height: 75vh;
   }
 }

@@ -22,7 +22,7 @@ socketio = SocketIO(app)
 
 @app.route('/sw.js') # path to service worker
 def sw():
-    return send_file(os.path.join(os.path.dirname(__file__),"\\static\\sw.js"))
+    return send_file(os.path.dirname(os.path.realpath(__file__))+"\static\sw.js")
 
 @app.route('/')
 def hello():
@@ -184,6 +184,22 @@ def cook_list():
 
     return jsonify({'cook_list': cook_list})
 
+@app.route('/api/member_membership', methods=['POST'])
+def member_member():
+    print('MEMBER: ----------------------------')
+    print(request.json)
+    if (request.json.get('member')):
+        membership = db.exe_fetch('SELECT a.membership_name from membership a, members b WHERE a.membership_id = b.membership and member_id = \'%s\''%request.json.get('member'))
+        print(membership)
+        return jsonify({'membership': membership})
+
+    return jsonify({'result': 'error'})
+
+@app.route('/api/membership', methods=['GET'])
+def membership():
+    membership = db.exe_fetch('Select * from membership', 'all')
+    return jsonify({'membership': membership})
+
 # API end
 
 
@@ -203,6 +219,13 @@ def user_login():
     if member_password != None:
         if member_password[0] == loginInfo.get('password'):
             session['member'] = loginInfo.get('id')
+            table = session.get('table')
+            order_id = db.exe_fetch("SELECT a.order_id from order_table a, orders b WHERE a.order_id = b.order_id and b.order_state = 'in sit' and a.table_id = '%s'"%table)
+            print(order_id)
+            db.cursor.execute("Update orders set member = '%s' where order_id = '%s'"%(loginInfo.get('id'), order_id.get('ORDER_ID')))
+            db.cursor.execute("commit")
+            socketio.emit('reloadbill', room=session.get(table))
+
             return jsonify({ 'result': 'Success' })
 
     return jsonify({'result':'Error'})
