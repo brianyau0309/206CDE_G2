@@ -74,7 +74,7 @@ const BillRow = (props) => {
 export default class ClientBill extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {'bill': {}, 'vocabulary': vocabulary_eng, 'lang': 'eng' ,'block': null}
+    this.state = {'bill': {}, 'vocabulary': vocabulary_eng, 'lang': 'eng'}
     this.cancel_food = this.cancel_food.bind(this)
   }
 
@@ -115,7 +115,6 @@ export default class ClientBill extends React.Component {
     }
     return(
       <div className="ClientBill translateX-3">
-        {this.state.block ? <div className="Blocked"></div>: ''}
         <div className="bill_title">
           <label for="bill_toggle">
             <img src="https://img.icons8.com/carbon-copy/100/000000/back.png"/>
@@ -131,7 +130,7 @@ export default class ClientBill extends React.Component {
             <td>{this.state.vocabulary.Time}: {this.state.bill.bill.length !== 0 ? new Date(this.state.bill.bill[0].ORDER_DATE).toLocaleTimeString() : ''}</td>
           </tr>
           <tr>
-            <td>{this.state.vocabulary.Table}: {this.state.bill.bill.length !== 0 ? this.state.bill.bill[0].ORDER_STATE : ''}</td>
+            <td>{this.state.vocabulary.Table}: {this.props.table}</td>
             <td>{this.state.vocabulary.Staff}: {this.state.bill.bill.length !== 0 ? this.state.bill.bill[0].STAFF_NAME : ''}</td>
           </tr>
         </table>
@@ -147,10 +146,10 @@ export default class ClientBill extends React.Component {
           {bill_detail}
         </ul>
         <div className="checkout_field">
-          <div>Service Charge: +10%</div>
-          <div>Membership: {this.state.bill.bill[0] ? this.state.bill.bill[0].MEMBER ? this.state.bill.bill[0].MEMBER : 'None' : 'None'}</div>
-          <div>Total Price: {this.state.bill.bill[0] ? this.state.bill.bill[0].TOTAL_PRICE : 0}</div>
-          <button className="checkout_button" onClick={this.props.pay}>Pay</button>
+          <div>{this.state.lang === 'eng' ? 'Service Charge' : '服務費'}: +10%</div>
+          <div>{this.state.lang === 'eng' ? 'Membership' : '會員'}: {this.state.bill.bill[0] ? this.state.bill.bill[0].MEMBER ? this.state.bill.bill[0].MEMBER : 'None' : 'None'}</div>
+          <div>{this.state.lang === 'eng' ? 'Total Price' : '總費用'}: {this.state.bill.bill[0] ? this.state.bill.bill[0].TOTAL_PRICE : 0}</div>
+          <button className="checkout_button" onClick={this.props.pay}>{this.state.lang === 'eng' ? 'Call Waiter' : '呼叫服務員'}</button>
         </div>
       </div>
     )

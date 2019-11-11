@@ -14,6 +14,8 @@ export default class Client extends React.Component {
     this.state = { 
                    'orderID':null,
                    'member': null, 
+                   'QR': false,
+                   'table': '',
                    'lang': 'eng',
                    'bill_btn': 'active', 
                    'PageHeight': 0,
@@ -119,6 +121,8 @@ export default class Client extends React.Component {
       if (res.ok) {
         res.json().then(result => {
           console.log(result.table)
+          if (result.QR) {this.setState({ 'QR': true })}
+          if (result.table) {this.setState({ 'table': result.table })}
           let socket = this.state.socket
           let logout = this.logout
           let QRlogout = this.QRlogout
@@ -152,7 +156,7 @@ export default class Client extends React.Component {
   }
 
  QRlogout(){
-    fetch(`/QRlogout`).then(res => {
+    fetch(`/QRlogout`, {method: 'POST'}).then(res => {
       if (res.ok) {
         res.json().then(result => 
           {console.log(result)}
@@ -221,8 +225,11 @@ export default class Client extends React.Component {
     return(
       <div className="Client"> 
       {this.state.block ? 
-       <div className="Blocked"><p>Please wait for the staff come</p></div>
-      : '' }
+        <div className="Blocked">
+          <img src={window.location.origin + "/static/image/client/cover.jpeg"}/>
+          <p>Please wait for the staff come</p>
+        </div>
+        : '' }
         <input id="side_toggle" type="checkbox" /> 
         <label for="side_toggle" className="cover"> 
         </label> 
@@ -243,8 +250,8 @@ export default class Client extends React.Component {
             </Switch>
           </div>
         </Router>
-        <ClientSide loadBill={this.loadBill} memberName={this.state.member ? this.state.member.MEMBER_SURNAME : null} loginFunc={this.login} logoutFunc={this.logout} lang={this.state.lang} changeLang={this.changeLang}/>
-        <ClientBill loadBill={this.loadBill} lang={this.state.lang} order_bill={this.state.order_bill.food ? this.state.order_bill : {'bill': [], 'food': []}} pay={this.pay} block={this.state.block} />
+        <ClientSide order={this.state.order_bill.bill ? this.state.order_bill.bill[0].ORDER_ID : null} loadBill={this.loadBill} memberName={this.state.member ? this.state.member.MEMBER_SURNAME : null} loginFunc={this.login} logoutFunc={this.logout} lang={this.state.lang} changeLang={this.changeLang}/>
+        <ClientBill table={this.state.table} loadBill={this.loadBill} lang={this.state.lang} order_bill={this.state.order_bill.food ? this.state.order_bill : {'bill': [], 'food': []}} pay={this.pay} block={this.state.block} />
       </div>
     )
   }

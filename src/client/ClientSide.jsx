@@ -51,7 +51,7 @@ export default class ClientSide extends React.Component {
         <ul className="side_list">
           {this.props.memberName ? 
           <li className="side_li" onClick={this.props.logoutFunc}>
-            Logout
+            {this.state.lang === 'eng' ? 'Member Logout' : '會員登出'}
           </li>
           :
           <li className="side_li">
@@ -92,7 +92,7 @@ export default class ClientSide extends React.Component {
             </form>
           </li>
           <li style={{paddingTop: '8vh'}}>
-            <div>Order by Phone!</div>
+          <div>{this.state.lang === 'eng' ? 'Order by Phone' : '手機點餐'}: {this.props.order}</div>
             <img className="qr" src={window.location.origin+'/static/image/qr.png'}></img>
           </li>
         </ul>

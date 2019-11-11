@@ -1,7 +1,7 @@
 .cook_list {
   display: flex;
   flex-flow: column wrap;
-  height: 85vh;
+  height: 90vh;
 }
 .kitchen_container {
   display: inline-block;
