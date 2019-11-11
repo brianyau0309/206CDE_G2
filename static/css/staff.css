@@ -50,6 +50,7 @@
 }
 .StaffMain {
   grid-area: main;
+  background-color: #CFD8DC;
 }
 .StaffTable {
   width: 100%;

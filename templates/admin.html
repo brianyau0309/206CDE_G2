@@ -1,0 +1,35 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="yes">
+    <title>PizzaHutAdminpage</title>
+
+    <link rel="stylesheet" href="{{url_for('static', filename='css/admin.css')}}">
+</head>
+
+<body>
+
+<form action="upload.php" method="post" enctype="multipart/form-data">
+    Select image to upload:
+    <input type="file" name="fileToUpload" id="fileToUpload">
+    <input type="submit" value="Upload Image" name="submit">
+</form>
+    
+<form action="/action_page.php">
+    <input type="file" name="pic" accept="image/*">
+    <input type="submit">
+  </form>
+  
+</body>
+
+
+
+
+
+
+
+</body>
+</html>
