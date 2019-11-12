@@ -2,12 +2,42 @@
 <html>
   <header>
     <title>Login</title>
+    <style>
+    body{
+      margin-top: 50px;
+      background-color: firebrick;
+    }
+    
+    #header{
+      text-align: center;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 25px;
+    }
+
+    #login{
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 18px;
+      text-align: center;
+
+    }
+
+    #logo{
+      border: 3px solid black;
+      border-radius: 40px;
+    }
+    </style>
   </header>
   <body>
+    <div id="header"> 
+    <img src="{{url_for('static',filename='image/client_icons/icon-221x203.png')}}" id="logo">
     <h1>Table login</h1>
+    </div>
+    <div id="login">
     <form action="{{ url_for('tablelogin') }}" method="post">
-      <input type="text" name="Table" placeholder="Table No."/>
+      Plase Enter Your Table Number:
+      <br><input type="text" name="Table" placeholder="Table No."/>
       <input type="submit"  name="submit"></input>
-  </form>
+    </form>
+    </div>
   </body>
 </html>

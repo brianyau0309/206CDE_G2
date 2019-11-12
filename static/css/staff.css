@@ -16,11 +16,13 @@
   overflow: hidden;
 }
 .StaffTop {
+  text-align: center;
   grid-area: top;
   font-family:Arial, Helvetica, sans-serif;
   font-weight:bolder;
-  font-size: 25px;
-  background-color: #607D8B
+  font-size: 30px;
+  background-color: #607D8B;
+  color: white;
 }
 .StaffMenu {
   grid-area: menu;
@@ -58,6 +60,14 @@
   font-family:Arial, Helvetica, sans-serif;
   font-weight:bolder;
   background-color: #CFD8DC;
+}
+
+.StaffMessage{
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 50px;
+  text-align: center;
+
+
 }
 .table_table {
   width: 100%;
