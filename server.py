@@ -569,7 +569,14 @@ def finish_cook():
     db.cursor.execute(SQL['foodCooked']%(orderID,food,sequence))
     db.cursor.execute('commit')
     food_name = db.exe_fetch("SELECT food_eng_name FROM food WHERE food_id = '%s'"%food).get('FOOD_ENG_NAME')
-    socketio.emit('staffmessage',orderID + '\'s'+ ' ' + food_name +' cooked', room='staff')
+    remark = db.exe_fetch("SELECT a.remark_eng, a.option_eng, b.remark from food_remark a, order_remark b where a.remark_id=b.remark and a.food = b.food and b.orders = '%s' and b.food='%s' and b.order_sequence=%d"%(orderID,food,sequence),'all')
+    message = orderID + '\'s'+ ' ' + food_name + '(' 
+    for i in remark:
+        remark_name = i.get('REMARK_ENG')
+        option = i.get('OPTION_ENG')
+        message+=(option + ' ' + remark_name + ', ')
+    message+=')'
+    socketio.emit('staffmessage',message +' cooked', room='staff')
     return jsonify({'result': 'success'})
 
 @app.route('/food_served', methods = ["post"]) #served the ordered food
