@@ -75,7 +75,7 @@ export default class StaffTable extends React.Component {
   }
 
   resetCheckbox() {
-    let temp = document.querySelectorAll('.table_select_box > input')
+    let temp = document.querySelectorAll('.table_selector > input')
     for (let i = 0; i < temp.length; i++) { temp[i].checked = false }
   }
 

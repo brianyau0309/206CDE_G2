@@ -647,8 +647,12 @@
   }
   .bill_info {
     font-size: 1.5vh;
-  }.bill_detail {
+  }
+  .bill_detail {
     font-size: 1vh;
+  }
+  .bill_detail_list {
+    padding-bottom: 20vh;
   }
   .bill_detail.first {
     font-size: 1.2vh;
