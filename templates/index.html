@@ -2,11 +2,29 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <title>Test</title>
+        <title>Navigation Page</title>
         <link rel="stylesheet" href="{{url_for('static', filename='css/index.css')}}">
+    <style>
+    body{
+        background-color: #d32f2f;
+    }
+    
+    #enter{
+        text-align: center;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 25px;
+    }
+    </style>
     </head>
+    
     <body>
-        Content of the document
+        <div id="enter">
+                <img src="{{url_for('static',filename='image/client_icons/icon-221x203.png')}}" id="logo">
+        <h1>Navigation</h1>
+        <br><a href="{{ url_for('loginpage') }}">Client</a>
+        <br><a href="{{ url_for('staffloginpage') }}">Staff</a>
+        <br><a href="{{ url_for('kitchenloginpage') }}">Kitchen</a>
+        </div>
         <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
         <script type="text/javascript" charset="utf-8">
             window.onload = function() {

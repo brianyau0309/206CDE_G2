@@ -2,13 +2,42 @@
 <html>
   <header>
     <title>Staff Login</title>
+    <style>
+    body{
+      background-color: lightsteelblue;
+    }
+    
+    #header{
+      margin-top: 50px;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: small;
+      text-align: center;
+    }
+
+    #login{
+      font-family: Arial, Helvetica, sans-serif;
+      text-align: center;
+    }
+    
+    #logo{
+      border: 3px solid black;
+      border-radius: 40px;
+    }
+    </style>
   </header>
   <body>
+    <div id= header>
+  
+    <img src="{{url_for('static',filename='image/client_icons/icon-221x203.png')}}" id="logo">
     <h1>Staff only</h1>
+    </div>
+
+    <div id = login>
     <form action="{{ url_for('stafflogin') }}" method="post">
-      <input type="text" name="Staff" placeholder="Staff No."/>
-      <input type="password" name="Password" placeholder="Password"/>
-    <input type="submit">staff login</input>
+      <br>Staff number:<input type="text" name="Staff" placeholder="Staff No."/>
+      <br>Password&nbsp;&nbsp;&nbsp;&nbsp;:<input type="password" name="Password" placeholder="Password"/>
+    <br><input value="login" type="submit"></input>
   </form>
+    </div>
   </body>
 </html>
