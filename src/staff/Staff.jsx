@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Switch, NavLink } from 'react-router-do
 
 import StaffTable from './StaffTable.jsx'
 import StaffMessage from './StaffMessage.jsx'
+import StaffHome from './StaffHome.jsx'
 
 export default class Staff extends React.Component {
   constructor() {
@@ -10,10 +11,12 @@ export default class Staff extends React.Component {
     this.state = {
       'socket':'',
       'messages': [],
+      'staff_info': '',
       'popup': false
     }
     this.loadMessage = this.loadMessage.bind(this)
     this.showPop = this.showPop.bind(this)
+    this.loadStaffInfo = this.loadStaffInfo.bind(this)
   }
 
   componentDidMount() {
@@ -35,6 +38,7 @@ export default class Staff extends React.Component {
       loadMessage(msg)
     });
     
+    this.loadStaffInfo()
   }
 
   loadMessage(msg) {
@@ -47,6 +51,17 @@ export default class Staff extends React.Component {
   showPop() {
     this.setState({'popup': true})
     setTimeout(() => this.setState({'popup': false}), 3000);
+  }
+
+  loadStaffInfo() {
+    fetch('/api/staff_info').then(res => {
+      if (res.ok) {
+        res.json().then(result => {
+          console.log(result.staff_info)
+          this.setState({'staff_info': result.staff_info})
+        })
+      }
+    })
   }
 
   render() {
@@ -66,6 +81,9 @@ export default class Staff extends React.Component {
               </Route>
               <Route path="/staff/message">
                 <StaffMessage messages={this.state.messages} />
+              </Route>
+              <Route path="/staff/">
+                <StaffHome staff_info={this.state.staff_info} />
               </Route>
             </Switch>
           </div>

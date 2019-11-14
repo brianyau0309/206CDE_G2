@@ -131,7 +131,6 @@ export default class Client extends React.Component {
     }).then(res => {
       if (res.ok) {
         res.json().then(info => {
-          console.log(info.result)
           this.setState({ 'member': info.result, 'lang': this.state.lang })
         })
       }

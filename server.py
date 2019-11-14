@@ -182,8 +182,6 @@ def cook_list():
 
 @app.route('/api/member_membership', methods=['POST'])
 def member_member():
-    print('MEMBER: ----------------------------')
-    print(request.json)
     if (request.json.get('member')):
         membership = db.exe_fetch('SELECT a.membership_name from membership a, members b WHERE a.membership_id = b.membership and member_id = \'%s\''%request.json.get('member'))
         print(membership)
@@ -195,6 +193,15 @@ def member_member():
 def membership():
     membership = db.exe_fetch('Select * from membership', 'all')
     return jsonify({'membership': membership})
+
+@app.route('/api/staff_info', methods=['GET'])
+def staff_info():
+    if (session.get('staff')):
+        print(session.get('staff'))
+        staff_info = db.exe_fetch("SELECT staff_id, staff_surname||' '||staff_lastname as staff_name, position FROM staff WHERE staff_id = '%s'"%session.get('staff'))
+        print(staff_info)
+        return jsonify({'staff_info': staff_info})
+    return jsonify({'result': 'error'})
 
 # API end
 

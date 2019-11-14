@@ -54,6 +54,13 @@
   grid-area: main;
   background-color: #CFD8DC;
 }
+.StaffHome {
+  text-align: center;
+}
+.StaffHome > div {
+  margin-top: 1vh;
+  font-size: 3vh;
+}
 .StaffMessage{
   font-family: Arial, Helvetica, sans-serif;
   font-size: 30px;
