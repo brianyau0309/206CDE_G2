@@ -74,17 +74,17 @@
         <tbody>
             {% for i in result %}
             <tr>
-            <th scope="row">{{ i[0] }}</th>
-            <td>{{ i[1] }}</td>
-            <td>{{ i[2] }}</td>
-            <td>{{ i[3] }}</td>
-            <td>{{ i[4] }}</td>
-            <td><a href="/update?fid={{ i[0] }}"><h3>update now</h3></a></td>
-            {% if i[4] == 'Y' %}
-            <td><a href="/delete?fid={{ i[0] }}"><h3>disable food</h3></a></td>
+            <th scope="row">{{ i.get('FOOD_ID') }}</th>
+            <td>{{ i.get('FOOD_ENG_NAME') }}</td>
+            <td>{{ i.get('FOOD_CHI_NAME') }}</td>
+            <td>{{ i.get('FOOD_PRICE') }}</td>
+            <td>{{ i.get('AVAILABLE') }}</td>
+            <td><a href="/admin_update?fid={{ i.get('FOOD_ID') }}"><h3>update now</h3></a></td>
+            {% if i.get('AVAILABLE') == 'Y' %}
+            <td><a href="/admin_delete?fid={{ i.get('FOOD_ID') }}"><h3>disable food</h3></a></td>
             {% endif %}
-            {% if i[4] == 'N' %}
-            <td><a href="/delete?fid={{ i[0] }}"><h3>able food</h3></a></td>
+            {% if i.get('AVAILABLE') == 'N' %}
+            <td><a href="/admin_delete?fid={{ i.get('FOOD_ID') }}"><h3>able food</h3></a></td>
             {% endif %}
 
             </tr>

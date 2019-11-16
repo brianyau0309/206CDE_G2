@@ -1,5 +1,0 @@
-.gitignore
-node_modules
-oracleAC.txt
-__pycache__
-package-lock.json
