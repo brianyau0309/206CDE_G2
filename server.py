@@ -763,7 +763,7 @@ def admin_loginpage():
 def admin_login():
     staff_id = request.form['staff_id']
     password = request.form['password']
-    sql = "select staff_id ,staff_password from staff where staff_id = '{0}' and staff_password = '{1}'"
+    sql = "select staff_id ,staff_password from staff where position = 'manager' and staff_id = '{0}' and staff_password = '{1}'"
     adminInfo = db.exe_fetch(sql.format(staff_id, password),'all')
     print(adminInfo)
     if adminInfo != []:
