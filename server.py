@@ -186,8 +186,6 @@ def cook_list():
 
 @app.route('/api/member_membership', methods=['POST'])
 def member_member():
-    print('MEMBER: ----------------------------')
-    print(request.json)
     if (request.json.get('member')):
         membership = db.exe_fetch('SELECT a.membership_name from membership a, members b WHERE a.membership_id = b.membership and member_id = \'%s\''%request.json.get('member'))
         print(membership)
@@ -199,6 +197,15 @@ def member_member():
 def membership():
     membership = db.exe_fetch('Select * from membership', 'all')
     return jsonify({'membership': membership})
+
+@app.route('/api/staff_info', methods=['GET'])
+def staff_info():
+    if (session.get('staff')):
+        print(session.get('staff'))
+        staff_info = db.exe_fetch("SELECT staff_id, staff_surname||' '||staff_lastname as staff_name, position FROM staff WHERE staff_id = '%s'"%session.get('staff'))
+        print(staff_info)
+        return jsonify({'staff_info': staff_info})
+    return jsonify({'result': 'error'})
 
 # API end
 
@@ -572,7 +579,15 @@ def finish_cook():
     
     db.cursor.execute(SQL['foodCooked']%(orderID,food,sequence))
     db.cursor.execute('commit')
-    socketio.emit('staffmessage',orderID + '\'s'+ food +' cooked', room='staff')
+    food_name = db.exe_fetch("SELECT food_eng_name FROM food WHERE food_id = '%s'"%food).get('FOOD_ENG_NAME')
+    remark = db.exe_fetch("SELECT a.remark_eng, a.option_eng, b.remark from food_remark a, order_remark b where a.remark_id=b.remark and a.food = b.food and b.orders = '%s' and b.food='%s' and b.order_sequence=%d"%(orderID,food,sequence),'all')
+    message = orderID + '\'s'+ ' ' + food_name + '(' 
+    for i in remark:
+        remark_name = i.get('REMARK_ENG')
+        option = i.get('OPTION_ENG')
+        message+=(option + ' ' + remark_name + ', ')
+    message+=')'
+    socketio.emit('staffmessage',message +' cooked', room='staff')
     return jsonify({'result': 'success'})
 
 @app.route('/food_served', methods = ["post"]) #served the ordered food
