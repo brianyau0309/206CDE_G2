@@ -9,14 +9,12 @@
     <form action="/admin_update" method="POST">
     <h1>UPDATED : {{ foodid }}</h1>
     {% for i in result %}
-    id<input type="text" name="id" value="{{ i[0] }}" ><br>
-    Eng_name<input type="text" name="name" value="{{ i[1] }}"><br>
-    ZH_name<input type="text" name="cname" value="{{ i[2] }}"><br> 
-    Price<input type="text" name="price" value="{{ i[3] }}"><br> 
+    <input type='hidden' name='id' value="{{ i.get('FOOD_ID') }}" />
+    FOOD_Eng_name<input type="text" name="name" value="{{ i.get('FOOD_ENG_NAME') }}"><br>
+    FOOD_CHI_name<input type="text" name="cname" value="{{ i.get('FOOD_CHI_NAME') }}"><br> 
+    Price<input type="text" name="price" value="{{ i.get('FOOD_PRICE') }}"><br> 
 
-    available:<input type="radio" name="r1" value="Y"> Yes
-    <input type="radio" name="r1" value="N"> No<br>
-
+    <img src="{{ url_for('static', filename='image/food/'+foodid+'.png') }}" /><br/> 
     <button type="submit" formaction="/admin_update">Submit to another page</button></form>
     {% endfor %}
 </body>

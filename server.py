@@ -678,34 +678,57 @@ def admin_index():
 
 @app.route("/admin_food")
 def admin_food():
-    sql = "select food_id, food_eng_name, food_chi_name,food_price,available from food"
+    sql = "select food_id, food_eng_name, food_chi_name,food_price,available from food where category != 'C1'"
     result = db.exe_fetch(sql,'all')
     return render_template("food.html", result = result)
 
 @app.route("/admin_combo")
 def admin_combo():
-    sql = "select COMBO_ID, FOOD_ID, TYPES, PRICE from combo_price"
+    sql = "select FOOD_ID, FOOD_CHI_NAME from FOOD where CATEGORY ='C1'"
+    sql2 = "select a.FOOD_ID, a.FOOD_CHI_NAME, a.FOOD_PRICE, a.AVAILABLE, b.PERSON, b.CATEGORY, b.QUANTITY from FOOD a, COMBO_PERSON b"
     result = db.exe_fetch(sql,'all')
     print(type(result))
-    sql2 = "select COMBO, PERSON, CATEGORY, QUANTITY from combo_person"
     result2 = db.exe_fetch(sql2,'all')
     return render_template("combo.html", result = result, result2 = result2)
+
+@app.route("/admin_combo_price")
+def admin_combo_price():
+    if 'fid' in request.args:
+        foodid = request.args['fid']
+        sql1 = "select a.FOOD_ID, a.FOOD_CHI_NAME, a.FOOD_PRICE, a.AVAILABLE,b.FOOD_ID as FOOD, b.TYPES, b.PRICE from FOOD a, COMBO_PRICE b where a.CATEGORY ='C1' and a.FOOD_ID = b.COMBO_ID and b.COMBO_ID = '%s'"%foodid
+        result = db.exe_fetch(sql1,'all')
+    return render_template("combo_price.html", foodid = foodid, result = result)
+
+@app.route("/admin_combo_person")
+def admin_combo_person():
+    if 'fid' in request.args:
+        foodid = request.args['fid']
+        sql1 = "select a.FOOD_ID, a.FOOD_CHI_NAME, a.FOOD_PRICE, a.AVAILABLE, b.PERSON, b.CATEGORY, b.QUANTITY from FOOD a, COMBO_PERSON b where a.CATEGORY ='C1' and a.FOOD_ID = b.COMBO and b.COMBO = '%s'"%foodid
+        result = db.exe_fetch(sql1,'all')
+    return render_template("combo_person.html", foodid = foodid, result = result)
 
 @app.route("/admin_order")
 def admin_order():
     sql = "select ORDER_ID, MEMBER, STAFF, PAYMENT_METHOD, ORDER_STATE, ORDER_DATE from orders"
     result = db.exe_fetch(sql,'all')
     return render_template("order.html", result = result)
+
+@app.route("/admin_staff")
+def admin_staff():
+    sql = "select * from staff"
+    result = db.exe_fetch(sql,'all')
+    return render_template("admin_staff.html", result = result)
     
 
 @app.route("/admin_update", methods=['GET', 'POST'])
 def admin_update():
     if 'fid' in request.args:
         foodid = request.args['fid']
-        sql1 = "select food_id, food_eng_name, food_chi_name,food_price,available from food"
-        result = db.exe_fetch(sql,'all')
+        sql1 = "select food_id, food_eng_name, food_chi_name,food_price,available from food where food_id = '%s'"%foodid
+        result = db.exe_fetch(sql1,'all')
 
     if request.method == "POST":
+        print(request.form)
         food_id = request.form['id']
         engname = request.form['name']
         cname = request.form['cname']
@@ -714,8 +737,8 @@ def admin_update():
         print(engname)
         print(cname)
         sql = "update food SET food_eng_name = '{0}', food_chi_name = '{1}',food_price = {2} where food_id ='{3}'"
-        execute(sql.format(engname, cname, price, food_id))
-        execute('commit')
+        db.cursor.execute(sql.format(engname, cname, price, food_id))
+        db.cursor.execute('commit')
         return redirect(url_for("admin_food"))
 
     return render_template("update.html",foodid = foodid,result=result)
@@ -727,14 +750,16 @@ def admin_delete():
         foodid = request.args['fid']
         db.exe_fetch("SELECT available from food where food_id ='%s'"%foodid,'one')
         available = db.exe_fetch("SELECT available from food where food_id ='%s'"%foodid,'one')
-        if available[0] == 'Y':
+        if available.get('AVAILABLE') == 'Y':
             sql = "update food set available = 'N' where food_id = '{0}'".format(foodid)
-            execute(sql)
-            execute('commit')
-        if available[0] == 'N':
+            db.cursor.execute(sql)
+            db.cursor.execute('commit')
+        if available.get('AVAILABLE') == 'N':
             sql = "update food set available = 'Y' where food_id = '{0}'".format(foodid)
-            execute(sql)
-            execute('commit')
+            db.cursor.execute(sql)
+            db.cursor.execute('commit')
+
+    return redirect(url_for('admin_food'))
 
 @app.route("/admin_add", methods=['POST'])
 def admin_add():
@@ -748,8 +773,8 @@ def admin_add():
     print(food_Chi_name)
     food_Vegetarian = request.form['Vegetarian']
     sql = "insert into food values('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', {6}, '{7}', 'Y')"
-    execute(sql.format(food_id, food_Catecory, food_Eng_name, '一', food_Disscription_Eng, '一', food_Price, food_Vegetarian))
-    execute('commit')
+    db.cursor.execute(sql.format(food_id, food_Catecory, food_Eng_name, '一', food_Disscription_Eng, '一', food_Price, food_Vegetarian))
+    db.cursor.execute('commit')
     return redirect(url_for("food"))
 
 @app.route("/admin_loginpage")
@@ -778,17 +803,11 @@ def admin_logout():
 def admin_upload():
     if request.method == 'POST':
         file = request.files['image']
-        name = request.form['newname']
-        if Path(os.getcwd() + '/static/image/food' + str(name) + '.png').exists():
-            return render_template("admin_index.html")
-        elif Path(os.getcwd() + '/static/image/food' + str(name) + '.jpg').exists():
-            return render_template("admin_index.html")
-        elif Path(os.getcwd() + '/static/image/food' + str(name) + '.jpeg').exists():
-            return render_template("admin_index.html")
+        if Path(os.getcwd() + '/static/image/food' + str("new food ID") + '.png').exists():
+            return render_template("admin_index.html") #redirect
         else:
             if 'image' not in request.files:
-                return render_template("admin_index.html")
-            file = request.files['image']
+                return render_template("admin_index.html") #use redirect!
             if file.filename == "":
                 return render_template("admin_index.html")
             if name == "":

@@ -22,7 +22,7 @@
         <a href="{{ url_for('admin_combo') }}">combo</a>   
     </li>
 	<li>
-        <a href="#">staff</a>   
+        <a href="{{ url_for('admin_staff') }}">staff</a>   
     </li>
 
 </ul>
@@ -35,38 +35,16 @@
   <table id="combo_price">
     {% for i in result %}
     <tr>
-    <td style="width: 10%">{{ i.get('COMBO_ID') }}</td>
     <td style="width: 10%">{{ i.get('FOOD_ID') }}</td>
-    <td style="width: 10%">{{ i.get('TYPES') }}</td>
-    <td style="width: 10%">{{ i.get('PRICE') }}</td>
+    <td style="width: 10%">{{ i.get('FOOD_CHI_NAME') }}</td>
+    <td><a href="/admin_combo_price?fid={{ i.get('FOOD_ID') }}"><h3>Combo detail</h3></a></td>
+    <td><a href="/admin_combo_person?fid={{ i.get('FOOD_ID') }}"><h3>Combo person detail</h3></a></td>
+
     </tr>
     {% endfor %}
   </table>
   {% endif %}
-
-  {% if result2 %}
-  <table id="combo_person">
-    {% for i in result2 %}
-    <tr>
-    <td style="width: 10%">{{ i.get('COMBO') }}</td>
-    <td style="width: 10%">{{ i.get('PERSON') }}</td>
-    <td style="width: 10%">{{ i.get('CATEGORY') }}</td>
-    <td style="width: 10%">{{ i.get('QUANTITY') }}</td>
-    </tr>
-    {% endfor %}
-  </table>
-  {% endif %}
-
-
-    
-
-
-
-
-
-
-
-
+ 
 </div>
 </body>
 </html>
