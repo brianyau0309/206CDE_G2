@@ -684,18 +684,40 @@ def admin_food():
 
 @app.route("/admin_combo")
 def admin_combo():
-    sql = "select COMBO_ID, FOOD_ID, TYPES, PRICE from combo_price"
+    sql = "select FOOD_ID, FOOD_CHI_NAME from FOOD where CATEGORY ='C1'"
+    sql2 = "select a.FOOD_ID, a.FOOD_CHI_NAME, a.FOOD_PRICE, a.AVAILABLE, b.PERSON, b.CATEGORY, b.QUANTITY from FOOD a, COMBO_PERSON b"
     result = db.exe_fetch(sql,'all')
     print(type(result))
-    sql2 = "select COMBO, PERSON, CATEGORY, QUANTITY from combo_person"
     result2 = db.exe_fetch(sql2,'all')
     return render_template("combo.html", result = result, result2 = result2)
+
+@app.route("/admin_combo_price")
+def admin_combo_price():
+    if 'fid' in request.args:
+        foodid = request.args['fid']
+        sql1 = "select a.FOOD_ID, a.FOOD_CHI_NAME, a.FOOD_PRICE, a.AVAILABLE,b.FOOD_ID as FOOD, b.TYPES, b.PRICE from FOOD a, COMBO_PRICE b where a.CATEGORY ='C1' and a.FOOD_ID = b.COMBO_ID and b.COMBO_ID = '%s'"%foodid
+        result = db.exe_fetch(sql1,'all')
+    return render_template("combo_price.html", foodid = foodid, result = result)
+
+@app.route("/admin_combo_person")
+def admin_combo_person():
+    if 'fid' in request.args:
+        foodid = request.args['fid']
+        sql1 = "select a.FOOD_ID, a.FOOD_CHI_NAME, a.FOOD_PRICE, a.AVAILABLE, b.PERSON, b.CATEGORY, b.QUANTITY from FOOD a, COMBO_PERSON b where a.CATEGORY ='C1' and a.FOOD_ID = b.COMBO and b.COMBO = '%s'"%foodid
+        result = db.exe_fetch(sql1,'all')
+    return render_template("combo_person.html", foodid = foodid, result = result)
 
 @app.route("/admin_order")
 def admin_order():
     sql = "select ORDER_ID, MEMBER, STAFF, PAYMENT_METHOD, ORDER_STATE, ORDER_DATE from orders"
     result = db.exe_fetch(sql,'all')
     return render_template("order.html", result = result)
+
+@app.route("/admin_staff")
+def admin_staff():
+    sql = "select * from staff"
+    result = db.exe_fetch(sql,'all')
+    return render_template("admin_staff.html", result = result)
     
 
 @app.route("/admin_update", methods=['GET', 'POST'])

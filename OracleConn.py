@@ -41,7 +41,7 @@ class OracleConn():
     self.cursor.execute('commit')
 
   def close(self):
-    self.conn.close;
+    self.conn.close
 
 SQL = {
   'getFood': '''
