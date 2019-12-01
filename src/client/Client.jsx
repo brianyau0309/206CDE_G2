@@ -56,13 +56,11 @@ export default class Client extends React.Component {
     });
     socket.on('topay', function(msg) {
       console.log(msg);
-      alert(msg);
       setBlocked()
     });
     socket.on('created_order', function(msg){
       loadBill()
       console.log(msg);
-      alert(msg);
       setunBlocked()
     });
     socket.on('reloadbill', function(msg){
@@ -169,7 +167,7 @@ export default class Client extends React.Component {
           if (result.result === 'success') {
             this.setState({ 'member': null, 'membership': 'None' })
           } else if (result.result === 'error') {
-            alert('Log out Error. Please contact the staff.')
+            console.log('Log out Error. Please contact the staff.')
           }
         })
       }
