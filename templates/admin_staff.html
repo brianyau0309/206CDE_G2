@@ -1,0 +1,75 @@
+<html>
+<HEAD>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<TITLE>admin page</TITLE>	
+<link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='index.css') }}" >
+</HEAD>
+<body>
+<div id="header">
+<center><a href="{{url_for('admin_index')}}"><img src="{{ url_for('static',filename='admin_icon.png') }}" alt="logo" id="adminlogo"></a><br>hello, this is a admin page
+</center>
+
+
+
+
+</div>
+
+<div id="sidebar">
+<ul>
+	<li>
+	<a href="{{ url_for('admin_food') }}">food</a>
+	</li>
+	<li>
+    <a href="{{ url_for('admin_combo') }}">combo</a>
+    </li>
+	<li>
+    <a href="{{ url_for('admin_staff') }}">staff</a>
+    </li>
+
+</ul>
+
+
+
+</div>
+
+<div id="data"><br>
+    
+    <h1>Staff List</h1>
+    <p>Table</p>
+    
+    <table class="table">
+        <thead>
+            <tr>
+            <th scope="col">STAFF ID</th>
+            <th scope="col">STAFF SURNAME</th>
+            <th scope="col">STAFF LASTNAME</th>
+            <th scope="col">SEX</th>
+            <th scope="col">POSITION</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in result %}
+            <tr>
+            <th scope="row">{{ i.get('STAFF_ID') }}</th>
+            <td>{{ i.get('STAFF_SURNAME') }}</td>
+            <td>{{ i.get('STAFF_LASTNAME') }}</td>
+            <td>{{ i.get('SEX') }}</td>
+            <td>{{ i.get('POSITION') }}</td>
+            
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
+
+
+
+
+
+
+</div>
+</body>
+</html>

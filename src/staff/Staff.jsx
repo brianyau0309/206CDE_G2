@@ -17,6 +17,7 @@ export default class Staff extends React.Component {
     this.loadMessage = this.loadMessage.bind(this)
     this.showPop = this.showPop.bind(this)
     this.loadStaffInfo = this.loadStaffInfo.bind(this)
+    this.staff_logout = this.staff_logout.bind(this)
   }
 
   componentDidMount() {
@@ -63,6 +64,17 @@ export default class Staff extends React.Component {
       }
     })
   }
+  staff_logout() {
+    fetch(`/stafflogout`, {method: 'POST'}).then(res => {
+      if (res.ok) {
+        res.json().then(result => {
+          if (result.result === 'Success') {
+            location.reload();
+          }
+        })
+      }
+    })
+  }
 
   render() {
     return(
@@ -73,6 +85,7 @@ export default class Staff extends React.Component {
             <NavLink to="/staff/"><li>Home</li></NavLink>
             <NavLink to="/staff/table_list"><li>Table State</li></NavLink>
             <NavLink to="/staff/message"><li>Message</li></NavLink>
+            <a><li onClick={this.staff_logout}>Logout</li></a>
           </ul>
           <div className="StaffMain">
             <Switch>

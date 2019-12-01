@@ -1,0 +1,24 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Combo detail</title>
+</head>
+<body>
+    <table id="combo_detail">
+    <h1>Combo ID : {{ foodid }}</h1>
+    {% for i in result %}
+    <tr>
+    <td>{{ i.get('FOOD_ID') }}</td>
+    <td>{{ i.get('FOOD_CHI_NAME') }}</td>
+    <td>{{ i.get('FOOD_PRICE') }}</td>
+    <td>{{ i.get('AVAILABLE') }}</td>
+    <td>{{ i.get('FOOD') }}</td>
+    <td>{{ i.get('TYPES') }}</td>
+    <td>{{ i.get('PRICE') }}</td> 
+    </tr>
+    {% endfor %}
+    </table>
+</body>
+</html>
