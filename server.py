@@ -221,12 +221,13 @@ def loginpage():
 def user_login():
     loginInfo = request.json.get('login')
     db.cursor.execute("SELECT member_password FROM members WHERE member_id = '%s'"%loginInfo.get('id'))
-    member_password = db.fetchone()
+    member_password = db.cursor.fetchone()
     
     if member_password != None:
         if member_password[0] == loginInfo.get('password'):
             session['member'] = loginInfo.get('id')
             table = session.get('table')
+            print(table)
             order_id = db.exe_fetch("SELECT a.order_id from order_table a, orders b WHERE a.order_id = b.order_id and b.order_state = 'in sit' and a.table_id = '%s'"%table)
             print(order_id)
             db.cursor.execute("Update orders set member = '%s' where order_id = '%s'"%(loginInfo.get('id'), order_id.get('ORDER_ID')))
@@ -386,6 +387,7 @@ def getorderid():
 @cross_origin()
 def create_order():
     order_date = datetime.now().strftime('%Y/%m/%d %H:%M:%S')
+    print(order_date)
     print(SQL['createOrder']%order_date)
     table = request.json.get('table')
     print(table)

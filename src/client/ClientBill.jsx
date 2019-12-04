@@ -152,8 +152,7 @@ export default class ClientBill extends React.Component {
             <td onClick={() => console.log(this.state)}>{this.state.vocabulary.Order}: {this.state.bill.bill.length !== 0 ? this.state.bill.bill[0].ORDER_ID : ''}</td>
           </tr>
           <tr>
-            <td>{this.state.vocabulary.Date}: {this.state.bill.bill.length !== 0 ? new Date(this.state.bill.bill[0].ORDER_DATE).toDateString() : ''}</td>
-            <td>{this.state.vocabulary.Time}: {this.state.bill.bill.length !== 0 ? new Date(this.state.bill.bill[0].ORDER_DATE).toLocaleTimeString() : ''}</td>
+            <td colSpan="2">{this.state.vocabulary.Date}: {this.state.bill.bill.length !== 0 ? this.state.bill.bill[0].ORDER_DATE : ''}</td>
           </tr>
           <tr>
             <td>{this.state.vocabulary.Table}: {this.props.table}</td>

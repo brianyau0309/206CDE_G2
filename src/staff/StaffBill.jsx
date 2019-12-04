@@ -86,7 +86,7 @@ export default class StaffBill extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      'bill': {}, 'open': false, 'payments': [], 'payment_rate': '',
+      'bill': {}, 'open': false, 'payments': [], 'payment_rate': '', 'membership': '',
       'combo_toggle': false, 'combo_id': '', 'combo_info': '',
       'food_toggle': false, 'food_id': '', 'food_info': ''
     }
@@ -98,14 +98,41 @@ export default class StaffBill extends React.Component {
     this.closeFood = this.closeFood.bind(this)
     this.loadPayment = this.loadPayment.bind(this)
     this.handlePaymentChange = this.handlePaymentChange.bind(this)
+    this.getMemberShip = this.getMemberShip.bind(this)
   }
 
   componentDidMount() {
     this.loadPayment()
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.bill !== this.state.bill) {
+      this.getMemberShip()
+    }
+  }
+
   static getDerivedStateFromProps(props, state) {
     return { 'bill': props.order_bill, 'open': props.open}
+  }
+
+  getMemberShip() {
+    if (this.state.bill) {
+      if (this.state.bill.bill[0].MEMBER) {
+        console.log('OK')
+        fetch('/api/member_membership', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({'member': this.state.bill.bill[0].MEMBER})
+        }).then(res => {
+          if (res.ok) {
+            res.json().then(result => {
+              console.log(result.membership)
+              this.setState({'membership': result.membership.MEMBERSHIP_NAME})
+            })
+          }
+        })
+      }
+    }
   }
 
   addFood() {
@@ -233,12 +260,13 @@ export default class StaffBill extends React.Component {
             <td><input id="food_input" type="text"/><button onClick={this.addFood}>Add</button></td>
             <td></td>
           </tr>
-          <tr>
-            <td>Date: {this.state.bill.bill ? new Date(this.state.bill.bill[0].ORDER_DATE).toDateString() : ''}</td>
-            <td>Time: {this.state.bill.bill ? new Date(this.state.bill.bill[0].ORDER_DATE).toLocaleTimeString() : ''}</td>
+          <tr rowspan="2">
+            <td style={{width: '100%'}}>Date: {this.state.bill.bill ? this.state.bill.bill[0].ORDER_DATE : ''}</td>
           </tr>
           <tr>
             <td>Table: {this.state.bill.bill ? this.state.bill.bill[0].ORDER_STATE : ''}</td>
+          </tr>
+          <tr>
             <td>Staff: {this.state.bill.bill ? this.state.bill.bill[0].STAFF_NAME : ''}</td>
           </tr>
         </table>
@@ -262,7 +290,7 @@ export default class StaffBill extends React.Component {
             </select>
           </div>
           <div>Membership: {this.state.bill.bill ? this.state.bill.bill[0].MEMBER ? this.state.bill.bill[0].MEMBER : 'None' : 'None'}</div>
-          <div>Total Price: {this.state.bill.bill && this.state.payment_rate != '' ? (this.state.bill.bill[0].TOTAL_PRICE*1.1*this.state.payments.filter(p => p.PAYMENT_METHOD_ID === this.state.payment_rate)[0].PRICE_RATE / 100).toFixed(1) : 0}</div>
+          <div>Total Price: {this.state.bill.bill && this.state.payment_rate != '' ? (this.state.bill.bill[0].TOTAL_PRICE*1.1*(this.state.membership === "gold" ? 0.9 : 1)*this.state.payments.filter(p => p.PAYMENT_METHOD_ID === this.state.payment_rate)[0].PRICE_RATE / 100).toFixed(1) : 0}</div>
           <button className="checkout_button" onClick={this.closeOrder}>Receive Payment</button>
         </div>
         <StaffComboChoice order={this.state.bill.bill ? this.state.bill.bill[0].ORDER_ID : ''} loadBill={this.props.openBill} open={this.state.combo_toggle} close={this.closeCombo} combo={this.state.combo_id} />

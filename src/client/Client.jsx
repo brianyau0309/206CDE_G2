@@ -106,6 +106,7 @@ export default class Client extends React.Component {
       }).then(res => {
         if (res.ok) {
           res.json().then(result => {
+            console.log(result.membership)
             this.setState({'membership': result.membership.MEMBERSHIP_NAME})
           })
         }
@@ -210,7 +211,10 @@ export default class Client extends React.Component {
             if (res.ok) {
               res.json().then(result => {
                 console.log(result)
-                this.setState({'order_bill': result}, () => console.log(this.state.order_bill))
+                this.setState({'order_bill': result}, () => {
+                  console.log(this.state.order_bill)
+                  this.getMemberShip()
+                })
               })
             }
           })

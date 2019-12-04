@@ -88,6 +88,9 @@ export default class ClientComboRemark extends React.Component {
         let temp = this.state.order_remark
         if (temp[this.state.qty] !== undefined) {temp[this.state.qty] = []}
         this.setState({'order_remark': temp})
+        if (this.state.qty === 0) {
+          this.setState({'num_now': 1, 'price': this.state.food_info.PRICE})
+        }
         this.setState({'qty': this.state.qty+1})
       }
     } 
@@ -95,7 +98,12 @@ export default class ClientComboRemark extends React.Component {
       if (this.state.qty > 0) {
         this.setState({'qty': this.state.qty-1}, () => {
           if (this.state.num_now > this.state.qty) {
-            this.setState({'num_now': this.state.qty}, () => this.setRemark())
+            this.setState({'num_now': this.state.qty}, () => {
+              this.setRemark()
+              if (this.state.qty === 0) {
+                this.setState({'price': 0})
+              }
+            })
           }
         })
       }
@@ -135,6 +143,7 @@ export default class ClientComboRemark extends React.Component {
   }
 
   changeNumNow(num) {
+    console.log(num)
     this.setState({ 'num_now': num })
   }
 

@@ -95,7 +95,7 @@ export default class ClientSide extends React.Component {
           </li>
           <li style={{paddingTop: '8vh'}}>
           <div>{this.state.lang === 'eng' ? 'Order by Phone' : '手機點餐'}: {this.props.order}</div>
-            <img className="qr" src={window.location.origin+'/static/image/qr.png'}></img>
+            <a href={window.location.origin+'/loginpage'}><img className="qr" src={window.location.origin+'/static/image/qr.png'}></img></a>
           </li>
         </ul>
         <div className="lang" onClick={this.props.changeLang}>{this.state.vocabulary.ToLang}</div>

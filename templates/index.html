@@ -21,9 +21,10 @@
         <div id="enter">
                 <img src="{{url_for('static',filename='image/client_icons/icon-221x203.png')}}" id="logo">
         <h1>Navigation</h1>
-        <br><a href="{{ url_for('loginpage') }}">Client</a>
+        <br><a href="{{ url_for('tableloginpage') }}">Client</a>
         <br><a href="{{ url_for('staffloginpage') }}">Staff</a>
         <br><a href="{{ url_for('kitchenloginpage') }}">Kitchen</a>
+        <br><a href="{{ url_for('admin_index') }}">Admin</a>
         </div>
         <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
         <script type="text/javascript" charset="utf-8">
