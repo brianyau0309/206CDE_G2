@@ -774,10 +774,22 @@ def admin_add():
     food_Price = request.form['Price']
     print(food_Chi_name)
     food_Vegetarian = request.form['Vegetarian']
-    sql = "insert into food values('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', {6}, '{7}', 'Y')"
-    db.cursor.execute(sql.format(food_id, food_Catecory, food_Eng_name, '一', food_Disscription_Eng, '一', food_Price, food_Vegetarian))
-    db.cursor.execute('commit')
-    return redirect(url_for("food"))
+    file = request.files['image']
+    if Path(os.getcwd() + '/static/image/food' + str(food_id) + '.png').exists():
+        return redirect(url_for('admin_food'))
+    if file.filename == "":
+        return redirect(url_for('admin_food'))
+    if food_id == "":
+        return redirect(url_for('admin_food'))
+    if 'image' not in request.files:
+        return redirect(url_for('admin_food'))
+    else:
+        filename = str(food_id) + '.' + silename(file.filename).split('.')[-1]
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        sql = "insert into food values('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', {6}, '{7}', 'Y')"
+        db.cursor.execute(sql.format(food_id, food_Catecory, food_Eng_name, food_Chi_name, food_Disscription_Eng, food_Disscription_Chi, food_Price, food_Vegetarian))
+        db.cursor.execute('commit')
+        return redirect(url_for("admin_food"))
 
 @app.route("/admin_loginpage")
 def admin_loginpage():
