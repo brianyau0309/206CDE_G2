@@ -24,7 +24,6 @@
 	<li>
     <a href="{{ url_for('admin_combo') }}">combo</a>
     </li>
-	<li>staff</li>
 
 </ul>
 
@@ -47,7 +46,7 @@
     }
     </script>
     <div id="add_food" style="display:none">
-    <form action="/add" method="post">
+    <form action="/admin_add" method="post" enctype="multipart/form-data">
         Food_id: <input type="text" name="ID"><br>
         Catecory: <input type="text" name="Catecory"><br>
         Eng_name: <input type="text" name="Eng_name"><br>

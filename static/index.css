@@ -1,0 +1,49 @@
+body{
+    margin: 0px;
+    border: 0px;
+    background: #e74c3c;
+}
+
+#header {
+    width: auto;
+    height: 130px;
+    background: #c0392b;
+    color: white;
+    font-family:Arial;
+}
+
+#sidebar{
+    width: 16.5vw;
+    background: #e74c3c;
+    font-family:Arial;
+    color: white;
+    position: absolute  ;
+    top: 130px;
+    left:0;    
+}
+
+#data{
+    height: auto;
+    background: #c9c9c9;
+    font-family:Arial;
+    font-size: 30px;    
+}
+
+#adminlogo{
+    background: white;
+    border-radius: 50px;
+}
+
+ul li {
+    padding: 20px;
+    border-bottom: 2px solid grey;
+}
+
+ul li:hover{
+    background: #c9c9c9;
+    color: white;
+}
+#combo_price,
+#data {
+    margin-left: 16.5vw;
+}

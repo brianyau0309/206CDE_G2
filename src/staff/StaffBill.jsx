@@ -13,7 +13,7 @@ const BillRow = (props) => {
         <td className="ta-r bill_detail_price">{props.food.PRICE}</td>
         <td className="ta-r bill_detail_ok">
         {
-          props.food.CATEGORY_NAME !== 'combo' && props.food.DISH_STATE !== 'served' ?
+          props.food.CATEGORY_NAME !== 'combo' && props.food.DISH_STATE == 'cooked' ?
             <button className="served_button" onClick={() => props.served_food(props.order,props.food.FOOD,props.food.ORDER_SEQUENCE)}>OK</button>
             : null
         }

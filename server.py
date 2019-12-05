@@ -8,6 +8,7 @@ from OracleConn import OracleConn, SQL
 from flask_socketio import SocketIO, send, join_room, leave_room, emit
 from datetime import datetime
 from werkzeug.utils import secure_filename
+from pathlib import Path
 
 UPLOAD_FOLDER = os.getcwd() + '/static' + '/image' + '/food'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
@@ -590,6 +591,10 @@ def finish_cook():
         message+=(option + ' ' + remark_name + ', ')
     message+=')'
     socketio.emit('staffmessage',message +' cooked', room='staff')
+    condition = "WHERE order_id = '%s'"%orderID
+    table = db.exe_fetch(SQL['getOrderTable'].format(condition=condition),'all')
+    for i in table:
+        socketio.emit('reloadbill',{'room':i.get('TABLE_ID')})
     return jsonify({'result': 'success'})
 
 @app.route('/food_served', methods = ["post"]) #served the ordered food
@@ -775,16 +780,17 @@ def admin_add():
     print(food_Chi_name)
     food_Vegetarian = request.form['Vegetarian']
     file = request.files['image']
+    print('file:', file)
+    print('ID:', food_id)
+
     if Path(os.getcwd() + '/static/image/food' + str(food_id) + '.png').exists():
         return redirect(url_for('admin_food'))
-    if file.filename == "":
+    elif file.filename == "":
         return redirect(url_for('admin_food'))
-    if food_id == "":
-        return redirect(url_for('admin_food'))
-    if 'image' not in request.files:
+    elif food_id == "":
         return redirect(url_for('admin_food'))
     else:
-        filename = str(food_id) + '.' + silename(file.filename).split('.')[-1]
+        filename = str(food_id) + '.' + secure_filename(file.filename).split('.')[-1]
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         sql = "insert into food values('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', {6}, '{7}', 'Y')"
         db.cursor.execute(sql.format(food_id, food_Catecory, food_Eng_name, food_Chi_name, food_Disscription_Eng, food_Disscription_Chi, food_Price, food_Vegetarian))
@@ -812,23 +818,6 @@ def admin_login():
 def admin_logout():
      session.pop('admin', None)
      return redirect(url_for('admin_loginpage'))
-
-@app.route('/admin_upload', methods=['GET', 'POST'])
-def admin_upload():
-    if request.method == 'POST':
-        file = request.files['image']
-        if Path(os.getcwd() + '/static/image/food' + str("new food ID") + '.png').exists():
-            return render_template("admin_index.html") #redirect
-        else:
-            if 'image' not in request.files:
-                return render_template("admin_index.html") #use redirect!
-            if file.filename == "":
-                return render_template("admin_index.html")
-            if name == "":
-                return render_template("admin_index.html")
-                filename = str(name) + '.' + silename(file.filename).split('.')[-1]
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                return render_template("admin_index.html")
 
 #Admin End
 

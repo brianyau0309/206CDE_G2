@@ -15,7 +15,7 @@
     Price<input type="text" name="price" value="{{ i.get('FOOD_PRICE') }}"><br> 
 
     <img src="{{ url_for('static', filename='image/food/'+foodid+'.png') }}" /><br/> 
-    <button type="submit" formaction="/admin_update">Submit to another page</button></form>
+    <button type="submit" formaction="/admin_update">Update</button></form>
     {% endfor %}
 </body>
 </html>

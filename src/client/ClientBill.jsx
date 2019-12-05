@@ -18,7 +18,7 @@ const BillRow = (props) => {
             props.food.COMBO_FOOD.filter(food => food.DISH_STATE === 'served').length > 0 ?
               null
               : <button className="cancel_button" onClick={() => props.cancel_food(props.order,props.food.FOOD,props.food.ORDER_SEQUENCE)}>X</button>
-          : props.food.DISH_STATE === 'preparing' ? 
+          : props.food.DISH_STATE === 'cooked' || props.food.DISH_STATE === 'preparing' ? 
             <button className="cancel_button" onClick={() => props.cancel_food(props.order,props.food.FOOD,props.food.ORDER_SEQUENCE)}>X</button>
             : null
         }
